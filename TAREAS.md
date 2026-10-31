@@ -3,7 +3,7 @@
 ## 0. Setup técnico inicial
 - [x] Inicializar repositorio git y `.gitignore`
 - [x] Crear estructura de carpetas (`backend/`, `mobile/`)
-- [ ] Inicializar proyecto Node + Express (scripts, nodemon, CORS, JSON)
+- [x] Inicializar proyecto Node + Express (scripts, nodemon, CORS, JSON)
 - [ ] Inicializar proyecto React Native con Expo
 - [ ] Verificar conexión celular ↔ PC por IP local
 - [ ] Crear registro de uso de IA (prompts, aciertos, correcciones)
