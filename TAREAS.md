@@ -4,7 +4,7 @@
 - [x] Inicializar repositorio git y `.gitignore`
 - [x] Crear estructura de carpetas (`backend/`, `mobile/`)
 - [x] Inicializar proyecto Node + Express (scripts, nodemon, CORS, JSON)
-- [ ] Inicializar proyecto React Native con Expo
+- [x] Inicializar proyecto React Native con Expo
 - [ ] Verificar conexión celular ↔ PC por IP local
 - [ ] Crear registro de uso de IA (prompts, aciertos, correcciones)
 - [ ] Crear skills de Claude Code para la implementación (`.claude/skills/`) y registrar su uso
