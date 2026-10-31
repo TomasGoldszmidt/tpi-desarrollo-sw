@@ -5,7 +5,7 @@
 - [x] Crear estructura de carpetas (`backend/`, `mobile/`)
 - [x] Inicializar proyecto Node + Express (scripts, nodemon, CORS, JSON)
 - [x] Inicializar proyecto React Native con Expo
-- [ ] Verificar conexión celular ↔ PC por IP local
+- [x] Verificar conexión dispositivo mobile ↔ backend (emulador Android + Expo Go)
 - [ ] Crear registro de uso de IA (prompts, aciertos, correcciones)
 - [ ] Crear skills de Claude Code para la implementación (`.claude/skills/`) y registrar su uso
 
