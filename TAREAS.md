@@ -6,7 +6,7 @@
 - [x] Inicializar proyecto Node + Express (scripts, nodemon, CORS, JSON)
 - [x] Inicializar proyecto React Native con Expo
 - [x] Verificar conexión dispositivo mobile ↔ backend (emulador Android + Expo Go)
-- [ ] Crear registro de uso de IA (prompts, aciertos, correcciones)
+- [x] Crear registro de uso de IA (prompts, aciertos, correcciones)
 - [ ] Crear skills de Claude Code para la implementación (`.claude/skills/`) y registrar su uso
 
 ## 1. Persistencia (en memoria)
