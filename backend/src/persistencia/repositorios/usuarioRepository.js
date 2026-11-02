@@ -1,21 +1,25 @@
 import { Coleccion } from '../coleccion.js';
 
-// Documento: { id, nombre, apellido, favoritos: [eventoId] }
-// Sin rol: un usuario es organizador si tiene eventos creados.
+/** @typedef {import('../esquemas.js').Usuario} Usuario */
+
 const usuarios = new Coleccion();
 
+/** @returns {Usuario} */
 export function crear({ nombre, apellido }) {
   return usuarios.insertar({ nombre, apellido, favoritos: [] });
 }
 
+/** @returns {Usuario | null} */
 export function buscarPorId(id) {
   return usuarios.buscarPorId(id);
 }
 
+/** @returns {Usuario[]} */
 export function buscarTodos() {
   return usuarios.buscarTodos();
 }
 
+/** @returns {Usuario | null} */
 export function agregarFavorito(usuarioId, eventoId) {
   const usuario = usuarios.buscarPorId(usuarioId);
   if (!usuario) return null;
@@ -26,6 +30,7 @@ export function agregarFavorito(usuarioId, eventoId) {
   });
 }
 
+/** @returns {Usuario | null} */
 export function quitarFavorito(usuarioId, eventoId) {
   const usuario = usuarios.buscarPorId(usuarioId);
   if (!usuario) return null;

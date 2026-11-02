@@ -26,6 +26,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - Devuelve copias con `structuredClone`, así nadie modifica el estado por fuera del repositorio.
 - Ignora el `id` que venga en los datos: no se puede elegir ni pisar.
 
+`backend/src/persistencia/esquemas.js` tiene la estructura de todos los documentos, con un `@typedef` de JSDoc por entidad. Es la referencia en el código; este archivo explica el porqué de cada decisión.
+
 `backend/src/persistencia/seed.js` carga los datos de ejemplo al iniciar el servidor desde `src/index.js`.
 
 ## Decisiones

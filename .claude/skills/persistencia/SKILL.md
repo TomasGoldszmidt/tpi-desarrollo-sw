@@ -66,7 +66,12 @@ Convenciones de `backend/src/persistencia/`, que se crean la primera vez:
   - Guarda los documentos en un `Map` y genera ids numéricos incrementales por colección.
   - Métodos: `insertar`, `buscarPorId`, `buscarTodos(filtro?)`, `actualizar(id, cambios)`, `eliminar`.
   - Devuelve **copias** (`structuredClone`), para que nadie pueda modificar el estado sin pasar por el repositorio.
+- `esquemas.js`: la estructura de **todos** los documentos en un solo lugar, con un `@typedef` de JSDoc por entidad.
+  - Agregar el de la entidad nueva, con un comentario que diga en qué colección se guarda y qué decisión importante tiene.
+  - Para las relaciones: `xxxId` / `xxxIds` es una referencia por id, y un objeto o array de objetos significa que está embebido.
+  - Las entidades embebidas también llevan su `@typedef`, y el padre las referencia (ej: `@property {TipoEntrada[]} tiposEntrada`).
 - `repositorios/<entidad>Repository.js` (ej: `usuarioRepository.js`, importado como `usuarioRepository`): una instancia de `Coleccion` más las consultas específicas del Paso 2.
+  - Importa su tipo con `/** @typedef {import('../esquemas.js').<Entidad>} <Entidad> */` y anota cada función con `@returns`.
   - Exporta funciones con nombres de dominio en español, como `buscarPorCategoria`.
 - `seed.js`: carga los datos de ejemplo. Se llama una vez al iniciar el servidor desde `src/index.js`.
   - Las referencias usan los ids que devuelve `insertar`; no se escriben a mano.
