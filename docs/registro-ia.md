@@ -176,3 +176,22 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Agregó `buscarTodos` al repositorio sin que estuviera en el análisis (lo avisó).
   - Detalle que quedó abierto: buscar "musica" no encuentra eventos por su categoría, solo por su texto.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Persistencia de Compra
+- **Tarea:** Persistir entidad por entidad (Compra, que también resuelve EstadoCompra, CambioEstadoCompra y Mensaje)
+- **Herramienta / skill:** Claude Code + `/persistencia Compra` + `registrar-ia`
+- **Pedido (prompt):** `/persistencia Compra`, y "Ok, implementalo" después del análisis.
+- **Resultado:**
+  - Antes de analizar, revisó el enunciado con `pdftotext`. Confirmó los 5 estados y que el chat es "de cada compra".
+  - Análisis: colección propia `compras`, con `compradorId`, `eventoId` y `tipoEntradaId` como referencias. El historial de estados y los mensajes van embebidos, y `EstadoCompra` es una constante en `backend/src/dominio/estadoCompra.js`. Avisó que esto decidía cuatro entidades del diagrama.
+  - Justificó guardar `total` (lo que se pagó no debe cambiar si cambia el precio) y `estado` además del historial (`registrarCambioEstado` escribe los dos juntos).
+  - Con el ok, creó `compraRepository.js` y un seed de 9 compras que cubre todos los estados, el cupo de Backstage agotado y una compra CONFIRMADA de un evento pasado, que no se puede cancelar.
+  - Lo probó con un script de Node: el estado coincide con el historial, las fechas están en orden, las 2 de 2 Backstage vendidas, y las consultas y las copias aisladas funcionan. Verificó el arranque: "Seed cargado: 4 usuarios, 5 categorias, 6 eventos, 9 compras".
+- **Bien:**
+  - Revisó el enunciado antes de plantear dudas, que fue lo que se le marcó con Evento.
+  - Separó lo que es persistencia de lo que es regla de negocio: si una PENDIENTE reserva cupo y cuándo una cancelación queda CANCELADA o REEMBOLSADA quedaron para la sección 2.
+- **Corregido / problemas:**
+  - Ninguna corrección mía al análisis.
+  - Agregó a `crear` y `agregarMensaje` un parámetro de fecha opcional que no estaba en el análisis, para que el seed arme historiales con fechas pasadas (lo avisó).
+  - El seed asume que una compra pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio define otro flujo, hay que ajustarla.
+- **Aprendizaje:** (completar)
