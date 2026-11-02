@@ -21,7 +21,7 @@ El TP exige reflexionar en el video sobre el uso de IA (ventajas, desventajas, d
 - **Resultado:** qué hizo la IA, con lo técnico relevante
 - **Bien:** qué salió bien o ahorró tiempo
 - **Corregido / problemas:** qué hubo que corregir, qué falló, qué tuvo que hacer el usuario a mano
-- **Aprendizaje:** qué se lleva el usuario
+- **Aprendizaje:** qué se lleva el usuario, en primera persona
 ```
 
 4. Commitear el registro junto con el resto de la subtarea, o solo si no hay otros cambios.
@@ -31,5 +31,5 @@ El TP exige reflexionar en el video sobre el uso de IA (ventajas, desventajas, d
 - **No inventar ni exagerar.** Si no hubo correcciones, poner "ninguno". Los errores de la IA (código que no anduvo, suposiciones equivocadas, cosas que el usuario corrigió) son lo más valioso para el video: registrarlos siempre.
 - Mencionar explícitamente las **skills** usadas, incluida esta, porque el video las va a mostrar.
 - Fecha en formato `AAAA-MM-DD`, con la fecha real del día.
-- El campo **Aprendizaje** es del usuario: proponerlo, pero avisarle que lo revise y lo reescriba con sus palabras.
+- El campo **Aprendizaje** lo completa la IA, nunca queda "(completar)". Se saca de las decisiones que tomó el usuario en la conversación: qué corrigió, qué cuestionó, qué aprobó y por qué. Es una frase en primera persona, como si la escribiera el usuario, con una lección aplicable a lo que sigue del TP (ej: "cuando la IA plantea una duda sobre el dominio, primero hay que pedirle que la verifique contra el enunciado"). Si el usuario no corrigió nada, el aprendizaje sale de lo que funcionó de la forma de trabajo.
 - Escribir en español rioplatense, breve; viñetas si el resultado tiene varios pasos.
