@@ -10,9 +10,9 @@
 - [x] Crear skills base de Claude Code (`registrar-ia`, `probar-caso-de-uso`) en `.claude/skills/`
 
 ## 1. Persistencia (en memoria)
-- [ ] Crear skill `modelo-dominio` (entidad + repositorio en memoria)
-- [ ] Definir modelo de dominio: Usuario, Categoria, Evento, TipoEntrada, Compra, EstadoCompra, CambioEstadoCompra, Mensaje, Resenia
-- [ ] Implementar repositorios en memoria (CRUD genérico + generación de IDs)
+- [x] Crear skill `persistencia` (análisis por entidad → ok → implementación)
+- [ ] Persistir entidad por entidad con `/persistencia` (seguimiento en `docs/persistencia.md`): Usuario, Categoria, Evento, TipoEntrada, Compra, EstadoCompra, CambioEstadoCompra, Mensaje, Resenia
+- [ ] Colección genérica en memoria (CRUD + generación de IDs), se crea con la primera entidad
 - [ ] Cargar datos de ejemplo (seed) al iniciar el servidor
 
 ## 2. Back-End
