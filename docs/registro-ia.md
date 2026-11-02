@@ -259,3 +259,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía.
   - En la prueba, la IA vio que un header `X-User-Id: abc` respondía "Falta indicar el usuario activo", que era engañoso, y lo separó en su propio mensaje.
 - **Aprendizaje:** probar cada error con su mensaje real, y no solo el status, muestra cosas que un "devuelve 401" no muestra. Lo voy a exigir también en los endpoints.
+
+### 2026-11-02 · Dominio: cupo disponible y `hayCupoPara`
+- **Tarea:** Lógica de dominio (análisis + subtarea de cupo)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "explicame la tarea antes", después "Dale" para el análisis y "Aprobado".
+- **Resultado:**
+  - Explicó la tarea con la máquina de estados dibujada y las decisiones pendientes desde persistencia. Después presentó el análisis: tres archivos en `domain/` con funciones que reciben los documentos, la tabla de transiciones con quién puede hacer cada paso, y tres dudas propias (no pagar un evento pasado, "desde el día del evento" desde las 00:00, y pruebas con `node --test`).
+  - Decisiones aprobadas: una PENDIENTE ocupa cupo; cancelar una PENDIENTE la deja CANCELADA y una CONFIRMADA, REEMBOLSADA; la regla de cancelación va en la tabla de transiciones.
+  - Con el ok, creó `domain/compra.js` (`ESTADOS_QUE_OCUPAN_CUPO`, `ocupaCupo`) y `domain/tipoEntrada.js` (`calcularDisponibles`, `hayCupoPara`), funciones puras que no tocan los repositorios.
+  - Agregó `npm test` con el runner de Node y `test/domain.test.js` con 5 casos contra el seed: Backstage agotado, la PENDIENTE de la obra que ocupa, la REEMBOLSADA del rock que libera y el filtro por tipo.
+- **Bien:** el seed preparado en la sección 1 ya tenía los casos borde, así que los tests salieron directo de ahí.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - El primer script `node --test test/` falló en Node 24 porque toma la carpeta como archivo. La IA lo cambió a `node --test`, que busca solo los `*.test.js`.
+- **Aprendizaje:** pedir la explicación antes del análisis me dejó aprobar decisiones de negocio (que una PENDIENTE ocupe cupo) entendiendo el porqué, y tener tests guardados va a servir cuando los endpoints usen estas reglas.
