@@ -7,14 +7,16 @@
 - [x] Inicializar proyecto React Native con Expo
 - [x] Verificar conexión dispositivo mobile ↔ backend (emulador Android + Expo Go)
 - [x] Crear registro de uso de IA (prompts, aciertos, correcciones)
-- [ ] Crear skills de Claude Code para la implementación (`.claude/skills/`) y registrar su uso
+- [x] Crear skills base de Claude Code (`registrar-ia`, `probar-caso-de-uso`) en `.claude/skills/`
 
 ## 1. Persistencia (en memoria)
+- [ ] Crear skill `modelo-dominio` (entidad + repositorio en memoria)
 - [ ] Definir modelo de dominio: Usuario, Categoria, Evento, TipoEntrada, Compra, EstadoCompra, CambioEstadoCompra, Mensaje, Resenia
 - [ ] Implementar repositorios en memoria (CRUD genérico + generación de IDs)
 - [ ] Cargar datos de ejemplo (seed) al iniciar el servidor
 
 ## 2. Back-End
+- [ ] Crear skill `nuevo-endpoint` (ruta, controlador, validaciones, errores)
 - [ ] Lógica de dominio: cupo disponible, `hayCupoPara`, `tuPrecioEstaEntre`, transiciones de estado con historial
 - [ ] Endpoints de usuarios y categorías
 - [ ] Endpoints de eventos: crear con tipos de entrada, detalle
@@ -28,6 +30,7 @@
 - [ ] Manejo de errores y validaciones
 
 ## 3. Front-End
+- [ ] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
 - [ ] Navegación, cliente HTTP y selección de usuario activo
 - [ ] Pantalla de catálogo: búsqueda, categorías y ordenamiento
 - [ ] Pantalla de detalle de evento con reseñas del organizador
