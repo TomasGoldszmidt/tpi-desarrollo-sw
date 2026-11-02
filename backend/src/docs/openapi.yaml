@@ -15,6 +15,8 @@ tags:
     description: Usuarios del sistema (no hay login, se elige el usuario activo)
   - name: Categorias
     description: Categorías para explorar y clasificar los eventos
+  - name: Eventos
+    description: Eventos con sus tipos de entrada
 paths:
   /health:
     get:
@@ -67,7 +69,95 @@ paths:
                   $ref: '#/components/schemas/Categoria'
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /eventos:
+    post:
+      tags: [Eventos]
+      summary: Crear un evento con sus tipos de entrada
+      description: >-
+        El organizador es el usuario activo. La categoría tiene que existir, la
+        fecha tiene que ser futura y los tipos de entrada no pueden repetir nombre
+        (sin distinguir mayúsculas).
+      operationId: createEvento
+      security:
+        - usuarioActivo: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NuevoEvento'
+      responses:
+        '201':
+          description: El evento creado, con la misma forma que el detalle
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoDetalle'
+        '400':
+          description: Falta un campo, tiene un formato inválido o la categoría no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo tiposEntrada[0].cupo tiene que ser como mínimo 1
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '409':
+          description: La fecha no es futura o hay tipos de entrada con el nombre repetido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: La fecha del evento tiene que ser futura
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /eventos/{id}:
+    get:
+      tags: [Eventos]
+      summary: Ver el detalle de un evento
+      description: Incluye las entradas disponibles de cada tipo, calculadas con las compras que ocupan cupo.
+      operationId: getEventoById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 3
+      responses:
+        '200':
+          description: El evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventoDetalle'
+        '400':
+          description: El id no es un número válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo id tiene que ser un id válido
+        '404':
+          description: No existe el evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el evento 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
+  securitySchemes:
+    usuarioActivo:
+      type: apiKey
+      in: header
+      name: X-User-Id
+      description: Id del usuario activo (no hay login). Ej. 1 = Lucía, 2 = Martín, 3 = Sofía, 4 = Juan.
   schemas:
     Error:
       type: object
@@ -105,7 +195,141 @@ components:
         descripcion:
           type: string
           example: Recitales, conciertos y shows en vivo
+    TipoEntrada:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Id dentro del evento (1, 2, 3…)
+          example: 3
+        nombre:
+          type: string
+          example: Backstage
+        descripcion:
+          type: string
+          example: Encuentro con los artistas
+        precio:
+          type: number
+          example: 350000
+        cupo:
+          type: integer
+          example: 2
+        disponibles:
+          type: integer
+          description: Calculado. Cupo menos las entradas de compras PENDIENTE, CONFIRMADA o UTILIZADA.
+          example: 0
+    EventoDetalle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        nombre:
+          type: string
+          example: Festival de Verano
+        descripcion:
+          type: string
+          example: Tres días de música, food trucks y artistas invitados
+        lugar:
+          type: string
+          example: Hipódromo de San Isidro, Av. Márquez 504, San Isidro
+        fecha:
+          type: string
+          format: date-time
+          example: '2027-01-01T19:00:00.000Z'
+        multimedia:
+          type: array
+          items:
+            type: string
+          example: ['https://picsum.photos/seed/festival/800/400']
+        categoria:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 4
+            nombre:
+              type: string
+              example: Festivales
+        organizador:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nombre:
+              type: string
+              example: Lucía
+            apellido:
+              type: string
+              example: Fernández
+        tiposEntrada:
+          type: array
+          items:
+            $ref: '#/components/schemas/TipoEntrada'
+    NuevoEvento:
+      type: object
+      required: [nombre, descripcion, lugar, categoriaId, fecha, tiposEntrada]
+      properties:
+        nombre:
+          type: string
+        descripcion:
+          type: string
+        lugar:
+          type: string
+        categoriaId:
+          type: integer
+        fecha:
+          type: string
+          format: date-time
+          description: Tiene que ser futura
+        multimedia:
+          type: array
+          description: URLs de imágenes. Si falta, queda vacío.
+          items:
+            type: string
+        tiposEntrada:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [nombre, descripcion, precio, cupo]
+            properties:
+              nombre:
+                type: string
+              descripcion:
+                type: string
+              precio:
+                type: number
+                minimum: 0
+              cupo:
+                type: integer
+                minimum: 1
+      example:
+        nombre: Meetup de JavaScript
+        descripcion: Charlas cortas sobre el ecosistema JS
+        lugar: UTN FRBA, Medrano 951, CABA
+        categoriaId: 5
+        fecha: '2027-03-15T19:00:00.000Z'
+        multimedia: []
+        tiposEntrada:
+          - nombre: General
+            descripcion: Entrada libre con registro
+            precio: 0
+            cupo: 100
+          - nombre: Con certificado
+            descripcion: Incluye certificado de asistencia
+            precio: 5000
+            cupo: 30
   responses:
+    SinUsuarioActivo:
+      description: Falta el header X-User-Id, es inválido o el usuario no existe
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Falta indicar el usuario activo
     ErrorInterno:
       description: Error no previsto del servidor
       content:

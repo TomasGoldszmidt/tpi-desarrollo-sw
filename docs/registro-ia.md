@@ -318,3 +318,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El comando de verificación de la skill `swagger` fallaba desde la raíz del proyecto porque `yaml` está instalado en `backend/`. La IA lo corrigió en la skill.
   - `POST /usuarios` responde 404 y no 405 (método no permitido). Es aceptable para el TP, pero no es lo más preciso.
 - **Aprendizaje:** el análisis no solo dice qué endpoints hacer, también qué no hacer y por qué. Eso me evita implementar cosas que ninguna pantalla va a usar.
+
+### 2026-11-02 · Endpoints de eventos: crear y detalle
+- **Tarea:** Endpoints de eventos: crear con tipos de entrada, detalle
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `POST /eventos` (caso 4, con el organizador tomado del usuario activo) y `GET /eventos/:id` (público). Cuatro dudas, todas aprobadas con la recomendación: categoría inexistente responde 400 y no 404; la respuesta trae resúmenes de categoría y organizador en lugar de los ids; `POST` devuelve la misma forma que el detalle; y se rechazan los tipos de entrada con el nombre repetido.
+  - Con el ok, agregó `crearEvento` (categoría existente, fecha futura, nombres sin repetir) y `detalleEvento` (resúmenes y `disponibles` por tipo) a `domain/evento.js`. También creó `eventoController` (`create`, `getById`) y `eventoRoutes`, con `requireUsuario` solo en el `POST`.
+  - 5 tests de dominio nuevos: la suite quedó en 22 y pasan todos.
+  - `/swagger` agregó el tag `Eventos`, los schemas `EventoDetalle`, `TipoEntrada` y `NuevoEvento`, la respuesta `SinUsuarioActivo` y, por primera vez, el `securityScheme` `usuarioActivo` (botón Authorize con `X-User-Id`).
+  - `/probar-caso-de-uso` probó con `curl` 16 casos contra el backend: crear como Martín y leer el evento creado, el festival con Backstage en 0, y cada error de la tabla del análisis (400, 401, 404 y 409). Todos dieron lo esperado.
+- **Bien:** los mensajes de validación indican el campo exacto, por ejemplo `tiposEntrada[1].cupo`, así la pantalla de creación puede mostrar dónde está el error.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - El evento creado en la prueba (id 7) queda en memoria hasta que se reinicie el backend.
+  - `domain/evento.js`, `tipoEntrada.js` y `compra.js` se importan en círculo. Funciona porque solo se usan funciones declaradas, pero conviene tenerlo en cuenta si se agregan constantes.
+- **Aprendizaje:** cuando la IA propone varias dudas con su recomendación, puedo aprobarlas juntas sin perder control, porque cada una viene con su porqué.
