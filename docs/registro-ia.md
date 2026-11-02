@@ -229,3 +229,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La convención anterior de `CLAUDE.md` ("nombres de dominio en español") era ambigua, y la IA la había aplicado también a lo técnico. La corregí yo.
   - Los comentarios del código quedaron en español a propósito, porque son explicaciones y no nombres.
 - **Aprendizaje:** una convención de nombres ambigua se aplica de más; conviene escribirla con ejemplos de qué va en cada idioma, y cambiarla antes de que haya más código que dependa de ella.
+
+### 2026-11-02 · Convenciones de endpoints y skill `nuevo-endpoint`
+- **Tarea:** Crear skill `nuevo-endpoint` (subtareas 1 y 2: convenciones y SKILL.md)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "antes de hacerlo explicame qué es", después "dale" para el análisis y "Aprobado".
+- **Resultado:**
+  - Explicó con un ejemplo (`POST /compras`) por dónde pasa un request y qué hace cada capa, antes de proponer nada.
+  - Propuso seis decisiones, cada una con su recomendación: capas `routes/` → `controllers/` → `domain/` → repositorios; validaciones a mano en `http/validation.js`; clases de error con su status (400, 401, 403, 404, 409) y un `errorHandler` central; códigos y forma de las respuestas (listados como array directo); usuario activo en el header `X-User-Id`, que nunca se toma del body; y ajustes al swagger.
+  - Al revisar el swagger encontró dos choques con su propia propuesta y los marcó: el formato de error ya era `{ "error": "mensaje" }` (recomendó mantenerlo en lugar del `{ codigo, mensaje }` que había sugerido), y la skill `swagger` pedía `operationId` en español (lo pasó a `createCompra`, igual que el controlador).
+  - Con el ok, creó `.claude/skills/nuevo-endpoint/SKILL.md` (análisis → frena → implementa → `/swagger` + `/probar-caso-de-uso`), sumó el `securityScheme` del usuario activo a la skill `swagger` y resumió las convenciones en `CLAUDE.md`.
+- **Bien:** pedirle primero la explicación hizo que las decisiones fueran entendibles antes de aprobarlas, y la revisión de lo existente evitó contradecir el swagger.
+- **Corregido / problemas:**
+  - Ninguna corrección mía al análisis.
+  - La primera propuesta de formato de error no tenía en cuenta el swagger existente; la IA lo detectó sola al leerlo.
+  - Intentó editar con Python, que no está instalado en la PC; lo resolvió con las herramientas de edición.
+- **Aprendizaje:** pedir "explicame qué es" antes de aprobar me deja decidir con criterio propio y no solo aceptar la recomendación; y conviene que la IA lea lo que ya existe antes de proponer, porque su primera idea puede chocar con decisiones anteriores.

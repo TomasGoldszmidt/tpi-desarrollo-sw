@@ -24,9 +24,10 @@ Esta skill **no frena para pedir aprobación**: documenta lo que ya existe en el
 Por cada endpoint:
 
 - **`tags`**: uno por recurso (`Usuarios`, `Categorias`, `Eventos`, `Compras`, `Resenias`). Si el tag no existe, agregarlo a la lista `tags` de arriba con su descripción.
-- **`summary`** en español, corto, en infinitivo ("Crear una compra"), y **`operationId`** en camelCase (`crearCompra`).
+- **`summary`** en español, corto, en infinitivo ("Crear una compra"), y **`operationId`** igual al nombre del controlador, con la regla de nombres del proyecto (`createCompra`, `payCompra`, `listEventos`).
 - **`description`** solo si hay reglas de negocio que conviene saber (ej: "solo se puede cancelar si la compra no está UTILIZADA y el evento no se realizó").
 - **`parameters`**: path y query, con tipo, si es obligatorio y un ejemplo.
+- **Usuario activo:** si la ruta usa `requireUsuario`, agregar `security: [{ usuarioActivo: [] }]` y la respuesta 401. El esquema `usuarioActivo` (apiKey en el header `X-User-Id`) va en `components/securitySchemes`; si no existe, crearlo. Así Swagger UI muestra el botón **Authorize** para cargar el usuario una vez.
 - **`requestBody`**: schema con los `required` reales y un `example` que funcione contra el seed.
 - **`responses`**: la respuesta exitosa y **todos los errores** que el código puede devolver (400, 404, 409, …), cada uno con `$ref: '#/components/schemas/Error'` y una descripción del caso.
 

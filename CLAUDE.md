@@ -13,6 +13,7 @@ TP individual de DDS (UTN FRBA, 2C 2026): plataforma de venta de entradas para e
 | Skill | Cuándo usarla |
 |---|---|
 | `/persistencia <Entidad>` | Para persistir una entidad: analiza, frena hasta el ok e implementa |
+| `/nuevo-endpoint <MÉTODO /ruta>` | Para crear o modificar un endpoint: analiza, frena hasta el ok, implementa, documenta y prueba |
 | `/swagger` | **Cada vez que se crea, modifica o elimina un endpoint**, en el mismo commit |
 | `/probar-caso-de-uso` | Después de implementar un endpoint o una pantalla |
 | `/registrar-ia` | Al cerrar cada subtarea |
@@ -28,7 +29,7 @@ TP individual de DDS (UTN FRBA, 2C 2026): plataforma de venta de entradas para e
   - Los datos de ejemplo están en `seed.js`.
   - Las decisiones de cada entidad están en `docs/persistencia.md`.
   - Los repositorios solo guardan y consultan; las reglas de negocio van en el dominio.
-- **API:** documentada en `backend/src/docs/openapi.yaml` y servida en `/api-docs`.
+- **API:** capas `routes/` → `controllers/` → `domain/` → `persistence/repositories/`, con errores y validaciones en `http/` (detalle en la skill `nuevo-endpoint`). El usuario activo viaja en el header `X-User-Id` y los errores responden `{ "error": "mensaje" }`. Documentada en `backend/src/docs/openapi.yaml` y servida en `/api-docs`.
 - **Mobile:** Expo SDK 58 con la plantilla en blanco, en JavaScript. Seguir `mobile/AGENTS.md`: instalar paquetes con `npx expo install` y consultar la documentación de la versión instalada. La URL del backend se arma en `mobile/src/config.js`.
 - No agregar dependencias sin avisar.
 
