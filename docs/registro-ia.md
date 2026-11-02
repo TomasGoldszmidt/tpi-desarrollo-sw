@@ -159,3 +159,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** descartó los schemas del swagger con un argumento concreto: la API va a devolver campos calculados que no se persisten.
 - **Corregido / problemas:** la falta de un lugar central la detecté yo. La IA había dejado la estructura solo en comentarios sueltos y en la documentación.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Persistencia de Evento
+- **Tarea:** Persistir entidad por entidad (Evento, que también resuelve TipoEntrada)
+- **Herramienta / skill:** Claude Code + `/persistencia Evento` + `registrar-ia`
+- **Pedido (prompt):** `/persistencia Evento`. Después corregí: "prefiero fecha Date" y "si en la consigna habla del lugar agregalo, sino no".
+- **Resultado:**
+  - Análisis: colección propia `eventos`, con `categoriaId` y `organizadorId` como referencias y `tiposEntrada` embebidos con un id local, para que Compra los referencie con `eventoId` + `tipoEntradaId`. Las entradas disponibles, el precio mínimo y el puntaje se calculan, no se guardan. Avisó que la decisión afectaba a TipoEntrada, que quedó embebida.
+  - Para lo del lugar, extrajo el texto del PDF con `pdftotext` y encontró "el acceso al lugar". Agregó `lugar` y aclaró que la "ubicación" de los tipos de entrada ya queda en su nombre.
+  - Con el ok, creó `eventoRepository.js` (`buscar` por texto y categoría sin distinguir mayúsculas ni tildes, `buscarPorOrganizador` y `buscarPorIds`), los typedefs y un seed de 6 eventos con fechas relativas al arranque, dos de ellos pasados y uno con cupo 2 para agotar.
+  - Lo probó con un script de Node: consultas, copias aisladas y la fecha como `Date` serializada a ISO. Verificó el arranque: "Seed cargado: 4 usuarios, 5 categorias, 6 eventos".
+- **Bien:** las fechas relativas evitan que el seed quede viejo, y los casos borde (evento pasado, cupo chico) quedaron preparados para las próximas entidades.
+- **Corregido / problemas:**
+  - La IA había propuesto guardar la fecha como string ISO; la cambié a `Date`.
+  - Planteó `lugar` como una duda en vez de revisar primero el enunciado; se lo pedí yo.
+  - Agregó `buscarTodos` al repositorio sin que estuviera en el análisis (lo avisó).
+  - Detalle que quedó abierto: buscar "musica" no encuentra eventos por su categoría, solo por su texto.
+- **Aprendizaje:** (completar)
