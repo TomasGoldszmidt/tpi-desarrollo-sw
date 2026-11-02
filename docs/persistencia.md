@@ -8,8 +8,8 @@ Persistencia **en memoria, orientada a documentos**. Cada entidad se analiza y s
 |---|---|---|---|
 | 1 | Usuario | implementada | Colección propia `usuarios` |
 | 2 | Categoria | implementada | Colección propia `categorias` (solo lectura, la carga el seed) |
-| 3 | Evento | pendiente | |
-| 4 | TipoEntrada | pendiente | |
+| 3 | Evento | implementada | Colección propia `eventos` |
+| 4 | TipoEntrada | implementada | Embebida en `Evento.tiposEntrada` (se decidió con Evento) |
 | 5 | Compra | pendiente | |
 | 6 | EstadoCompra | pendiente | |
 | 7 | CambioEstadoCompra | pendiente | |
@@ -94,3 +94,58 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - El ícono, si se quiere, lo elige el front según el nombre; no se persiste.
 
 **Seed:** Música, Teatro, Deportes, Festivales y Conferencias, sacadas del contexto del enunciado. Al cargar los eventos, una categoría va a quedar sin eventos para probar la búsqueda sin resultados.
+
+### Evento · colección `eventos`
+
+**Por qué colección propia:**
+- Tiene identidad y ciclo de vida propios: lo crea un organizador (caso de uso 4).
+- Se consulta solo en la búsqueda y el catálogo (casos de uso 3 y 11).
+- Lo referencian Usuario (`favoritos`), Compra y Resenia.
+
+**Documento:**
+```js
+{
+  id: 1,
+  nombre: "Noche de Rock Nacional",
+  descripcion: "Las bandas clásicas del rock argentino en un solo escenario",
+  lugar: "Estadio Obras, Av. del Libertador 7395, CABA",
+  categoriaId: 1,
+  organizadorId: 1,
+  fecha: new Date("2026-11-23T00:00:00.000Z"),
+  multimedia: ["https://picsum.photos/seed/rock/800/400"],
+  tiposEntrada: [
+    { id: 1, nombre: "Campo", descripcion: "De pie, frente al escenario", precio: 45000, cupo: 500 },
+    { id: 2, nombre: "Platea", descripcion: "Asiento numerado", precio: 80000, cupo: 200 }
+  ]
+}
+```
+
+| Relación | Decisión | Motivo |
+|---|---|---|
+| categoria → Categoria | Referencia (`categoriaId`) | Compartida por muchos eventos |
+| organizador → Usuario | Referencia (`organizadorId`) | Decidido en Usuario: la relación se guarda de este lado |
+| tiposEntrada → TipoEntrada[] | Embebe, con id local 1..n | Se definen al crear el evento, no existen sin él, siempre se leen con él y son pocos. Compra lo referencia con `eventoId` + `tipoEntradaId` |
+| multimedia → String[] | Embebe (URLs) | Valores simples sin identidad |
+| entradas disponibles por tipo | Se calcula | `cupo` menos las compras activas de ese tipo; guardarlo aparte se podría desincronizar |
+| precio para ordenar | Se calcula | Mínimo de `tiposEntrada[].precio` |
+| puntaje del organizador | Se calcula | Decidido en Usuario: promedio de sus reseñas |
+
+**Repositorio** (`backend/src/persistencia/repositorios/eventoRepository.js`):
+- `crear`, que asigna los ids locales de los tipos de entrada y convierte la fecha a `Date`
+- `buscarPorId` y `buscarTodos`
+- `buscar({ texto, categoriaId })`, ambos opcionales. El texto se busca en el nombre, la descripción y el lugar, sin distinguir mayúsculas ni tildes
+- `buscarPorOrganizador`, para las ventas del organizador y sus reseñas
+- `buscarPorIds`, para resolver los favoritos
+
+**Decisiones aprobadas:**
+- `fecha` es un `Date`: `structuredClone` lo copia y `res.json` lo devuelve como string ISO.
+- Se agrega `lugar` (texto libre), que no está en el diagrama: el enunciado menciona consultas sobre "el acceso al lugar". La "ubicación" de los tipos de entrada ya queda en su `nombre`.
+- TipoEntrada no tiene colección propia: ningún caso de uso la consulta por separado.
+- No se guarda un contador de vendidas: calcularlo en memoria es barato y no se desincroniza.
+- El orden (precio, fecha, puntaje), las validaciones de referencias y si se ocultan los eventos pasados van en el dominio.
+- No hay `actualizar` ni `eliminar`: ningún caso de uso los pide.
+
+**Seed:** 6 eventos con fechas relativas al arranque.
+- Lucía: rock (+20 días), teatro (+5), festival (+60, con un tipo Backstage de cupo 2 para agotar con el seed de Compra) y acústico (−15 días, pasado).
+- Martín: partido (+10) y stand-up (−30 días, pasado).
+- Conferencias queda sin eventos.

@@ -20,4 +20,30 @@
  * @property {string} descripcion
  */
 
+/**
+ * Colección `eventos`. Las entradas disponibles, el precio mínimo y el puntaje
+ * del organizador no se guardan: se calculan.
+ * @typedef {Object} Evento
+ * @property {number} id
+ * @property {string} nombre
+ * @property {string} descripcion
+ * @property {string} lugar Nombre y dirección, en texto libre.
+ * @property {number} categoriaId Id de Categoria (referencia).
+ * @property {number} organizadorId Id de Usuario (referencia).
+ * @property {Date} fecha
+ * @property {string[]} multimedia URLs de imágenes o videos.
+ * @property {TipoEntrada[]} tiposEntrada Embebidos.
+ */
+
+/**
+ * Embebido en `Evento.tiposEntrada`. El id es local al evento (1..n):
+ * una compra lo referencia con `eventoId` + `tipoEntradaId`.
+ * @typedef {Object} TipoEntrada
+ * @property {number} id
+ * @property {string} nombre
+ * @property {string} descripcion
+ * @property {number} precio
+ * @property {number} cupo Cupo total; las disponibles se calculan con las compras.
+ */
+
 export {};
