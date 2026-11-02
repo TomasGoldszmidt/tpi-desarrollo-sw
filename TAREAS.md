@@ -12,7 +12,7 @@
 ## 1. Persistencia (en memoria)
 - [x] Crear skill `persistencia` (análisis por entidad → ok → implementación)
 - [ ] Persistir entidad por entidad con `/persistencia` (seguimiento en `docs/persistencia.md`): Usuario, Categoria, Evento, TipoEntrada, Compra, EstadoCompra, CambioEstadoCompra, Mensaje, Resenia
-- [ ] Colección genérica en memoria (CRUD + generación de IDs), se crea con la primera entidad
+- [x] Colección genérica en memoria (CRUD + generación de IDs), se crea con la primera entidad
 - [ ] Cargar datos de ejemplo (seed) al iniciar el servidor
 
 ## 2. Back-End
