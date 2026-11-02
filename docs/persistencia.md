@@ -7,7 +7,7 @@ Persistencia **en memoria, orientada a documentos**. Cada entidad se analiza y s
 | # | Entidad | Estado | Decisión |
 |---|---|---|---|
 | 1 | Usuario | implementada | Colección propia `usuarios` |
-| 2 | Categoria | pendiente | |
+| 2 | Categoria | implementada | Colección propia `categorias` (solo lectura, la carga el seed) |
 | 3 | Evento | pendiente | |
 | 4 | TipoEntrada | pendiente | |
 | 5 | Compra | pendiente | |
@@ -59,3 +59,36 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
 
 **Seed:** Lucía Fernández y Martín Gómez como organizadores; Sofía Pérez y Juan Rodríguez como compradores.
+
+**Ids:** se evaluó cambiar a UUID y se mantuvieron numéricos.
+- El choque de ids entre colecciones (el usuario 1 y el evento 1) solo pasaría por un bug de programación: cada repositorio busca en su propia colección y las referencias se validan antes de usarse.
+- Que un UUID no se pueda adivinar no aporta nada sin login.
+- Los ids numéricos son más legibles para probar y para mostrar en el video.
+
+### Categoria · colección `categorias`
+
+**Por qué colección propia:**
+- La necesitan los filtros del catálogo (caso de uso 3) y el selector al crear un evento (caso de uso 4).
+- Todos los eventos la referencian; si se embebiera, el nombre y la descripción se repetirían en cada uno.
+- Se descartó dejarla como constante en código: en el diagrama es una clase con atributos, no un enum, y con un repositorio queda igual que las demás entidades.
+
+**Documento:**
+```json
+{ "id": 1, "nombre": "Música", "descripcion": "Recitales, conciertos y shows en vivo" }
+```
+
+| Relación | Decisión | Motivo |
+|---|---|---|
+| Evento → Categoria | Referencia (`categoriaId` en el evento) | Compartida por muchos eventos; filtrar es comparar ids |
+
+**Repositorio** (`backend/src/persistencia/repositorios/categoriaRepositorio.js`):
+- `buscarTodos`, para los filtros del catálogo y el selector
+- `buscarPorId`, para validar el `categoriaId` al crear un evento
+- `crear`, que solo usa el seed
+
+**Decisiones aprobadas:**
+- Solo lectura para la API: ningún caso de uso pide crear, editar ni borrar categorías.
+- No se valida que el nombre sea único, porque solo crea categorías el seed.
+- El ícono, si se quiere, lo elige el front según el nombre; no se persiste.
+
+**Seed:** Música, Teatro, Deportes, Festivales y Conferencias, sacadas del contexto del enunciado. Al cargar los eventos, una categoría va a quedar sin eventos para probar la búsqueda sin resultados.

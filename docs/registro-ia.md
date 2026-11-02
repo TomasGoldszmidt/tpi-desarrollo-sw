@@ -103,3 +103,24 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Durante las pruebas, la IA ajustó `Coleccion` para que el `id` quede primero y no se pueda pisar desde afuera.
   - Al escribir `docs/persistencia.md` con un comando de bash, las comillas invertidas se rompieron. Lo reescribió con la herramienta de archivos.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Ids numéricos vs UUID
+- **Tarea:** Persistir entidad por entidad (decisión transversal)
+- **Herramienta / skill:** Claude Code
+- **Pedido (prompt):** "¿la persistencia de usuarios no debería ser con UUID?"; después "el choque entre colecciones no me parece una razón tan fuerte".
+- **Resultado:** comparó las dos opciones en una tabla y se inclinó apenas por UUID, por el choque de ids entre colecciones. Cuando le discutí ese argumento, lo revisó: el choque solo pasaría por un bug de programación y las referencias se validan. Cambió la recomendación a mantener los ids numéricos.
+- **Bien:** reconoció que su argumento era débil y lo explicó, en lugar de sostenerlo por haberlo propuesto.
+- **Corregido / problemas:** su primera recomendación le daba demasiado peso a un riesgo poco realista. Tuve que cuestionarla yo.
+- **Aprendizaje:** (completar)
+
+### 2026-11-02 · Persistencia de Categoria
+- **Tarea:** Persistir entidad por entidad: Categoria
+- **Herramienta / skill:** Claude Code + `/persistencia` + `registrar-ia`
+- **Pedido (prompt):** "dale" (`/persistencia Categoria`); después "si las categorías no las carga nadie, entonces está bien lo que decís".
+- **Resultado:**
+  - Propuso una colección propia de solo lectura, cargada por el seed con 5 categorías del enunciado y referenciada desde Evento con `categoriaId`. Planteó como alternativa dejarla como constante en código.
+  - Con el ok, creó `categoriaRepositorio`, sumó las categorías al seed e hizo que el log de arranque las cuente.
+  - Lo probó con un script de Node y verificó el arranque: "Seed cargado: 4 usuarios, 5 categorias".
+- **Bien:** usó el enunciado (el contexto menciona recitales, teatro, festivales, conferencias y deportes) para elegir las categorías, en vez de inventarlas.
+- **Corregido / problemas:** ninguno. Aprobé el análisis después de confirmar que nadie carga categorías.
+- **Aprendizaje:** (completar)

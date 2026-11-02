@@ -5,7 +5,10 @@ const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 
 const seed = cargarSeed();
-console.log(`Seed cargado: ${Object.keys(seed.usuarios).length} usuarios`);
+const resumen = Object.entries(seed)
+  .map(([coleccion, documentos]) => `${Object.keys(documentos).length} ${coleccion}`)
+  .join(', ');
+console.log(`Seed cargado: ${resumen}`);
 
 const app = crearApp();
 
