@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: AI Ticket It API
+  description: >-
+    Backend de AI Ticket It, plataforma de venta de entradas para eventos.
+    Persistencia en memoria: los datos vuelven al seed en cada reinicio.
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local
+tags:
+  - name: Sistema
+    description: Estado del servidor
+paths:
+  /health:
+    get:
+      tags: [Sistema]
+      summary: Verificar que el servidor está activo
+      operationId: health
+      responses:
+        '200':
+          description: El servidor responde
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+components:
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Recurso no encontrado

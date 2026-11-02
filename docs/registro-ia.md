@@ -133,3 +133,16 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** al estar la convención escrita en la skill, el cambio queda fijado para todas las entidades que faltan.
 - **Corregido / problemas:** la convención original de la skill la había propuesto la IA; la cambié a mi gusto.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Skill /swagger y CLAUDE.md
+- **Tarea:** Documentación de la API y convenciones del proyecto
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "quiero crear una skill /swagger para que cada vez que se crea un endpoint se registre en el swagger; en el CLAUDE.md debería estar especificado 'cada vez que se crea un endpoint usar /swagger'. ¿Te parece bien?"
+- **Resultado:**
+  - La IA propuso tres ajustes: que la regla cubra también modificar y eliminar endpoints; usar un `openapi.yaml` aparte en lugar de comentarios `swagger-jsdoc`; y que la skill no frene para pedir aprobación, porque solo documenta código existente.
+  - Con el ok, instaló `swagger-ui-express` y `yaml`, sirvió Swagger UI en `/api-docs` y documentó `/health` como primer endpoint. También configuró nodemon para reiniciar cuando cambia el `.yaml`.
+  - Creó `CLAUDE.md` con la regla de `/swagger`, la forma de trabajo, la tabla de skills, las convenciones y cómo levantar el proyecto.
+  - Verificó que el YAML es válido y que `/api-docs` responde 200 e incluye `/health`.
+- **Bien:** `CLAUDE.md` reúne en el repo convenciones que estaban dispersas en las skills y en la memoria de la IA.
+- **Corregido / problemas:** `npm` bloqueó el script de instalación de `@scarf/scarf`, una telemetría que trae `swagger-ui-dist`. Lo dejamos bloqueado porque no hace falta.
+- **Aprendizaje:** (completar)
