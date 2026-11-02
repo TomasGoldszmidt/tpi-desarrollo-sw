@@ -1,16 +1,16 @@
-import { crearApp } from './app.js';
-import { cargarSeed } from './persistencia/seed.js';
+import { createApp } from './app.js';
+import { loadSeed } from './persistence/seed.js';
 
 const PORT = process.env.PORT || 3000;
 const HOST = '0.0.0.0';
 
-const seed = cargarSeed();
-const resumen = Object.entries(seed)
-  .map(([coleccion, documentos]) => `${Object.keys(documentos).length} ${coleccion}`)
+const seed = loadSeed();
+const summary = Object.entries(seed)
+  .map(([collection, documents]) => `${Object.keys(documents).length} ${collection}`)
   .join(', ');
-console.log(`Seed cargado: ${resumen}`);
+console.log(`Seed cargado: ${summary}`);
 
-const app = crearApp();
+const app = createApp();
 
 app.listen(PORT, HOST, () => {
   console.log(`Servidor escuchando en http://${HOST}:${PORT}`);

@@ -214,3 +214,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía al análisis.
   - Quedó abierto para la sección 2: el promedio de un organizador sin reseñas es `null`, y hay que decidir dónde va al ordenar por puntaje.
 - **Aprendizaje:** los criterios que fui fijando entidad por entidad (no agregar campos que el enunciado no pide, calcular en vez de duplicar) hicieron que la última entidad saliera sin correcciones.
+
+### 2026-11-02 · Nombres técnicos en inglés
+- **Tarea:** preparación de "Crear skill `nuevo-endpoint`" (sección 2), antes de definir las carpetas de rutas y controladores
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "mantené la convención del inglés: routes, controller, domain. ¿hay algo que ya quedó en español? habría que dejarlo en inglés"; después elegí "Nivel 1 y 2".
+- **Resultado:**
+  - Relevó lo técnico que estaba en español y propuso una regla: lo técnico en inglés y lo del dominio en español (entidades, campos, estados), que ya era lo que pasaba con `categoriaRepository`.
+  - Separó el cambio en dos niveles: carpetas, archivos y clases (`persistencia/` → `persistence/`, `repositorios/` → `repositories/`, `dominio/` → `domain/`, `Coleccion` → `Collection`, `esquemas.js` → `schemas.js`, `cargarSeed` → `loadSeed`, `crearApp` → `createApp`) y métodos (`insertar`/`buscarPorId`/`buscarTodos` → `insert`/`findById`/`findAll`, `buscarPorComprador` → `findByComprador`, `registrarCambioEstado` → `addCambioEstado`, etc.).
+  - Renombró con `git mv` para conservar el historial y actualizó los imports, `CLAUDE.md` (nueva convención **Nombres**), la skill `persistencia` y `docs/persistencia.md`. Las entradas viejas de este registro quedaron como estaban.
+  - Lo probó con un script de Node: el seed carga igual (4 usuarios, 5 categorías, 6 eventos, 9 compras, 2 reseñas), las consultas renombradas responden y `/health` contesta.
+- **Bien:** el cambio se hizo antes de que existiera el primer endpoint, así que no hubo que tocar rutas ni el swagger.
+- **Corregido / problemas:**
+  - La convención anterior de `CLAUDE.md` ("nombres de dominio en español") era ambigua, y la IA la había aplicado también a lo técnico. La corregí yo.
+  - Los comentarios del código quedaron en español a propósito, porque son explicaciones y no nombres.
+- **Aprendizaje:** una convención de nombres ambigua se aplica de más; conviene escribirla con ejemplos de qué va en cada idioma, y cambiarla antes de que haya más código que dependa de ella.

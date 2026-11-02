@@ -11,7 +11,7 @@ Persistencia **en memoria, orientada a documentos**. Cada entidad se analiza y s
 | 3 | Evento | implementada | Colección propia `eventos` |
 | 4 | TipoEntrada | implementada | Embebida en `Evento.tiposEntrada` (se decidió con Evento) |
 | 5 | Compra | implementada | Colección propia `compras` |
-| 6 | EstadoCompra | no se persiste | Constante en código (`dominio/estadoCompra.js`), se decidió con Compra |
+| 6 | EstadoCompra | no se persiste | Constante en código (`domain/estadoCompra.js`), se decidió con Compra |
 | 7 | CambioEstadoCompra | implementada | Embebida en `Compra.historial` (se decidió con Compra) |
 | 8 | Mensaje | implementada | Embebida en `Compra.mensajes` (se decidió con Compra) |
 | 9 | Resenia | implementada | Colección propia `resenias` |
@@ -20,15 +20,15 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 
 ## Base común
 
-`backend/src/persistencia/coleccion.js`, clase `Coleccion`:
+`backend/src/persistence/collection.js`, clase `Collection`:
 - Guarda los documentos en un `Map` y genera ids numéricos incrementales por colección.
-- Métodos: `insertar`, `buscarPorId`, `buscarTodos(filtro?)`, `actualizar` y `eliminar`.
+- Métodos: `insert`, `findById`, `findAll(filter?)`, `update` y `delete`.
 - Devuelve copias con `structuredClone`, así nadie modifica el estado por fuera del repositorio.
 - Ignora el `id` que venga en los datos: no se puede elegir ni pisar.
 
-`backend/src/persistencia/esquemas.js` tiene la estructura de todos los documentos, con un `@typedef` de JSDoc por entidad. Es la referencia en el código; este archivo explica el porqué de cada decisión.
+`backend/src/persistence/schemas.js` tiene la estructura de todos los documentos, con un `@typedef` de JSDoc por entidad. Es la referencia en el código; este archivo explica el porqué de cada decisión.
 
-`backend/src/persistencia/seed.js` carga los datos de ejemplo al iniciar el servidor desde `src/index.js`.
+`backend/src/persistence/seed.js` carga los datos de ejemplo al iniciar el servidor desde `src/index.js`.
 
 ## Decisiones
 
@@ -47,11 +47,11 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | organizador de eventos | Se guarda en Evento (`organizadorId`) | Evita mantener la relación en los dos lados |
 | reputación del organizador | Se calcula, no se persiste | Es el promedio de sus reseñas; guardarla aparte podría desincronizarse |
 
-**Repositorio** (`backend/src/persistencia/repositorios/usuarioRepository.js`):
+**Repositorio** (`backend/src/persistence/repositorios/usuarioRepository.js`):
 - `crear`
-- `buscarPorId`
-- `buscarTodos`, para la selección de usuario activo
-- `agregarFavorito` y `quitarFavorito`, que no generan duplicados
+- `findById`
+- `findAll`, para la selección de usuario activo
+- `addFavorito` y `removeFavorito`, que no generan duplicados
 
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
@@ -83,9 +83,9 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 |---|---|---|
 | Evento → Categoria | Referencia (`categoriaId` en el evento) | Compartida por muchos eventos; filtrar es comparar ids |
 
-**Repositorio** (`backend/src/persistencia/repositorios/categoriaRepository.js`):
-- `buscarTodos`, para los filtros del catálogo y el selector
-- `buscarPorId`, para validar el `categoriaId` al crear un evento
+**Repositorio** (`backend/src/persistence/repositorios/categoriaRepository.js`):
+- `findAll`, para los filtros del catálogo y el selector
+- `findById`, para validar el `categoriaId` al crear un evento
 - `crear`, que solo usa el seed
 
 **Decisiones aprobadas:**
@@ -130,12 +130,12 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | precio para ordenar | Se calcula | Mínimo de `tiposEntrada[].precio` |
 | puntaje del organizador | Se calcula | Decidido en Usuario: promedio de sus reseñas |
 
-**Repositorio** (`backend/src/persistencia/repositorios/eventoRepository.js`):
+**Repositorio** (`backend/src/persistence/repositorios/eventoRepository.js`):
 - `crear`, que asigna los ids locales de los tipos de entrada y convierte la fecha a `Date`
-- `buscarPorId` y `buscarTodos`
-- `buscar({ texto, categoriaId })`, ambos opcionales. El texto se busca en el nombre, la descripción y el lugar, sin distinguir mayúsculas ni tildes
-- `buscarPorOrganizador`, para las ventas del organizador y sus reseñas
-- `buscarPorIds`, para resolver los favoritos
+- `findById` y `findAll`
+- `search({ texto, categoriaId })`, ambos opcionales. El texto se busca en el nombre, la descripción y el lugar, sin distinguir mayúsculas ni tildes
+- `findByOrganizador`, para las ventas del organizador y sus reseñas
+- `findByIds`, para resolver los favoritos
 
 **Decisiones aprobadas:**
 - `fecha` es un `Date`: `structuredClone` lo copia y `res.json` lo devuelve como string ISO.
@@ -143,7 +143,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - TipoEntrada no tiene colección propia: ningún caso de uso la consulta por separado.
 - No se guarda un contador de vendidas: calcularlo en memoria es barato y no se desincroniza.
 - El orden (precio, fecha, puntaje), las validaciones de referencias y si se ocultan los eventos pasados van en el dominio.
-- No hay `actualizar` ni `eliminar`: ningún caso de uso los pide.
+- No hay `update` ni `delete`: ningún caso de uso los pide.
 
 **Seed:** 6 eventos con fechas relativas al arranque.
 - Lucía: rock (+20 días), teatro (+5), festival (+60, con un tipo Backstage de cupo 2 para agotar con el seed de Compra) y acústico (−15 días, pasado).
@@ -188,17 +188,17 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | mensajes → Mensaje[] | Embebe | El chat es de cada compra y solo se lee en su detalle |
 | total | Se guarda | Es lo que se pagó y lo que se reembolsa; no debe cambiar si cambia el precio |
 
-**Repositorio** (`backend/src/persistencia/repositorios/compraRepository.js`):
+**Repositorio** (`backend/src/persistence/repositorios/compraRepository.js`):
 - `crear`, que arranca en `PENDIENTE` con el primer registro del historial y sin mensajes
-- `buscarPorId`, para el detalle, el chat y las acciones
-- `buscarPorComprador`, para "Mis compras" y para comprobar la compra UTILIZADA antes de reseñar
-- `buscarPorEvento`, para las ventas del organizador y las entradas disponibles
-- `registrarCambioEstado`, que actualiza `estado` y agrega el registro al historial en una sola escritura
-- `agregarMensaje`
+- `findById`, para el detalle, el chat y las acciones
+- `findByComprador`, para "Mis compras" y para comprobar la compra UTILIZADA antes de reseñar
+- `findByEvento`, para las ventas del organizador y las entradas disponibles
+- `addCambioEstado`, que actualiza `estado` y agrega el registro al historial en una sola escritura
+- `addMensaje`
 
 **Decisiones aprobadas:**
-- `EstadoCompra` es una constante congelada en `backend/src/dominio/estadoCompra.js`, la primera pieza de la carpeta del dominio.
-- Se guarda `estado` además del historial: está en el diagrama y simplifica los filtros. `registrarCambioEstado` escribe los dos juntos.
+- `EstadoCompra` es una constante congelada en `backend/src/domain/estadoCompra.js`, la primera pieza de la carpeta del dominio.
+- Se guarda `estado` además del historial: está en el diagrama y simplifica los filtros. `addCambioEstado` escribe los dos juntos.
 - Mensajes e historial no tienen colección propia: ningún caso de uso los consulta fuera de su compra.
 - Los mensajes no llevan `id`: nadie los referencia.
 - Quedan para el dominio (sección 2): si una PENDIENTE reserva cupo, las transiciones válidas y cuándo una cancelación queda CANCELADA o REEMBOLSADA.
@@ -227,11 +227,11 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | organizador | No se guarda: se llega por `evento.organizadorId` | Evita duplicar un dato de Evento |
 | puntaje del organizador | Se calcula | Decidido en Usuario: promedio de las reseñas de sus eventos |
 
-**Repositorio** (`backend/src/persistencia/repositorios/reseniaRepository.js`):
+**Repositorio** (`backend/src/persistence/repositorios/reseniaRepository.js`):
 - `crear`
-- `buscarPorEventos`, para las reseñas de un organizador a partir de `eventoRepository.buscarPorOrganizador`
-- `buscarPorCompradorYEvento`, para no reseñar dos veces el mismo evento
-- `buscarTodos`, para calcular de una vez el puntaje de todos los organizadores
+- `findByEventos`, para las reseñas de un organizador a partir de `eventoRepository.findByOrganizador`
+- `findByCompradorAndEvento`, para no reseñar dos veces el mismo evento
+- `findAll`, para calcular de una vez el puntaje de todos los organizadores
 
 **Decisiones aprobadas:**
 - Sin `organizadorId`: la consulta en dos pasos es barata en memoria y no duplica datos.

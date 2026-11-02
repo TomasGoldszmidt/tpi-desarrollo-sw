@@ -1,13 +1,13 @@
-import { Coleccion } from '../coleccion.js';
+import { Collection } from '../collection.js';
 
-/** @typedef {import('../esquemas.js').Resenia} Resenia */
+/** @typedef {import('../schemas.js').Resenia} Resenia */
 
-const resenias = new Coleccion();
+const resenias = new Collection();
 
 // Que haya una compra UTILIZADA y que la puntuación esté en rango lo valida el dominio.
 /** @returns {Resenia} */
-export function crear({ compradorId, eventoId, detalle, puntuacion }) {
-  return resenias.insertar({
+export function create({ compradorId, eventoId, detalle, puntuacion }) {
+  return resenias.insert({
     compradorId: Number(compradorId),
     eventoId: Number(eventoId),
     detalle,
@@ -16,20 +16,20 @@ export function crear({ compradorId, eventoId, detalle, puntuacion }) {
 }
 
 /** @returns {Resenia[]} */
-export function buscarTodos() {
-  return resenias.buscarTodos();
+export function findAll() {
+  return resenias.findAll();
 }
 
 // Para las reseñas de un organizador: se le pasan los ids de sus eventos.
 /** @returns {Resenia[]} */
-export function buscarPorEventos(eventoIds) {
+export function findByEventos(eventoIds) {
   const buscados = new Set(eventoIds.map(Number));
-  return resenias.buscarTodos((resenia) => buscados.has(resenia.eventoId));
+  return resenias.findAll((resenia) => buscados.has(resenia.eventoId));
 }
 
 /** @returns {Resenia | null} */
-export function buscarPorCompradorYEvento(compradorId, eventoId) {
-  const [resenia] = resenias.buscarTodos(
+export function findByCompradorAndEvento(compradorId, eventoId) {
+  const [resenia] = resenias.findAll(
     (r) => r.compradorId === Number(compradorId) && r.eventoId === Number(eventoId),
   );
   return resenia ?? null;

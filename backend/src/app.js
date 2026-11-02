@@ -6,7 +6,7 @@ import YAML from 'yaml';
 
 const openapi = YAML.parse(readFileSync(new URL('./docs/openapi.yaml', import.meta.url), 'utf8'));
 
-export function crearApp() {
+export function createApp() {
   const app = express();
 
   app.use(cors());

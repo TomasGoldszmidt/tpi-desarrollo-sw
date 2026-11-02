@@ -1,14 +1,14 @@
-import { Coleccion } from '../coleccion.js';
-import { EstadoCompra } from '../../dominio/estadoCompra.js';
+import { Collection } from '../collection.js';
+import { EstadoCompra } from '../../domain/estadoCompra.js';
 
-/** @typedef {import('../esquemas.js').Compra} Compra */
+/** @typedef {import('../schemas.js').Compra} Compra */
 
-const compras = new Coleccion();
+const compras = new Collection();
 
 // Arranca en PENDIENTE. Que haya cupo lo valida el dominio antes de llamar.
 /** @returns {Compra} */
-export function crear({ compradorId, eventoId, tipoEntradaId, cantidad, total, fechaHora = new Date() }) {
-  return compras.insertar({
+export function create({ compradorId, eventoId, tipoEntradaId, cantidad, total, fechaHora = new Date() }) {
+  return compras.insert({
     compradorId: Number(compradorId),
     eventoId: Number(eventoId),
     tipoEntradaId: Number(tipoEntradaId),
@@ -21,39 +21,39 @@ export function crear({ compradorId, eventoId, tipoEntradaId, cantidad, total, f
 }
 
 /** @returns {Compra | null} */
-export function buscarPorId(id) {
-  return compras.buscarPorId(id);
+export function findById(id) {
+  return compras.findById(id);
 }
 
 /** @returns {Compra[]} */
-export function buscarPorComprador(compradorId) {
-  return compras.buscarTodos((compra) => compra.compradorId === Number(compradorId));
+export function findByComprador(compradorId) {
+  return compras.findAll((compra) => compra.compradorId === Number(compradorId));
 }
 
 /** @returns {Compra[]} */
-export function buscarPorEvento(eventoId) {
-  return compras.buscarTodos((compra) => compra.eventoId === Number(eventoId));
+export function findByEvento(eventoId) {
+  return compras.findAll((compra) => compra.eventoId === Number(eventoId));
 }
 
 // Escribe el estado y el historial juntos para que no se desincronicen.
 // Si la transición es válida lo decide el dominio.
 /** @returns {Compra | null} */
-export function registrarCambioEstado(id, { estado, usuarioId, fechaHora = new Date() }) {
-  const compra = compras.buscarPorId(id);
+export function addCambioEstado(id, { estado, usuarioId, fechaHora = new Date() }) {
+  const compra = compras.findById(id);
   if (!compra) return null;
 
-  return compras.actualizar(id, {
+  return compras.update(id, {
     estado,
     historial: [...compra.historial, { estado, usuarioId: Number(usuarioId), fechaHora: new Date(fechaHora) }],
   });
 }
 
 /** @returns {Compra | null} */
-export function agregarMensaje(id, { usuarioId, mensaje, enviado = new Date() }) {
-  const compra = compras.buscarPorId(id);
+export function addMensaje(id, { usuarioId, mensaje, enviado = new Date() }) {
+  const compra = compras.findById(id);
   if (!compra) return null;
 
-  return compras.actualizar(id, {
+  return compras.update(id, {
     mensajes: [...compra.mensajes, { usuarioId: Number(usuarioId), mensaje, enviado: new Date(enviado) }],
   });
 }

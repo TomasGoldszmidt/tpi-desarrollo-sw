@@ -1,17 +1,17 @@
-import { Coleccion } from '../coleccion.js';
+import { Collection } from '../collection.js';
 
-/** @typedef {import('../esquemas.js').Evento} Evento */
+/** @typedef {import('../schemas.js').Evento} Evento */
 
-const eventos = new Coleccion();
+const eventos = new Collection();
 
 // Pasa a minúsculas y saca las tildes, para buscar "musica" y encontrar "Música".
-function normalizar(texto) {
+function normalize(texto) {
   return texto.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
 }
 
 /** @returns {Evento} */
-export function crear({ nombre, descripcion, lugar, categoriaId, organizadorId, fecha, multimedia = [], tiposEntrada }) {
-  return eventos.insertar({
+export function create({ nombre, descripcion, lugar, categoriaId, organizadorId, fecha, multimedia = [], tiposEntrada }) {
+  return eventos.insert({
     nombre,
     descripcion,
     lugar,
@@ -30,35 +30,35 @@ export function crear({ nombre, descripcion, lugar, categoriaId, organizadorId, 
 }
 
 /** @returns {Evento | null} */
-export function buscarPorId(id) {
-  return eventos.buscarPorId(id);
+export function findById(id) {
+  return eventos.findById(id);
 }
 
 /** @returns {Evento[]} */
-export function buscarTodos() {
-  return eventos.buscarTodos();
+export function findAll() {
+  return eventos.findAll();
 }
 
 // Los dos filtros son opcionales. El texto se busca en el nombre, la descripción y el lugar.
 /** @returns {Evento[]} */
-export function buscar({ texto, categoriaId } = {}) {
-  const buscado = texto ? normalizar(texto) : null;
+export function search({ texto, categoriaId } = {}) {
+  const buscado = texto ? normalize(texto) : null;
 
-  return eventos.buscarTodos((evento) => {
+  return eventos.findAll((evento) => {
     if (categoriaId && evento.categoriaId !== Number(categoriaId)) return false;
     if (!buscado) return true;
     return [evento.nombre, evento.descripcion, evento.lugar]
-      .some((campo) => normalizar(campo).includes(buscado));
+      .some((campo) => normalize(campo).includes(buscado));
   });
 }
 
 /** @returns {Evento[]} */
-export function buscarPorOrganizador(organizadorId) {
-  return eventos.buscarTodos((evento) => evento.organizadorId === Number(organizadorId));
+export function findByOrganizador(organizadorId) {
+  return eventos.findAll((evento) => evento.organizadorId === Number(organizadorId));
 }
 
 /** @returns {Evento[]} */
-export function buscarPorIds(ids) {
+export function findByIds(ids) {
   const buscados = new Set(ids.map(Number));
-  return eventos.buscarTodos((evento) => buscados.has(evento.id));
+  return eventos.findAll((evento) => buscados.has(evento.id));
 }

@@ -19,11 +19,12 @@ TP individual de DDS (UTN FRBA, 2C 2026): plataforma de venta de entradas para e
 
 ## Convenciones
 
-- **Backend:** Node + Express 5, con **ES Modules** (`import`/`export`, con `.js` en los imports relativos). Nombres de dominio en español.
+- **Backend:** Node + Express 5, con **ES Modules** (`import`/`export`, con `.js` en los imports relativos).
+- **Nombres:** lo técnico en inglés (carpetas como `persistence/`, `domain/`, `routes/`, `controllers/`; archivos, clases y métodos como `Collection`, `findById`, `create`) y lo del dominio en español (entidades, campos y estados: `Compra`, `fechaHora`, `EstadoCompra.PENDIENTE`). Se combinan así: `compraRepository.findByComprador`.
 - **Persistencia en memoria, orientada a documentos:**
-  - `backend/src/persistencia/coleccion.js` guarda los documentos en un `Map`, con ids numéricos incrementales, y devuelve copias.
-  - La estructura de cada documento está en `backend/src/persistencia/esquemas.js`, con un `@typedef` de JSDoc por entidad.
-  - Un repositorio por colección en `repositorios/<entidad>Repository.js`, tipado con esos esquemas.
+  - `backend/src/persistence/collection.js` guarda los documentos en un `Map`, con ids numéricos incrementales, y devuelve copias.
+  - La estructura de cada documento está en `backend/src/persistence/schemas.js`, con un `@typedef` de JSDoc por entidad.
+  - Un repositorio por colección en `repositories/<entidad>Repository.js`, tipado con esos esquemas.
   - Los datos de ejemplo están en `seed.js`.
   - Las decisiones de cada entidad están en `docs/persistencia.md`.
   - Los repositorios solo guardan y consultan; las reglas de negocio van en el dominio.

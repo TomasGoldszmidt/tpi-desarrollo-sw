@@ -15,7 +15,7 @@ Archivos de apoyo:
 
 - Si el usuario nombró una entidad, usar esa. Con "siguiente", tomar la primera `pendiente` de la tabla de `docs/persistencia.md`.
 - Leer las decisiones ya aprobadas para no contradecirlas. Si una entidad ya decidida se va a ver afectada, avisarlo en el análisis.
-- Leer el código existente en `backend/src/persistencia/` para respetar sus convenciones.
+- Leer el código existente en `backend/src/persistence/` para respetar sus convenciones.
 
 ## Paso 1 · ¿Necesita persistencia propia?
 
@@ -60,31 +60,31 @@ Si el usuario corrige algo, ajustar el análisis y volver a presentarlo hasta qu
 
 ## Paso 4 · Implementar (solo con ok)
 
-Convenciones de `backend/src/persistencia/`, que se crean la primera vez:
+Convenciones de `backend/src/persistence/`, que se crean la primera vez:
 
-- `coleccion.js`: clase genérica `Coleccion`.
+- `collection.js`: clase genérica `Collection`.
   - Guarda los documentos en un `Map` y genera ids numéricos incrementales por colección.
-  - Métodos: `insertar`, `buscarPorId`, `buscarTodos(filtro?)`, `actualizar(id, cambios)`, `eliminar`.
+  - Métodos: `insert`, `findById`, `findAll(filter?)`, `update(id, changes)`, `delete`.
   - Devuelve **copias** (`structuredClone`), para que nadie pueda modificar el estado sin pasar por el repositorio.
-- `esquemas.js`: la estructura de **todos** los documentos en un solo lugar, con un `@typedef` de JSDoc por entidad.
+- `schemas.js`: la estructura de **todos** los documentos en un solo lugar, con un `@typedef` de JSDoc por entidad.
   - Agregar el de la entidad nueva, con un comentario que diga en qué colección se guarda y qué decisión importante tiene.
   - Para las relaciones: `xxxId` / `xxxIds` es una referencia por id, y un objeto o array de objetos significa que está embebido.
   - Las entidades embebidas también llevan su `@typedef`, y el padre las referencia (ej: `@property {TipoEntrada[]} tiposEntrada`).
-- `repositorios/<entidad>Repository.js` (ej: `usuarioRepository.js`, importado como `usuarioRepository`): una instancia de `Coleccion` más las consultas específicas del Paso 2.
-  - Importa su tipo con `/** @typedef {import('../esquemas.js').<Entidad>} <Entidad> */` y anota cada función con `@returns`.
-  - Exporta funciones con nombres de dominio en español, como `buscarPorCategoria`.
+- `repositories/<entidad>Repository.js` (ej: `usuarioRepository.js`, importado como `usuarioRepository`): una instancia de `Collection` más las consultas específicas del Paso 2.
+  - Importa su tipo con `/** @typedef {import('../schemas.js').<Entidad>} <Entidad> */` y anota cada función con `@returns`.
+  - Exporta funciones con verbo en inglés y criterio de dominio en español, como `findByCategoria` o `addMensaje`.
 - `seed.js`: carga los datos de ejemplo. Se llama una vez al iniciar el servidor desde `src/index.js`.
-  - Las referencias usan los ids que devuelve `insertar`; no se escriben a mano.
+  - Las referencias usan los ids que devuelve `insert`; no se escriben a mano.
 
 Reglas:
 
-- ES Modules (`import`/`export`, con `.js` en los imports relativos) y nombres en español, igual que el resto del backend.
+- ES Modules (`import`/`export`, con `.js` en los imports relativos). Lo técnico en inglés (carpetas, archivos, clases, métodos) y lo del dominio en español (entidades, campos, estados), igual que el resto del backend.
 - Los repositorios solo guardan y consultan. Las reglas de negocio (`hayCupoPara`, transiciones de estado, validaciones) van en la sección 2 de TAREAS.md, no acá.
 - No agregar dependencias.
 
 ## Paso 5 · Verificar y cerrar
 
-1. Probar el repositorio con un script corto de Node: insertar, buscar, cada consulta específica y que el seed cargue bien. Mostrar la salida.
+1. Probar el repositorio con un script corto de Node: `insert`, `findById`, cada consulta específica y que el seed cargue bien. Mostrar la salida.
 2. Si el backend está corriendo, confirmar que sigue levantando bien con el seed.
 3. Actualizar `docs/persistencia.md`: pasar la entidad a `implementada` y anotar la decisión final. Si se decidió que no se persiste, marcarla como `no se persiste` con el motivo.
 4. Proponer el commit y sugerir `/registrar-ia`, sobre todo si el usuario corrigió el análisis, porque eso es material para el video.

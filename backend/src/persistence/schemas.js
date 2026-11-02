@@ -47,7 +47,7 @@
  */
 
 /**
- * Constante en código (`dominio/estadoCompra.js`), no se persiste como colección.
+ * Constante en código (`domain/estadoCompra.js`), no se persiste como colección.
  * @typedef {'PENDIENTE' | 'CONFIRMADA' | 'UTILIZADA' | 'CANCELADA' | 'REEMBOLSADA'} EstadoCompra
  */
 
