@@ -195,3 +195,22 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Agregó a `crear` y `agregarMensaje` un parámetro de fecha opcional que no estaba en el análisis, para que el seed arme historiales con fechas pasadas (lo avisó).
   - El seed asume que una compra pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio define otro flujo, hay que ajustarla.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Persistencia de Resenia (cierre de la sección 1)
+- **Tarea:** Persistir entidad por entidad (Resenia) · Cargar datos de ejemplo (seed)
+- **Herramienta / skill:** Claude Code + `/persistencia Resenia` + `registrar-ia`
+- **Pedido (prompt):** "Sí, seguí" (con la última entidad pendiente), y "Ok, implementalo" después del análisis.
+- **Resultado:**
+  - Revisó el enunciado con `pdftotext`: habla de "puntaje y comentario" y de la "reputación de cada organizador", pero no de una fecha de la reseña.
+  - Análisis: colección propia `resenias`, con `compradorId` y `eventoId` como referencias. Descartó embeberla en Evento o en Compra porque se consulta por organizador, atravesando varios eventos.
+  - No guarda el organizador (se llega por `evento.organizadorId`), ni `compraId`, ni la fecha. El puntaje del organizador se calcula.
+  - Con el ok, creó `reseniaRepository.js` (`buscarPorEventos`, `buscarPorCompradorYEvento` y `buscarTodos`) y un seed de 2 reseñas: Lucía queda con 4.5 de promedio, Martín sin reseñas, y Sofía tiene una compra UTILIZADA sin reseñar para probar en vivo.
+  - Lo probó con un script de Node, incluido el cálculo del promedio en dos pasos. Verificó el arranque: "Seed cargado: 4 usuarios, 5 categorias, 6 eventos, 9 compras, 2 resenias".
+  - Marcó en `TAREAS.md` las casillas de persistencia y seed: la sección 1 quedó completa.
+- **Bien:**
+  - Aplicó solo el criterio que yo había usado con `lugar` (no agregar campos que el enunciado no menciona) y descartó la fecha de la reseña.
+  - El seed deja preparados casos borde para la sección 2: un organizador sin puntaje y una compra CONFIRMADA de un evento pasado que no puede reseñar.
+- **Corregido / problemas:**
+  - Ninguna corrección mía al análisis.
+  - Quedó abierto para la sección 2: el promedio de un organizador sin reseñas es `null`, y hay que decidir dónde va al ordenar por puntaje.
+- **Aprendizaje:** (completar)
