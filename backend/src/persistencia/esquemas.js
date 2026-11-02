@@ -82,4 +82,15 @@
  * @property {Date} enviado
  */
 
+/**
+ * Colección `resenias`. No guarda el organizador: se llega por `evento.organizadorId`.
+ * El puntaje del organizador se calcula promediando las reseñas de sus eventos.
+ * @typedef {Object} Resenia
+ * @property {number} id
+ * @property {number} compradorId Id de Usuario (referencia).
+ * @property {number} eventoId Id de Evento (referencia).
+ * @property {string} detalle
+ * @property {number} puntuacion
+ */
+
 export {};

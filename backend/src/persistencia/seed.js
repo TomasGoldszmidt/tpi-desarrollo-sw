@@ -2,6 +2,7 @@ import * as usuarioRepository from './repositorios/usuarioRepository.js';
 import * as categoriaRepository from './repositorios/categoriaRepository.js';
 import * as eventoRepository from './repositorios/eventoRepository.js';
 import * as compraRepository from './repositorios/compraRepository.js';
+import * as reseniaRepository from './repositorios/reseniaRepository.js';
 import { EstadoCompra } from '../dominio/estadoCompra.js';
 
 // Fecha relativa al arranque, para que los eventos futuros y pasados no queden viejos.
@@ -183,5 +184,18 @@ export function cargarSeed() {
     usuarioId: lucia.id, mensaje: 'Sí, chica, la revisan en la puerta.', enviado: enDias(-4, 11),
   });
 
-  return { usuarios, categorias, eventos, compras };
+  // Sobre las compras utilizadas del acústico: Lucía queda con 4.5 de promedio.
+  // Sofía no reseñó el stand-up (para probar crear una) y Martín queda sin reseñas.
+  const resenias = {
+    sofiaAcustico: reseniaRepository.crear({
+      compradorId: sofia.id, eventoId: eventos.acustico.id, puntuacion: 5,
+      detalle: 'Sonido impecable y muy buena organización en la entrada.',
+    }),
+    juanAcustico: reseniaRepository.crear({
+      compradorId: juan.id, eventoId: eventos.acustico.id, puntuacion: 4,
+      detalle: 'Muy lindo show, aunque empezó media hora tarde.',
+    }),
+  };
+
+  return { usuarios, categorias, eventos, compras, resenias };
 }

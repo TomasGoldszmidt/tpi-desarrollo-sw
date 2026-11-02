@@ -14,7 +14,7 @@ Persistencia **en memoria, orientada a documentos**. Cada entidad se analiza y s
 | 6 | EstadoCompra | no se persiste | Constante en código (`dominio/estadoCompra.js`), se decidió con Compra |
 | 7 | CambioEstadoCompra | implementada | Embebida en `Compra.historial` (se decidió con Compra) |
 | 8 | Mensaje | implementada | Embebida en `Compra.mensajes` (se decidió con Compra) |
-| 9 | Resenia | pendiente | |
+| 9 | Resenia | implementada | Colección propia `resenias` |
 
 Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` · `no se persiste`.
 
@@ -207,3 +207,39 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - Sofía: rock CONFIRMADA con chat; obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Lucía y a Martín).
 - Juan: Backstage × 2 CONFIRMADA (agota el cupo de 2); rock REEMBOLSADA y partido CANCELADA (no cuentan para el cupo); acústico UTILIZADA; stand-up CONFIRMADA de un evento pasado (no se puede cancelar).
 - La compra REEMBOLSADA pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio decide otro flujo, hay que ajustar el seed.
+
+### Resenia · colección `resenias`
+
+**Por qué colección propia:**
+- Se consulta por fuera de su evento: el caso de uso 10 muestra las reseñas de todos los eventos anteriores de un organizador, y el 11 las promedia por organizador para ordenar la búsqueda.
+- Se descartó embeberla en Evento, porque crece con cada asistente y habría que leerla atravesando varios eventos.
+- Se descartó embeberla en Compra, porque quedaría escondida dentro de cada compra y el diagrama la modela como entidad propia.
+
+**Documento:**
+```js
+{ id: 1, compradorId: 3, eventoId: 4, detalle: "Sonido impecable y muy buena organización en la entrada.", puntuacion: 5 }
+```
+
+| Relación | Decisión | Motivo |
+|---|---|---|
+| comprador → Usuario | Referencia (`compradorId`) | Tiene vida propia y es compartido |
+| evento → Evento | Referencia (`eventoId`) | Tiene vida propia; las reseñas se buscan por evento |
+| organizador | No se guarda: se llega por `evento.organizadorId` | Evita duplicar un dato de Evento |
+| puntaje del organizador | Se calcula | Decidido en Usuario: promedio de las reseñas de sus eventos |
+
+**Repositorio** (`backend/src/persistencia/repositorios/reseniaRepository.js`):
+- `crear`
+- `buscarPorEventos`, para las reseñas de un organizador a partir de `eventoRepository.buscarPorOrganizador`
+- `buscarPorCompradorYEvento`, para no reseñar dos veces el mismo evento
+- `buscarTodos`, para calcular de una vez el puntaje de todos los organizadores
+
+**Decisiones aprobadas:**
+- Sin `organizadorId`: la consulta en dos pasos es barata en memoria y no duplica datos.
+- Sin `compraId`: se sigue el diagrama (comprador + evento), con una reseña por comprador y evento.
+- Sin `fecha`: el enunciado no la menciona; alcanza con la fecha del evento.
+- El dominio (sección 2) valida que haya una compra UTILIZADA y el rango de la puntuación.
+
+**Seed:** 2 reseñas del acústico (Sofía 5 y Juan 4), así Lucía queda con 4.5 de promedio.
+- Sofía no reseñó el stand-up, que tiene UTILIZADA: queda libre para probar crear una reseña.
+- Juan no puede reseñar el stand-up, porque su compra está CONFIRMADA.
+- Martín queda sin reseñas, para probar el orden por puntaje con un organizador sin puntaje.
