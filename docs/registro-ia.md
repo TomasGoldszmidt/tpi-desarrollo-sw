@@ -245,3 +245,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La primera propuesta de formato de error no tenía en cuenta el swagger existente; la IA lo detectó sola al leerlo.
   - Intentó editar con Python, que no está instalado en la PC; lo resolvió con las herramientas de edición.
 - **Aprendizaje:** pedir "explicame qué es" antes de aprobar me deja decidir con criterio propio y no solo aceptar la recomendación; y conviene que la IA lea lo que ya existe antes de proponer, porque su primera idea puede chocar con decisiones anteriores.
+
+### 2026-11-02 · Base de errores, validaciones y usuario activo
+- **Tarea:** Crear skill `nuevo-endpoint` (subtarea 3: la base que la skill da por hecha)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "dale"
+- **Resultado:**
+  - Creó `backend/src/http/errors.js` (`AppError` y las subclases de 400, 401, 403, 404 y 409) y `http/validation.js` (`requireId`, `requireInteger`, `requireNumber`, `requireString`, `requireDate`, `requireArray`, que devuelven el valor ya convertido).
+  - Creó los middlewares `requireUsuario` (lee `X-User-Id` y deja el documento en `req.usuario`) y `notFound` + `errorHandler` (responde `{ "error": "mensaje" }`, 400 para JSON mal formado y 500 genérico para lo no previsto), y los registró en `app.js`.
+  - Lo probó con un script de Node que levanta una app con rutas descartables: 15 casos, entre ellos 404 de ruta, JSON roto, header faltante, inválido o de un usuario inexistente, cada validación, un 409 lanzado desde un handler async y un 500.
+- **Bien:** la prueba confirmó que Express 5 lleva solo los errores async al `errorHandler`, así que los controladores no van a necesitar `try/catch`.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - En la prueba, la IA vio que un header `X-User-Id: abc` respondía "Falta indicar el usuario activo", que era engañoso, y lo separó en su propio mensaje.
+- **Aprendizaje:** probar cada error con su mensaje real, y no solo el status, muestra cosas que un "devuelve 401" no muestra. Lo voy a exigir también en los endpoints.

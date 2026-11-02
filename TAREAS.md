@@ -16,7 +16,7 @@
 - [x] Cargar datos de ejemplo (seed) al iniciar el servidor
 
 ## 2. Back-End
-- [ ] Crear skill `nuevo-endpoint` (ruta, controlador, validaciones, errores)
+- [x] Crear skill `nuevo-endpoint` (ruta, controlador, validaciones, errores)
 - [ ] Lógica de dominio: cupo disponible, `hayCupoPara`, `tuPrecioEstaEntre`, transiciones de estado con historial
 - [ ] Endpoints de usuarios y categorías
 - [ ] Endpoints de eventos: crear con tipos de entrada, detalle
