@@ -87,7 +87,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Creó `docs/persistencia.md` para seguir el estado y las decisiones de cada entidad.
 - **Bien:** el diseño del flujo (análisis → aprobación → implementación) lo definí yo y la IA lo convirtió en una skill reutilizable. Reemplazó a la skill `modelo-dominio` que había propuesto antes.
 - **Corregido / problemas:** la IA había propuesto crear las skills recién al empezar cada sección. Lo cambié: una skill por cada tipo de tarea, con aprobación en el medio.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** poner en la skill el punto de frenado (análisis → ok → implementación) hace que el control no dependa de acordarme de pedirlo cada vez.
 
 ### 2026-11-02 · Persistencia de Usuario (primer uso de `/persistencia`)
 - **Tarea:** Persistir entidad por entidad: Usuario
@@ -102,7 +102,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Corregido / problemas:**
   - Durante las pruebas, la IA ajustó `Coleccion` para que el `id` quede primero y no se pueda pisar desde afuera.
   - Al escribir `docs/persistencia.md` con un comando de bash, las comillas invertidas se rompieron. Lo reescribió con la herramienta de archivos.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** antes de cambiar de tecnología, conviene contrastarla con los requisitos del enunciado; preguntarle a la IA "¿cómo sería la alternativa?" me ayudó a decidir con información.
 
 ### 2026-11-02 · Ids numéricos vs UUID
 - **Tarea:** Persistir entidad por entidad (decisión transversal)
@@ -111,7 +111,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Resultado:** comparó las dos opciones en una tabla y se inclinó apenas por UUID, por el choque de ids entre colecciones. Cuando le discutí ese argumento, lo revisó: el choque solo pasaría por un bug de programación y las referencias se validan. Cambió la recomendación a mantener los ids numéricos.
 - **Bien:** reconoció que su argumento era débil y lo explicó, en lugar de sostenerlo por haberlo propuesto.
 - **Corregido / problemas:** su primera recomendación le daba demasiado peso a un riesgo poco realista. Tuve que cuestionarla yo.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** las recomendaciones de la IA se pueden discutir: cuando cuestioné su argumento lo revisó, así que vale la pena preguntar el porqué antes de aceptarlas.
 
 ### 2026-11-02 · Persistencia de Categoria
 - **Tarea:** Persistir entidad por entidad: Categoria
@@ -123,7 +123,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Lo probó con un script de Node y verificó el arranque: "Seed cargado: 4 usuarios, 5 categorias".
 - **Bien:** usó el enunciado (el contexto menciona recitales, teatro, festivales, conferencias y deportes) para elegir las categorías, en vez de inventarlas.
 - **Corregido / problemas:** ninguno. Aprobé el análisis después de confirmar que nadie carga categorías.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** basar los datos de ejemplo en el enunciado los hace más creíbles para la demo y evita inventar cosas que después hay que justificar.
 
 ### 2026-11-02 · Nomenclatura de repositorios
 - **Tarea:** Persistir entidad por entidad (convención)
@@ -132,7 +132,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Resultado:** renombró `usuarioRepositorio.js` → `usuarioRepository.js` y `categoriaRepositorio.js` → `categoriaRepository.js` con `git mv`, actualizó los imports del seed, `docs/persistencia.md` y la convención de la skill `/persistencia`. Verificó que el backend sigue arrancando.
 - **Bien:** al estar la convención escrita en la skill, el cambio queda fijado para todas las entidades que faltan.
 - **Corregido / problemas:** la convención original de la skill la había propuesto la IA; la cambié a mi gusto.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** cuando una convención no me convence, hay que cambiarla también en la skill; si no, la IA la vuelve a aplicar en las próximas entidades.
 
 ### 2026-11-02 · Skill /swagger y CLAUDE.md
 - **Tarea:** Documentación de la API y convenciones del proyecto
@@ -145,7 +145,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Verificó que el YAML es válido y que `/api-docs` responde 200 e incluye `/health`.
 - **Bien:** `CLAUDE.md` reúne en el repo convenciones que estaban dispersas en las skills y en la memoria de la IA.
 - **Corregido / problemas:** `npm` bloqueó el script de instalación de `@scarf/scarf`, una telemetría que trae `swagger-ui-dist`. Lo dejamos bloqueado porque no hace falta.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** escribir las reglas del proyecto en `CLAUDE.md` hace que la IA las siga en cada sesión, sin depender de que se las repita.
 
 ### 2026-11-02 · Esquemas de persistencia en un solo lugar
 - **Tarea:** Persistir entidad por entidad (estructura visible en el código)
@@ -158,7 +158,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Lo verificó con TypeScript: un error de tipeo a propósito (`apelido`) se detecta y sugiere `apellido`.
 - **Bien:** descartó los schemas del swagger con un argumento concreto: la API va a devolver campos calculados que no se persisten.
 - **Corregido / problemas:** la falta de un lugar central la detecté yo. La IA había dejado la estructura solo en comentarios sueltos y en la documentación.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** la IA no detecta sola algunos problemas de diseño, como que la estructura de los datos estuviera dispersa; mirar el código como revisor sigue siendo tarea mía.
 
 ### 2026-11-02 · Persistencia de Evento
 - **Tarea:** Persistir entidad por entidad (Evento, que también resuelve TipoEntrada)
@@ -175,7 +175,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Planteó `lugar` como una duda en vez de revisar primero el enunciado; se lo pedí yo.
   - Agregó `buscarTodos` al repositorio sin que estuviera en el análisis (lo avisó).
   - Detalle que quedó abierto: buscar "musica" no encuentra eventos por su categoría, solo por su texto.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** cuando la IA plantea una duda sobre el dominio, primero hay que pedirle que la verifique contra el enunciado; muchas "dudas" ya tienen respuesta ahí.
 
 ### 2026-11-02 · Persistencia de Compra
 - **Tarea:** Persistir entidad por entidad (Compra, que también resuelve EstadoCompra, CambioEstadoCompra y Mensaje)
@@ -194,7 +194,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía al análisis.
   - Agregó a `crear` y `agregarMensaje` un parámetro de fecha opcional que no estaba en el análisis, para que el seed arme historiales con fechas pasadas (lo avisó).
   - El seed asume que una compra pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio define otro flujo, hay que ajustarla.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** una corrección que le hice en una entidad (revisar el enunciado antes) la aplicó sola en la siguiente; las correcciones dentro de la sesión rinden.
 
 ### 2026-11-02 · Persistencia de Resenia (cierre de la sección 1)
 - **Tarea:** Persistir entidad por entidad (Resenia) · Cargar datos de ejemplo (seed)
@@ -213,4 +213,4 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Corregido / problemas:**
   - Ninguna corrección mía al análisis.
   - Quedó abierto para la sección 2: el promedio de un organizador sin reseñas es `null`, y hay que decidir dónde va al ordenar por puntaje.
-- **Aprendizaje:** (completar)
+- **Aprendizaje:** los criterios que fui fijando entidad por entidad (no agregar campos que el enunciado no pide, calcular en vez de duplicar) hicieron que la última entidad saliera sin correcciones.
