@@ -285,3 +285,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** salió tal como estaba en el análisis aprobado, sin decisiones nuevas.
 - **Corregido / problemas:** ninguno.
 - **Aprendizaje:** cuando el análisis deja definidos los casos borde (extremos incluidos, límites opcionales), la implementación y sus tests salen directo y sin idas y vueltas.
+
+### 2026-11-02 · Dominio: transiciones de estado con historial (cierre de la tarea)
+- **Tarea:** Lógica de dominio (subtarea de transiciones)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí"
+- **Resultado:**
+  - En `domain/evento.js` agregó `yaSeRealizo` (llegó la fecha y hora) y `esElDiaOPosterior` (desde las 00:00 del día del evento).
+  - En `domain/compra.js` armó la tabla `TRANSICIONES`: PENDIENTE → CONFIRMADA o CANCELADA, y CONFIRMADA → REEMBOLSADA (las tres las hace el comprador, si el evento no se realizó) o UTILIZADA (la hace el organizador, desde el día del evento). Cualquier otra transición queda rechazada.
+  - `estadoAlCancelar` decide entre CANCELADA y REEMBOLSADA. `actualizarEstado` valida en orden la transición (409), quién la pide (403) y la fecha (409), y graba el estado y el historial con `compraRepository.addCambioEstado`.
+  - Sumó 8 tests: pagar con el historial, las dos cancelaciones, cancelar una UTILIZADA, pagar o cancelar un evento pasado, permisos, el borde de las 00:00 y las transiciones fuera de la tabla. Las compras que se modifican se crean en el test, para no alterar las del seed. La suite quedó en 17 tests, todos pasan.
+  - Marcó en `TAREAS.md` la tarea de lógica de dominio.
+- **Bien:** con `ahora` como parámetro se pudo probar el límite exacto de las 00:00 sin depender del día en que corren los tests.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - La IA había dejado en un test una aserción que no probaba nada; la sacó sola al revisarlo.
+  - El dominio importa las clases de error de `http/errors.js`. Funciona, pero mezcla un poco las capas; si molesta, se pueden mover a `domain/`.
+- **Aprendizaje:** escribir las reglas como una tabla de datos, y no como varios `if`, deja la regla del enunciado a la vista y la hace fácil de explicar en el video.
