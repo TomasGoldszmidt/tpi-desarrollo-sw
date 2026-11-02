@@ -46,4 +46,40 @@
  * @property {number} cupo Cupo total; las disponibles se calculan con las compras.
  */
 
+/**
+ * Constante en código (`dominio/estadoCompra.js`), no se persiste como colección.
+ * @typedef {'PENDIENTE' | 'CONFIRMADA' | 'UTILIZADA' | 'CANCELADA' | 'REEMBOLSADA'} EstadoCompra
+ */
+
+/**
+ * Colección `compras`. El historial y el chat van embebidos. `total` se guarda
+ * aunque se pueda calcular: es lo que se pagó y lo que se reembolsa.
+ * @typedef {Object} Compra
+ * @property {number} id
+ * @property {number} compradorId Id de Usuario (referencia).
+ * @property {number} eventoId Id de Evento (referencia).
+ * @property {number} tipoEntradaId Id local dentro de `Evento.tiposEntrada` (referencia).
+ * @property {number} cantidad
+ * @property {number} total Precio al momento de comprar × cantidad.
+ * @property {EstadoCompra} estado Estado actual; se escribe junto con el historial.
+ * @property {CambioEstadoCompra[]} historial Embebido, en orden cronológico.
+ * @property {Mensaje[]} mensajes Embebidos: el chat de la compra.
+ */
+
+/**
+ * Embebido en `Compra.historial`. No lleva la compra: ya está dentro de ella.
+ * @typedef {Object} CambioEstadoCompra
+ * @property {EstadoCompra} estado
+ * @property {number} usuarioId Id de Usuario que hizo el cambio (referencia).
+ * @property {Date} fechaHora
+ */
+
+/**
+ * Embebido en `Compra.mensajes`. Sin id: nadie lo referencia.
+ * @typedef {Object} Mensaje
+ * @property {number} usuarioId Id de Usuario que lo envió (referencia).
+ * @property {string} mensaje
+ * @property {Date} enviado
+ */
+
 export {};

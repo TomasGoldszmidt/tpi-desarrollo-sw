@@ -1,6 +1,8 @@
 import * as usuarioRepository from './repositorios/usuarioRepository.js';
 import * as categoriaRepository from './repositorios/categoriaRepository.js';
 import * as eventoRepository from './repositorios/eventoRepository.js';
+import * as compraRepository from './repositorios/compraRepository.js';
+import { EstadoCompra } from '../dominio/estadoCompra.js';
 
 // Fecha relativa al arranque, para que los eventos futuros y pasados no queden viejos.
 function enDias(dias, hora = 21) {
@@ -110,5 +112,76 @@ export function cargarSeed() {
     }),
   };
 
-  return { usuarios, categorias, eventos };
+  // Crea la compra y le aplica los cambios de estado en orden, con fechas coherentes.
+  // El total sale del precio del tipo de entrada, no se escribe a mano.
+  function comprar({ comprador, evento, tipoEntradaId, cantidad, creada, cambios = [] }) {
+    const { precio } = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
+    let compra = compraRepository.crear({
+      compradorId: comprador.id,
+      eventoId: evento.id,
+      tipoEntradaId,
+      cantidad,
+      total: precio * cantidad,
+      fechaHora: creada,
+    });
+    for (const [estado, usuario, fechaHora] of cambios) {
+      compra = compraRepository.registrarCambioEstado(compra.id, { estado, usuarioId: usuario.id, fechaHora });
+    }
+    return compra;
+  }
+
+  const { sofia, juan, lucia, martin } = usuarios;
+  const { CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
+
+  const compras = {
+    sofiaRock: comprar({
+      comprador: sofia, evento: eventos.rock, tipoEntradaId: 1, cantidad: 2,
+      creada: enDias(-5, 14), cambios: [[CONFIRMADA, sofia, enDias(-5, 15)]],
+    }),
+    sofiaObra: comprar({ // pendiente de pago
+      comprador: sofia, evento: eventos.obra, tipoEntradaId: 1, cantidad: 1,
+      creada: enDias(-1, 18),
+    }),
+    juanBackstage: comprar({ // agota el cupo de Backstage (2)
+      comprador: juan, evento: eventos.festival, tipoEntradaId: 3, cantidad: 2,
+      creada: enDias(-10, 12), cambios: [[CONFIRMADA, juan, enDias(-10, 13)]],
+    }),
+    juanRockReembolsada: comprar({
+      comprador: juan, evento: eventos.rock, tipoEntradaId: 2, cantidad: 1,
+      creada: enDias(-8, 10),
+      cambios: [[CONFIRMADA, juan, enDias(-8, 11)], [REEMBOLSADA, juan, enDias(-3, 9)]],
+    }),
+    juanPartidoCancelada: comprar({ // cancelada sin pagar
+      comprador: juan, evento: eventos.partido, tipoEntradaId: 1, cantidad: 3,
+      creada: enDias(-4, 20), cambios: [[CANCELADA, juan, enDias(-3, 20)]],
+    }),
+    sofiaAcustico: comprar({ // utilizada: puede reseñar a Lucía
+      comprador: sofia, evento: eventos.acustico, tipoEntradaId: 1, cantidad: 1,
+      creada: enDias(-40, 15),
+      cambios: [[CONFIRMADA, sofia, enDias(-40, 16)], [UTILIZADA, lucia, enDias(-15, 20)]],
+    }),
+    juanAcustico: comprar({
+      comprador: juan, evento: eventos.acustico, tipoEntradaId: 1, cantidad: 2,
+      creada: enDias(-35, 11),
+      cambios: [[CONFIRMADA, juan, enDias(-35, 12)], [UTILIZADA, lucia, enDias(-15, 20)]],
+    }),
+    sofiaStandup: comprar({ // utilizada: puede reseñar a Martín
+      comprador: sofia, evento: eventos.standup, tipoEntradaId: 1, cantidad: 1,
+      creada: enDias(-50, 10),
+      cambios: [[CONFIRMADA, sofia, enDias(-50, 11)], [UTILIZADA, martin, enDias(-30, 21)]],
+    }),
+    juanStandup: comprar({ // confirmada de un evento pasado: no se puede cancelar
+      comprador: juan, evento: eventos.standup, tipoEntradaId: 1, cantidad: 1,
+      creada: enDias(-45, 17), cambios: [[CONFIRMADA, juan, enDias(-45, 18)]],
+    }),
+  };
+
+  compraRepository.agregarMensaje(compras.sofiaRock.id, {
+    usuarioId: sofia.id, mensaje: '¿Se puede entrar con mochila?', enviado: enDias(-4, 10),
+  });
+  compras.sofiaRock = compraRepository.agregarMensaje(compras.sofiaRock.id, {
+    usuarioId: lucia.id, mensaje: 'Sí, chica, la revisan en la puerta.', enviado: enDias(-4, 11),
+  });
+
+  return { usuarios, categorias, eventos, compras };
 }

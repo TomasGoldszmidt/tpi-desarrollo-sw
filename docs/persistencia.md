@@ -10,10 +10,10 @@ Persistencia **en memoria, orientada a documentos**. Cada entidad se analiza y s
 | 2 | Categoria | implementada | Colección propia `categorias` (solo lectura, la carga el seed) |
 | 3 | Evento | implementada | Colección propia `eventos` |
 | 4 | TipoEntrada | implementada | Embebida en `Evento.tiposEntrada` (se decidió con Evento) |
-| 5 | Compra | pendiente | |
-| 6 | EstadoCompra | pendiente | |
-| 7 | CambioEstadoCompra | pendiente | |
-| 8 | Mensaje | pendiente | |
+| 5 | Compra | implementada | Colección propia `compras` |
+| 6 | EstadoCompra | no se persiste | Constante en código (`dominio/estadoCompra.js`), se decidió con Compra |
+| 7 | CambioEstadoCompra | implementada | Embebida en `Compra.historial` (se decidió con Compra) |
+| 8 | Mensaje | implementada | Embebida en `Compra.mensajes` (se decidió con Compra) |
 | 9 | Resenia | pendiente | |
 
 Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` · `no se persiste`.
@@ -149,3 +149,61 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - Lucía: rock (+20 días), teatro (+5), festival (+60, con un tipo Backstage de cupo 2 para agotar con el seed de Compra) y acústico (−15 días, pasado).
 - Martín: partido (+10) y stand-up (−30 días, pasado).
 - Conferencias queda sin eventos.
+
+### Compra · colección `compras`
+
+**Por qué colección propia:**
+- Tiene identidad y ciclo de vida propios: se crea, se paga, se usa y se cancela.
+- Se consulta sola desde dos lados: las compras del comprador (caso de uso 1) y las de un evento (caso de uso 2).
+- Las entradas disponibles de cada tipo se calculan a partir de las compras (casos de uso 2 y 12).
+
+**Documento:**
+```js
+{
+  id: 1,
+  compradorId: 3,
+  eventoId: 1,
+  tipoEntradaId: 1,
+  cantidad: 2,
+  total: 90000,
+  estado: "CONFIRMADA",
+  historial: [
+    { estado: "PENDIENTE",  usuarioId: 3, fechaHora: new Date("2026-10-28T17:00:00Z") },
+    { estado: "CONFIRMADA", usuarioId: 3, fechaHora: new Date("2026-10-28T18:00:00Z") }
+  ],
+  mensajes: [
+    { usuarioId: 3, mensaje: "¿Se puede entrar con mochila?", enviado: new Date("2026-10-29T13:00:00Z") },
+    { usuarioId: 1, mensaje: "Sí, chica, la revisan en la puerta.", enviado: new Date("2026-10-29T14:00:00Z") }
+  ]
+}
+```
+
+| Relación | Decisión | Motivo |
+|---|---|---|
+| comprador → Usuario | Referencia (`compradorId`) | Tiene vida propia y es compartido |
+| evento → Evento | Referencia (`eventoId`) | Tiene vida propia; filtrar por evento es comparar ids |
+| tipoEntrada → TipoEntrada | Referencia (`tipoEntradaId`, local al evento) | Decidido en Evento: se busca con `eventoId` + `tipoEntradaId` |
+| estado → EstadoCompra | String de la constante `EstadoCompra` | Es un enum, no se persiste |
+| historial → CambioEstadoCompra[] | Embebe | No existe sin la compra, se lee con ella y es corto. El campo `compra` del diagrama sobra |
+| mensajes → Mensaje[] | Embebe | El chat es de cada compra y solo se lee en su detalle |
+| total | Se guarda | Es lo que se pagó y lo que se reembolsa; no debe cambiar si cambia el precio |
+
+**Repositorio** (`backend/src/persistencia/repositorios/compraRepository.js`):
+- `crear`, que arranca en `PENDIENTE` con el primer registro del historial y sin mensajes
+- `buscarPorId`, para el detalle, el chat y las acciones
+- `buscarPorComprador`, para "Mis compras" y para comprobar la compra UTILIZADA antes de reseñar
+- `buscarPorEvento`, para las ventas del organizador y las entradas disponibles
+- `registrarCambioEstado`, que actualiza `estado` y agrega el registro al historial en una sola escritura
+- `agregarMensaje`
+
+**Decisiones aprobadas:**
+- `EstadoCompra` es una constante congelada en `backend/src/dominio/estadoCompra.js`, la primera pieza de la carpeta del dominio.
+- Se guarda `estado` además del historial: está en el diagrama y simplifica los filtros. `registrarCambioEstado` escribe los dos juntos.
+- Mensajes e historial no tienen colección propia: ningún caso de uso los consulta fuera de su compra.
+- Los mensajes no llevan `id`: nadie los referencia.
+- Quedan para el dominio (sección 2): si una PENDIENTE reserva cupo, las transiciones válidas y cuándo una cancelación queda CANCELADA o REEMBOLSADA.
+
+**Seed:** 9 compras, con historiales de fechas coherentes relativas al arranque y el `total` calculado con el precio del tipo de entrada.
+- Sofía: rock CONFIRMADA con chat; obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Lucía y a Martín).
+- Juan: Backstage × 2 CONFIRMADA (agota el cupo de 2); rock REEMBOLSADA y partido CANCELADA (no cuentan para el cupo); acústico UTILIZADA; stand-up CONFIRMADA de un evento pasado (no se puede cancelar).
+- La compra REEMBOLSADA pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio decide otro flujo, hay que ajustar el seed.
