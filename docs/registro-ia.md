@@ -274,3 +274,14 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía.
   - El primer script `node --test test/` falló en Node 24 porque toma la carpeta como archivo. La IA lo cambió a `node --test`, que busca solo los `*.test.js`.
 - **Aprendizaje:** pedir la explicación antes del análisis me dejó aprobar decisiones de negocio (que una PENDIENTE ocupe cupo) entendiendo el porqué, y tener tests guardados va a servir cuando los endpoints usen estas reglas.
+
+### 2026-11-02 · Dominio: `tuPrecioEstaEntre`
+- **Tarea:** Lógica de dominio (subtarea de precio)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí"
+- **Resultado:**
+  - Creó `domain/evento.js` con `tuPrecioEstaEntre(evento, min, max)`: es verdadero si algún tipo de entrada tiene un precio en el rango, con los extremos incluidos, y cualquiera de los dos límites puede faltar.
+  - Sumó 4 tests con el rock del seed (45.000 y 80.000): rango que toma un solo tipo, extremos, rango vacío y límites faltantes. La suite quedó en 9 tests, todos pasan.
+- **Bien:** salió tal como estaba en el análisis aprobado, sin decisiones nuevas.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** cuando el análisis deja definidos los casos borde (extremos incluidos, límites opcionales), la implementación y sus tests salen directo y sin idas y vueltas.
