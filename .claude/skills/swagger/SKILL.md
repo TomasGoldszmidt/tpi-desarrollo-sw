@@ -40,7 +40,7 @@ Orden: los `paths` agrupados por recurso, en el mismo orden que los tags.
 
 ## Paso 3 · Verificar
 
-1. Que el YAML se pueda leer: `node --input-type=module -e "import YAML from 'yaml'; import {readFileSync} from 'node:fs'; YAML.parse(readFileSync('backend/src/docs/openapi.yaml','utf8')); console.log('ok')"` (ejecutado desde la raíz del proyecto).
+1. Que el YAML se pueda leer: `node --input-type=module -e "import YAML from 'yaml'; import {readFileSync} from 'node:fs'; YAML.parse(readFileSync('src/docs/openapi.yaml','utf8')); console.log('ok')"` (ejecutado desde `backend/`, donde está instalado `yaml`).
 2. Con el backend levantado, que `/api-docs/` responda 200 y que el endpoint aparezca: `curl -s http://localhost:3000/api-docs/swagger-ui-init.js | grep '<ruta>'`.
 3. Si el endpoint se puede probar, ejecutar el `example` del swagger con `curl` y confirmar que la respuesta coincide con lo documentado.
 

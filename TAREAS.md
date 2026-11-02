@@ -18,7 +18,7 @@
 ## 2. Back-End
 - [x] Crear skill `nuevo-endpoint` (ruta, controlador, validaciones, errores)
 - [x] Lógica de dominio: cupo disponible, `hayCupoPara`, `tuPrecioEstaEntre`, transiciones de estado con historial
-- [ ] Endpoints de usuarios y categorías
+- [x] Endpoints de usuarios y categorías
 - [ ] Endpoints de eventos: crear con tipos de entrada, detalle
 - [ ] Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
 - [ ] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada

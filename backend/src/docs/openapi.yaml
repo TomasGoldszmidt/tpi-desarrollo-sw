@@ -11,6 +11,10 @@ servers:
 tags:
   - name: Sistema
     description: Estado del servidor
+  - name: Usuarios
+    description: Usuarios del sistema (no hay login, se elige el usuario activo)
+  - name: Categorias
+    description: Categorías para explorar y clasificar los eventos
 paths:
   /health:
     get:
@@ -28,6 +32,41 @@ paths:
                   status:
                     type: string
                     example: ok
+  /usuarios:
+    get:
+      tags: [Usuarios]
+      summary: Listar los usuarios
+      description: >-
+        La app lo usa para elegir el usuario activo, cuyo id se manda después
+        en el header X-User-Id.
+      operationId: listUsuarios
+      responses:
+        '200':
+          description: Todos los usuarios
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /categorias:
+    get:
+      tags: [Categorias]
+      summary: Listar las categorías
+      operationId: listCategorias
+      responses:
+        '200':
+          description: Todas las categorías
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Categoria'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
   schemas:
     Error:
@@ -36,3 +75,42 @@ components:
         error:
           type: string
           example: Recurso no encontrado
+    Usuario:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        nombre:
+          type: string
+          example: Sofía
+        apellido:
+          type: string
+          example: Pérez
+        favoritos:
+          type: array
+          description: Ids de los eventos favoritos
+          items:
+            type: integer
+          example: []
+    Categoria:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        nombre:
+          type: string
+          example: Música
+        descripcion:
+          type: string
+          example: Recitales, conciertos y shows en vivo
+  responses:
+    ErrorInterno:
+      description: Error no previsto del servidor
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Error interno del servidor

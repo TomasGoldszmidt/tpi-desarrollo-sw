@@ -302,3 +302,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La IA había dejado en un test una aserción que no probaba nada; la sacó sola al revisarlo.
   - El dominio importa las clases de error de `http/errors.js`. Funciona, pero mezcla un poco las capas; si molesta, se pueden mover a `domain/`.
 - **Aprendizaje:** escribir las reglas como una tabla de datos, y no como varios `if`, deja la regla del enunciado a la vista y la hace fácil de explicar en el video.
+
+### 2026-11-02 · Endpoints de usuarios y categorías
+- **Tarea:** Endpoints de usuarios y categorías
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` (primer uso) + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "segui con lo proximo" y "Aprobado" después del análisis. Antes confirmé que las validaciones de dominio quedan en el dominio y lanzan excepciones.
+- **Resultado:**
+  - `/nuevo-endpoint` propuso solo dos lecturas públicas: `GET /usuarios`, para elegir el usuario activo porque no hay login, y `GET /categorias`, para los filtros y el selector al crear un evento. Dejó fuera los favoritos (ningún caso de uso numerado ni pantalla los pide), el detalle por id y crear usuarios o categorías.
+  - Con el ok, creó los primeros `routes/` y `controllers/` (`list` en cada uno) y los montó en `app.js`.
+  - `/swagger` agregó los tags `Usuarios` y `Categorias`, los schemas `Usuario` y `Categoria`, y una respuesta reusable `ErrorInterno` para el 500.
+  - `/probar-caso-de-uso` levantó el backend en una pestaña de la terminal y probó con `curl`: los dos listados responden 200 con los datos del seed, una ruta inexistente o con otro método responde 404 en JSON, y Swagger UI muestra los dos endpoints.
+- **Bien:** con las convenciones ya fijadas, el primer uso de la skill salió sin decisiones nuevas. El análisis hizo explícito qué se deja afuera y por qué.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - El comando de verificación de la skill `swagger` fallaba desde la raíz del proyecto porque `yaml` está instalado en `backend/`. La IA lo corrigió en la skill.
+  - `POST /usuarios` responde 404 y no 405 (método no permitido). Es aceptable para el TP, pero no es lo más preciso.
+- **Aprendizaje:** el análisis no solo dice qué endpoints hacer, también qué no hacer y por qué. Eso me evita implementar cosas que ninguna pantalla va a usar.
