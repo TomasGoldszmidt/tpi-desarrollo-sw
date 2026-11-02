@@ -45,7 +45,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | organizador de eventos | Se guarda en Evento (`organizadorId`) | Evita mantener la relación en los dos lados |
 | reputación del organizador | Se calcula, no se persiste | Es el promedio de sus reseñas; guardarla aparte podría desincronizarse |
 
-**Repositorio** (`backend/src/persistencia/repositorios/usuarioRepositorio.js`):
+**Repositorio** (`backend/src/persistencia/repositorios/usuarioRepository.js`):
 - `crear`
 - `buscarPorId`
 - `buscarTodos`, para la selección de usuario activo
@@ -81,7 +81,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 |---|---|---|
 | Evento → Categoria | Referencia (`categoriaId` en el evento) | Compartida por muchos eventos; filtrar es comparar ids |
 
-**Repositorio** (`backend/src/persistencia/repositorios/categoriaRepositorio.js`):
+**Repositorio** (`backend/src/persistencia/repositorios/categoriaRepository.js`):
 - `buscarTodos`, para los filtros del catálogo y el selector
 - `buscarPorId`, para validar el `categoriaId` al crear un evento
 - `crear`, que solo usa el seed

@@ -66,7 +66,7 @@ Convenciones de `backend/src/persistencia/`, que se crean la primera vez:
   - Guarda los documentos en un `Map` y genera ids numéricos incrementales por colección.
   - Métodos: `insertar`, `buscarPorId`, `buscarTodos(filtro?)`, `actualizar(id, cambios)`, `eliminar`.
   - Devuelve **copias** (`structuredClone`), para que nadie pueda modificar el estado sin pasar por el repositorio.
-- `repositorios/<entidad>Repositorio.js`: una instancia de `Coleccion` más las consultas específicas del Paso 2.
+- `repositorios/<entidad>Repository.js` (ej: `usuarioRepository.js`, importado como `usuarioRepository`): una instancia de `Coleccion` más las consultas específicas del Paso 2.
   - Exporta funciones con nombres de dominio en español, como `buscarPorCategoria`.
 - `seed.js`: carga los datos de ejemplo. Se llama una vez al iniciar el servidor desde `src/index.js`.
   - Las referencias usan los ids que devuelve `insertar`; no se escriben a mano.

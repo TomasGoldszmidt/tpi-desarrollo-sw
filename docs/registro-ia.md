@@ -124,3 +124,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** usó el enunciado (el contexto menciona recitales, teatro, festivales, conferencias y deportes) para elegir las categorías, en vez de inventarlas.
 - **Corregido / problemas:** ninguno. Aprobé el análisis después de confirmar que nadie carga categorías.
 - **Aprendizaje:** (completar)
+
+### 2026-11-02 · Nomenclatura de repositorios
+- **Tarea:** Persistir entidad por entidad (convención)
+- **Herramienta / skill:** Claude Code
+- **Pedido (prompt):** "modificá los repositorios para que sigan la nomenclatura entidadRepository; hacé el cambio en el código y en la skill".
+- **Resultado:** renombró `usuarioRepositorio.js` → `usuarioRepository.js` y `categoriaRepositorio.js` → `categoriaRepository.js` con `git mv`, actualizó los imports del seed, `docs/persistencia.md` y la convención de la skill `/persistencia`. Verificó que el backend sigue arrancando.
+- **Bien:** al estar la convención escrita en la skill, el cambio queda fijado para todas las entidades que faltan.
+- **Corregido / problemas:** la convención original de la skill la había propuesto la IA; la cambié a mi gusto.
+- **Aprendizaje:** (completar)
