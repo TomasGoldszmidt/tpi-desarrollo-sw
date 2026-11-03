@@ -473,3 +473,22 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** la IA reusó la estructura de las skills anteriores, y quedó avisado de antemano que Expo Router trae dependencias nuevas (se deciden en la subtarea siguiente).
 - **Corregido / problemas:** la primera propuesta tenía un análisis técnico (endpoints, archivos, estados) y no mostraba la pantalla. Le pedí que lo que apruebe sea un boceto visual.
 - **Aprendizaje:** en el frontend, lo que conviene aprobar antes de que la IA escriba código es cómo se ve la pantalla, no la lista de archivos. Un boceto con datos reales permite corregir el diseño cuando todavía no cuesta nada.
+
+### 2026-11-02 · Navegación, cliente HTTP y usuario activo (primera pantalla)
+- **Tarea:** Navegación, cliente HTTP y selección de usuario activo
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí". Sobre el boceto: "la app no tiene logo (podria ser un ticket o algo asi) y una vez ingresado no se ve nada que identifique a la app". Después, "Aprobado".
+- **Resultado:**
+  - Primer uso de `/nueva-pantalla`. El boceto (`docs/bocetos/usuario-activo.html`) tenía tres pantallas con los usuarios reales del seed: elegir usuario, sin conexión al backend y la app con pestañas.
+  - Antes de aprobar pregunté si estaba bien que no hubiera roles. La IA lo verificó contra el PDF: el diagrama tiene un solo `Usuario` y comprador y organizador son relaciones (`Compra.comprador`, `Evento.organizador`), así que las tres pestañas quedan visibles para todos.
+  - Con mi pedido del logo, rehizo el boceto con el ticket verde del enunciado ("AI" + "Ticket It"): grande en la selección y en el error, chico en el header de todas las pestañas, y pasó el color de la app a verde.
+  - Con el ok, instaló Expo Router (`expo-router`, `react-native-screens`, `react-native-safe-area-context`, `expo-linking`) con `npx expo install`, consultando antes la documentación de instalación y de pestañas. Creó el cliente `api/client.js` (manda `X-User-Id` y lanza el `{ error }` del backend), `UsuarioContext`, `theme.js`, los componentes `Logo` (dibujado con Views, sin imágenes), `Avatar`, `EstadoCarga` y `Seccion`, la pantalla de selección y las tres pestañas provisorias. Borró `App.js` e `index.js`.
+  - `/probar-caso-de-uso` en el emulador: lista de usuarios, entrar como Sofía, cambiar de pestaña, el chip vuelve a la selección, error sin red (se apagó el wifi del emulador con adb) y Reintentar con la red de vuelta, y entrar como Lucía. Coincide con el boceto.
+- **Bien:** el boceto hizo que discutiera el diseño (el logo, los roles) antes de que hubiera una línea de código.
+- **Corregido / problemas:**
+  - Le pedí el logo: el primer boceto no identificaba a la app.
+  - La IA se equivocó en el análisis: dijo que `@expo/vector-icons` venía con `expo` y no estaba instalado. Lo avisó y me preguntó antes de agregarlo.
+  - `npx expo install @expo/vector-icons` falló por un conflicto de dependencias opcionales de la versión web de Expo Router (`react-dom` pedía otro `react`). Se instaló con `--legacy-peer-deps`. Un `npm install` normal ahora funciona, con una advertencia.
+  - El puerto 8081 estaba ocupado por otro proceso (java) y Expo se levantó en el 8083.
+  - No corrió `npx expo lint`, porque la primera vez instala ESLint como dependencia nueva y queda pendiente de mi ok.
+- **Aprendizaje:** aprobar un boceto me hizo pensar en cosas que en un análisis de texto no hubiera visto, como la identidad de la app y si hacen falta roles. Y cuando la IA afirma que algo "ya viene incluido", conviene que lo verifique antes de dar por buena la decisión.

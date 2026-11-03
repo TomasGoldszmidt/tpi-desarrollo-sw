@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Usuario activo y navegación</title>
+<style>
+:root{--text-secondary:#5F5E5A;--border-strong:#B4B2A9}
+body{font-family:system-ui,sans-serif;max-width:720px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.ico{display:inline-block;width:16px;height:16px;border:1.5px solid currentColor;border-radius:4px}
+.cap{font-size:12px;color:var(--text-secondary);margin-bottom:6px}
+.phone{position:relative;border:0.5px solid var(--border-strong);border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:400px;display:flex;flex-direction:column}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:0.5px solid #D3D1C7;font-size:14px;font-weight:500;background:#fff}
+.scr{flex:1;padding:12px;font-size:12px}
+.h{font-size:14px;font-weight:500;margin:0 0 4px}
+.sub{font-size:12px;color:#5F5E5A;margin:0 0 10px;line-height:1.5}
+.row{position:relative;display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:0.5px solid #D3D1C7}
+.av,.chip{background:#EEEDFE;color:#3C3489;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.av{width:28px;height:28px}.chip{position:relative;width:28px;height:28px}
+.nm{flex:1;font-size:13px}
+.foot{font-size:11px;color:#888780;margin-top:14px}
+.btn{position:relative;margin-top:8px;border:0.5px solid #534AB7;color:#3C3489;border-radius:8px;padding:6px 14px;font-size:12px}
+.tabs{position:relative;display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:#534AB7}.tabs i{font-size:18px}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500;margin-right:4px}
+.row .n,.btn .n,.chip .n{position:absolute;right:-6px;top:-6px}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.logo.big{height:52px;font-size:26px;padding:0 22px 0 20px;border-radius:10px;gap:14px}
+.logo.big::before,.logo.big::after{width:16px;height:16px;margin-top:-8px}.logo.big::before{left:-8px}.logo.big::after{right:-8px}
+.logo.big i{height:32px;border-left-width:2px}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.tabs .on{color:#3B6D11}
+.av,.chip{background:#EAF3DE;color:#27500A}
+.btn{border-color:#3B6D11;color:#27500A}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Usuario activo y navegación</h1>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:1rem 0;">
+
+<div>
+<div class="cap">A · Elegir usuario</div>
+<div class="phone">
+<div class="scr">
+<div style="text-align:center;padding:14px 0 12px">
+<span class="logo big">AI<i></i></span>
+<div class="word" style="font-size:20px;margin-top:8px">Ticket <b>It</b></div>
+<div style="font-size:11px;color:#888780;letter-spacing:1px">ENTRADAS A UN CLICK</div>
+</div>
+<p class="h">¿Quién usa la app?</p>
+<div class="row"><span class="av">LF</span><span class="nm">Lucía Fernández</span><span class="n">1</span></div>
+<div class="row"><span class="av">MG</span><span class="nm">Martín Gómez</span></div>
+<div class="row"><span class="av">SP</span><span class="nm">Sofía Pérez</span></div>
+<div class="row"><span class="av">JR</span><span class="nm">Juan Rodríguez</span></div>
+<p class="foot">Backend: 192.168.1.10:3000</p>
+</div>
+</div>
+</div>
+
+<div>
+<div class="cap">B · Sin conexión al backend</div>
+<div class="phone">
+<div class="scr" style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;">
+<span class="logo big">AI<i></i></span>
+<div class="word" style="font-size:20px;margin:8px 0 18px">Ticket <b>It</b></div>
+<p class="h" style="color:#A32D2D">No se pudo conectar con el backend</p>
+<p class="sub">http://192.168.1.10:3000<br>Revisá que esté levantado.</p>
+<div class="btn">Reintentar <span class="n">2</span></div>
+</div>
+</div>
+</div>
+
+<div>
+<div class="cap">C · App con usuario activo</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">SP <span class="n">3</span></span></div>
+<div class="scr">
+<p class="h" style="font-size:18px">Catálogo</p>
+<p class="sub" style="margin-top:60px;text-align:center">Contenido de cada pestaña en las subtareas siguientes (3.3 a 3.9).</p>
+</div>
+<div class="tabs"><span class="on"><b class="ico"></b>Catálogo</span><span><b class="ico"></b>Mis compras</span><span><b class="ico"></b>Mis eventos</span><span class="n" style="position:absolute;right:2px;top:-8px">4</span></div>
+</div>
+</div>
+
+</div>
+
+<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;padding-bottom:1rem;">
+<div><span class="n">1</span> Tocar un usuario: se guarda como usuario activo (manda <code>X-User-Id</code>) y entra a la pestaña Catálogo.</div>
+<div><span class="n">2</span> Reintentar: vuelve a pedir <code>GET /usuarios</code>. Mientras carga se ve un spinner en lugar de la lista.</div>
+<div><span class="n">3</span> Chip con las iniciales del usuario activo, en todas las pestañas: vuelve a A para cambiar de usuario.</div>
+<div><span class="n">4</span> Pestañas visibles para todos (cualquier usuario puede comprar y organizar): Catálogo · Mis compras · Mis eventos.</div>
+</div>
+</body></html>
