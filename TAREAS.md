@@ -34,7 +34,7 @@
 - [x] Navegación, cliente HTTP y selección de usuario activo
 - [x] Pantalla de catálogo: búsqueda, categorías y ordenamiento
 - [x] Pantalla de detalle de evento con reseñas del organizador
-- [ ] Flujo de compra: tipo de entrada y cantidad
+- [x] Flujo de compra: tipo de entrada y cantidad
 - [ ] Pantalla "Mis compras" con estados y días restantes
 - [ ] Detalle de compra: acciones (pagar, cancelar, reseñar) y chat
 - [ ] Pantalla de creación de evento (organizador)

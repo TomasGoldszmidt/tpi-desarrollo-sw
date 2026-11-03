@@ -5,6 +5,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getEvento } from '../../api/eventos.js';
 import { getReseniasOrganizador } from '../../api/usuarios.js';
+import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { Avatar } from '../../components/Avatar.js';
 import { Estrellas } from '../../components/Estrellas.js';
@@ -16,6 +17,7 @@ import { colors, fontSize, spacing } from '../../theme.js';
 // disponibles y el organizador con su puntaje y la reseña más reciente.
 export default function DetalleEvento() {
   const { id } = useLocalSearchParams();
+  const { usuario } = useUsuario();
   const pedir = useCallback(async () => {
     const evento = await getEvento(id);
     // Solo se piden las reseñas si hay alguna: la tarjeta muestra la más reciente.
@@ -38,6 +40,11 @@ export default function DetalleEvento() {
 
   const { evento, resenias } = data;
   const agotado = evento.tiposEntrada.every((tipo) => tipo.disponibles === 0);
+  // El backend no deja comprar en un evento propio: el organizador no ve el botón de compra.
+  const esPropio = usuario?.id === evento.organizador.id;
+  let textoBoton = 'Comprar entradas';
+  if (esPropio) textoBoton = 'Es tu evento';
+  else if (agotado) textoBoton = 'Agotado';
 
   return (
     <View style={styles.pantalla}>
@@ -68,12 +75,12 @@ export default function DetalleEvento() {
 
       <View style={[styles.pie, { paddingBottom: spacing.md + insets.bottom }]}>
         <Pressable
-          style={[styles.comprar, agotado && styles.comprarAgotado]}
+          style={[styles.comprar, (agotado || esPropio) && styles.comprarAgotado]}
           onPress={() => router.push(`/eventos/${evento.id}/comprar`)}
-          disabled={agotado}
+          disabled={agotado || esPropio}
         >
-          <Text style={[styles.comprarTexto, agotado && styles.comprarTextoAgotado]}>
-            {agotado ? 'Agotado' : 'Comprar entradas'}
+          <Text style={[styles.comprarTexto, (agotado || esPropio) && styles.comprarTextoAgotado]}>
+            {textoBoton}
           </Text>
         </Pressable>
       </View>

@@ -542,3 +542,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El subtítulo "Organizadora" del boceto se cambió por "Reseñas de sus eventos", para no deducir el género a partir del nombre.
   - El botón Comprar todavía no lleva a ningún lado: es la subtarea siguiente.
 - **Aprendizaje:** un boceto también tiene que ser claro para quien lo aprueba: si muestra la misma pantalla partida en columnas, o mezcla notas para mí con lo que ve el usuario, no sirve para decidir. Y vale la pena proponer ideas propias de diseño, pero pidiéndole a la IA que las contraste con la consigna.
+
+### 2026-11-03 · Flujo de compra
+- **Tarea:** Flujo de compra: tipo de entrada y cantidad
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí". Sobre el boceto: "no debe mostrar el estado 409, nunca muestres nada del codigo". Después, "Aprobado".
+- **Resultado:**
+  - Boceto (`docs/bocetos/compra.html`): elegir el tipo de entrada y la cantidad con el total, la compra hecha (PENDIENTE de pago), la pantalla cuando no alcanza el cupo y el botón "Es tu evento" en el detalle de un evento propio, porque el backend no deja que el organizador compre en su evento.
+  - Con el ok: `api/compras.js` y `eventos/[id]/comprar.js`. La cantidad va de 1 a las disponibles del tipo elegido, y si las disponibles bajan, baja con ellas. Si la compra falla se muestra el mensaje del backend y se vuelve a pedir el evento. La compra hecha no tiene flecha para volver al formulario. "Ver mi compra" lleva por ahora a Mis compras, porque el detalle de la compra es la subtarea 3.7.
+  - Prueba en el emulador: Sofía elige 3 VIP; mientras tanto Juan compra 98 por la API y quedan 2. Al confirmar aparece "No hay cupo suficiente: quedan 2 entradas", VIP pasa a "2 disponibles" y la cantidad baja sola a 2. Confirma y se ve "Compraste 2 entradas VIP" por $ 360.000, que quedó PENDIENTE en el backend. Lucía ve "Es tu evento" en su festival.
+- **Bien:** la carrera por el cupo (dos personas comprando a la vez) se probó de verdad, combinando el emulador con una compra por la API en el medio.
+- **Corregido / problemas:**
+  - El primer boceto tenía otra vez texto técnico dentro del celular ("409", "la pantalla vuelve a pedir el evento"). Es la segunda vez que lo marco: la IA lo agregó como regla en la skill `nueva-pantalla` y en su memoria, y rehizo la pantalla del error tal como la vería el usuario.
+  - Otra vez Fast Refresh mostró un error en pantalla porque la IA agregó el uso de `useUsuario` antes del import. Quedó anotado en la skill: primero el import.
+- **Aprendizaje:** cuando corrijo lo mismo dos veces, tiene que quedar escrito en la skill o en la memoria, no alcanza con que la IA lo arregle esa vez. Y conviene probar los casos de concurrencia simulándolos, porque en el emulador solo no se pueden provocar.

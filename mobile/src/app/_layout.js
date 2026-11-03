@@ -24,6 +24,7 @@ export default function RootLayout() {
     <UsuarioProvider>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="eventos/[id]" options={conHeader} />
+        <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
         <Stack.Screen name="usuarios/[id]/resenias" options={conHeader} />
       </Stack>
       <StatusBar style="dark" />

@@ -28,6 +28,7 @@ Un mockup en HTML de la pantalla como se vería en el celular:
 - **Tamaño de celular:** ~380px de ancho, con la barra de título de la navegación y, si corresponde, las pestañas de abajo.
 - **Datos reales del seed:** eventos, precios, usuarios y estados que existen, con los campos calculados como los devuelve la API (`disponibles`, `diasRestantes`, puntaje). Nada de "Lorem ipsum" ni "Evento 1".
 - **Estados que importan:** el principal y, cuando aplique, cargando, vacío y error (ej: "Mis compras" sin compras, un tipo de entrada sin cupo, el mensaje de un 409). Se muestran uno al lado del otro.
+- **Dentro del celular, solo lo que ve el usuario:** nada de status HTTP (409, 404), endpoints, nombres de código ni explicaciones ("la pantalla vuelve a pedir…"). Cada estado (error, vacío, sin cupo) se dibuja como la pantalla real en ese estado; lo técnico va en las notas de afuera o en el análisis.
 - **Anotaciones:** cada elemento tocable (botón, filtro, tarjeta) lleva una nota numerada al costado con adónde lleva o qué endpoint llama.
 - **Estilo coherente** con los bocetos anteriores de `docs/bocetos/` y con `mobile/src/theme.js` si ya existe. Componentes que se puedan hacer con React Native puro (sin librerías de UI).
 
@@ -62,6 +63,7 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
 - **Fechas y precios** se formatean en un solo lugar (`src/format.js`), en es-AR.
 - JavaScript, sin TypeScript. ES Modules.
 - **Dependencias:** solo con `npx expo install` y **avisando antes**. Hoy falla por un conflicto de `react-dom` (dependencia opcional de la versión web de Expo Router), así que se instala con `npx expo install <paquete> -- --legacy-peer-deps`. Antes de usar una API de Expo o de React Native, consultar la documentación de la versión instalada (`https://docs.expo.dev/versions/v<major>.0.0/`), no la de memoria.
+- **Al editar un archivo que la app está mostrando, agregar primero el import y después el uso:** Fast Refresh toma cada edición por separado, y si el uso llega antes que el import aparece un error en pantalla ("Property 'x' doesn't exist").
 - La pantalla tiene que **respetar el boceto aprobado**. Si al implementar algo no se puede hacer igual, frenar y avisar.
 
 ## Paso 4 · Probar y cerrar
