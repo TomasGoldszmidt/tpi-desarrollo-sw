@@ -1,10 +1,12 @@
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero } from '../domain/compra.js';
+import {
+  comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+} from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
 import { ForbiddenError, NotFoundError } from '../http/errors.js';
-import { requireId, requireInteger } from '../http/validation.js';
+import { requireId, requireInteger, requireString } from '../http/validation.js';
 
 function toDetalle(compra) {
   return detalleCompra(
@@ -61,3 +63,20 @@ export const pay = changeEstado(() => EstadoCompra.CONFIRMADA);
 export const markUtilizada = changeEstado(() => EstadoCompra.UTILIZADA);
 // PENDIENTE → CANCELADA, CONFIRMADA → REEMBOLSADA (casos de uso 7 y 8).
 export const cancel = changeEstado(estadoAlCancelar);
+
+// Chat de la compra (casos de uso 5 y 6), del mensaje más viejo al más nuevo.
+export async function listMensajes(req, res) {
+  const compra = findCompra(req);
+  const evento = eventoRepository.findById(compra.eventoId);
+  if (!puedeVer(compra, evento, req.usuario)) {
+    throw new ForbiddenError('Solo el comprador y el organizador pueden ver este chat');
+  }
+  res.status(200).json(mensajesConAutor(compra.mensajes));
+}
+
+export async function createMensaje(req, res) {
+  const compra = findCompra(req);
+  const texto = requireString(req.body?.mensaje, 'mensaje', { maxLength: 500 });
+  const evento = eventoRepository.findById(compra.eventoId);
+  res.status(201).json(enviarMensaje(compra, evento, req.usuario, texto));
+}

@@ -514,6 +514,96 @@ paths:
                 error: No se puede cancelar una compra UTILIZADA
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}/mensajes:
+    get:
+      tags: [Compras]
+      summary: Ver el chat de una compra
+      description: >-
+        Mensajes del más viejo al más nuevo, cada uno con su autor. Solo para el
+        comprador y el organizador del evento.
+      operationId: listMensajesCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '200':
+          description: Los mensajes (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MensajeConAutor'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador ni el organizador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Solo el comprador y el organizador pueden ver este chat
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    post:
+      tags: [Compras]
+      summary: Enviar un mensaje en el chat de una compra
+      description: >-
+        El comprador y el organizador pueden escribir en cualquier momento, sin
+        importar el estado de la compra ni si el evento ya se realizó.
+      operationId: createMensajeCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [mensaje]
+              properties:
+                mensaje:
+                  type: string
+                  maxLength: 500
+            example:
+              mensaje: ¿A qué hora abren las puertas?
+      responses:
+        '201':
+          description: El mensaje enviado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MensajeConAutor'
+        '400':
+          description: El id es inválido, o el mensaje está vacío o tiene más de 500 caracteres
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Falta el campo mensaje
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador ni el organizador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Solo el comprador y el organizador pueden escribir en este chat
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
   parameters:
     CompraId:
@@ -712,6 +802,27 @@ components:
           type: integer
         mensaje:
           type: string
+        enviado:
+          type: string
+          format: date-time
+    MensajeConAutor:
+      type: object
+      properties:
+        autor:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+            nombre:
+              type: string
+              example: Sofía
+            apellido:
+              type: string
+              example: Pérez
+        mensaje:
+          type: string
+          example: ¿Se puede entrar con mochila?
         enviado:
           type: string
           format: date-time

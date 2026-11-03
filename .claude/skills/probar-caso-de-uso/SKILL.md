@@ -33,4 +33,5 @@ Objetivo: demostrar con evidencia que un caso de uso funciona, incluidos los cas
 
 - Nunca declarar que funciona sin haberlo ejecutado; si una parte no se pudo probar (ej: emulador cerrado), decirlo.
 - Las capturas y salidas temporales van al scratchpad, no al repo.
+- En Windows, curl manda mal los acentos y la ñ escritos directo en `-d` (llegan como `�`). Para bodies con texto en español, escribir el JSON en un archivo UTF-8 del scratchpad y mandarlo con `--data-binary @archivo`, o usar `fetch` desde `node -e`.
 - Al terminar, sugerir `/registrar-ia` si la prueba encontró algo interesante (un bug, un caso borde).

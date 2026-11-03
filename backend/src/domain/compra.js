@@ -3,6 +3,7 @@ import { yaSeRealizo, esElDiaOPosterior } from './evento.js';
 import { calcularDisponibles, hayCupoPara } from './tipoEntrada.js';
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
+import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { BusinessRuleError, ForbiddenError, ValidationError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
@@ -153,4 +154,28 @@ export function detalleCompra(compra, evento, comprador, ahora = new Date()) {
     ...resto,
     diasRestantes: diasRestantes(compra, evento, ahora),
   };
+}
+
+// Cada mensaje con los datos de quien lo escribió, para que el chat muestre nombres:
+// la compra trae al comprador, pero no al organizador.
+/** @param {import('../persistence/schemas.js').Mensaje[]} mensajes */
+export function mensajesConAutor(mensajes) {
+  return mensajes.map(({ usuarioId, mensaje, enviado }) => {
+    const autor = usuarioRepository.findById(usuarioId);
+    return { autor: { id: autor.id, nombre: autor.nombre, apellido: autor.apellido }, mensaje, enviado };
+  });
+}
+
+// Casos de uso 5 y 6: comprador y organizador escriben "en cualquier momento",
+// así que no importa el estado de la compra ni si el evento ya pasó.
+/**
+ * @param {Compra} compra @param {Evento} evento @param {Usuario} usuario
+ * @param {string} texto Ya validado por el controlador. @param {Date} [ahora]
+ */
+export function enviarMensaje(compra, evento, usuario, texto, ahora = new Date()) {
+  if (!puedeVer(compra, evento, usuario)) {
+    throw new ForbiddenError('Solo el comprador y el organizador pueden escribir en este chat');
+  }
+  const actualizada = compraRepository.addMensaje(compra.id, { usuarioId: usuario.id, mensaje: texto, enviado: ahora });
+  return mensajesConAutor([actualizada.mensajes.at(-1)])[0];
 }

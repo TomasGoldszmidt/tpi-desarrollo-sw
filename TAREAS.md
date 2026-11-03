@@ -25,7 +25,7 @@
 - [x] Cancelación / reembolso con sus reglas
 - [x] Listado de compras del comprador (estado + días restantes)
 - [x] Listado de compras por evento para el organizador (estado + disponibles por tipo)
-- [ ] Chat de la compra: enviar y listar mensajes
+- [x] Chat de la compra: enviar y listar mensajes
 - [ ] Reseñas: crear (solo compra utilizada) y listar por organizador
 - [ ] Manejo de errores y validaciones
 

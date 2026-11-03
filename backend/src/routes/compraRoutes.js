@@ -13,5 +13,7 @@ router.get('/:id', compraController.getById);
 router.post('/:id/pago', compraController.pay);
 router.post('/:id/utilizacion', compraController.markUtilizada);
 router.post('/:id/cancelacion', compraController.cancel);
+router.get('/:id/mensajes', compraController.listMensajes);
+router.post('/:id/mensajes', compraController.createMensaje);
 
 export default router;

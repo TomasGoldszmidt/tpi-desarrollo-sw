@@ -39,11 +39,15 @@ function checkRange(number, field, { min, max }) {
 }
 
 // Devuelve el texto sin espacios en los extremos; no acepta texto vacío.
-export function requireString(value, field) {
+export function requireString(value, field, { maxLength } = {}) {
   if (typeof value !== 'string' || value.trim() === '') {
     throw new ValidationError(`Falta el campo ${field}`);
   }
-  return value.trim();
+  const text = value.trim();
+  if (maxLength !== undefined && text.length > maxLength) {
+    throw new ValidationError(`El campo ${field} puede tener como máximo ${maxLength} caracteres`);
+  }
+  return text;
 }
 
 export function requireDate(value, field) {

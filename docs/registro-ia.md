@@ -416,3 +416,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía.
   - Agregó otro endpoint que no estaba en `TAREAS.md` (`/eventos/organizados`), propuesto y aprobado en el análisis.
 - **Aprendizaje:** antes de dar por cerrada una tarea conviene preguntarse cómo llega el usuario a usarla desde la app. Así salió a la luz que faltaba `organizados`.
+
+### 2026-11-02 · Chat de la compra
+- **Tarea:** Chat de la compra: enviar y listar mensajes
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `GET` y `POST /compras/:id/mensajes` (casos 5 y 6), para el comprador y el organizador, en cualquier estado de la compra y aunque el evento ya haya pasado. Cuatro dudas aprobadas: límite de 500 caracteres, `autor` con nombre en lugar de `usuarioId` (la compra no trae el nombre del organizador), el `POST` devuelve solo el mensaje creado, y nada de tiempo real (websockets sería una dependencia nueva; la pantalla puede refrescar).
+  - Con el ok, agregó la opción `maxLength` a `requireString`, `mensajesConAutor` y `enviarMensaje` a `domain/compra.js` (reusa `puedeVer` y `addMensaje`), y `listMensajes` y `createMensaje` al controlador. 4 tests nuevos: la suite quedó en 45.
+  - `/probar-caso-de-uso` probó con `curl` la conversación entre Sofía y Lucía en la compra 1, Juan y Martín en una compra CANCELADA, un chat vacío, el 403 de Martín para leer y escribir en una compra ajena, mensaje vacío, sin body, 501 caracteres, 404, 400 y 401.
+- **Bien:** ante un resultado raro, la IA no lo dio por bueno ni "arregló" el backend a ciegas: armó una prueba aparte para encontrar la causa real.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - En la prueba, "¡Gracias!" se guardó como "�Gracias!". La IA sospechó del cliente y no del servidor (los mensajes del seed se veían bien) y lo confirmó mandando el mismo texto desde un archivo UTF-8 y con `fetch`: el backend estaba bien y el problema era curl en Windows con acentos escritos en el comando. Lo anotó en la skill `probar-caso-de-uso`.
+- **Aprendizaje:** cuando una prueba falla, primero hay que descartar la herramienta de prueba antes de tocar el código. Y conviene dejar anotado en la skill lo que se aprendió, para que no vuelva a pasar.

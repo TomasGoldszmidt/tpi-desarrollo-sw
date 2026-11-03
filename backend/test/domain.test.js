@@ -7,7 +7,10 @@ import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDes
 import { calcularPuntajes } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
-import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero } from '../src/domain/compra.js';
+import {
+  actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+} from '../src/domain/compra.js';
+import { requireString } from '../src/http/validation.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
 import { BusinessRuleError, ForbiddenError } from '../src/http/errors.js';
 
@@ -349,5 +352,39 @@ describe('ventas del organizador', () => {
     const compras = [juanRockReembolsada, sofiaRock]; // −8 y −5 días
     assert.deepEqual(masRecientesPrimero(compras).map((c) => c.id), [sofiaRock.id, juanRockReembolsada.id]);
     assert.deepEqual(compras.map((c) => c.id), [juanRockReembolsada.id, sofiaRock.id]);
+  });
+});
+
+describe('chat de la compra', () => {
+  const { sofia, lucia, martin } = seed.usuarios;
+  const { acustico } = seed.eventos;
+
+  it('mensajesConAutor agrega el nombre de quien escribió cada mensaje', () => {
+    const mensajes = mensajesConAutor(seed.compras.sofiaRock.mensajes);
+    assert.deepEqual(mensajes.map((m) => [m.autor.nombre, m.mensaje]), [
+      ['Sofía', '¿Se puede entrar con mochila?'],
+      ['Lucía', 'Sí, chica, la revisan en la puerta.'],
+    ]);
+    assert.equal(mensajes[0].usuarioId, undefined);
+  });
+
+  it('comprador y organizador escriben en cualquier estado, incluso con el evento pasado', () => {
+    const compra = seed.compras.sofiaAcustico; // UTILIZADA, evento pasado
+    const ahora = new Date();
+    const mensaje = enviarMensaje(compra, acustico, lucia, '¡Gracias por venir!', ahora);
+    assert.deepEqual(mensaje, { autor: { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández' }, mensaje: '¡Gracias por venir!', enviado: ahora });
+    enviarMensaje(compra, acustico, sofia, 'A ustedes');
+    assert.deepEqual(compraRepository.findById(compra.id).mensajes.map((m) => m.mensaje), ['¡Gracias por venir!', 'A ustedes']);
+  });
+
+  it('nadie más puede escribir', () => {
+    assert.throws(() => enviarMensaje(seed.compras.sofiaAcustico, acustico, martin, 'hola'),
+      (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden escribir en este chat');
+  });
+
+  it('requireString respeta maxLength', () => {
+    assert.equal(requireString('  hola  ', 'mensaje', { maxLength: 4 }), 'hola');
+    assert.throws(() => requireString('a'.repeat(501), 'mensaje', { maxLength: 500 }),
+      (err) => err.status === 400 && err.message === 'El campo mensaje puede tener como máximo 500 caracteres');
   });
 });
