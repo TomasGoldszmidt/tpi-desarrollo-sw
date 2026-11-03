@@ -74,6 +74,7 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
 ## Paso 4 · Probar y cerrar
 
 1. `npx expo lint` en `mobile/`, sin errores.
+1. Recorrer cada proceso de la pantalla (cargar, recargar, cada acción y lo que se vuelve a pedir después) y confirmar que muestra su carga y que nunca queda a la vista un estado viejo. Los estados se muestran con `EstadoBadge`, nunca con texto escrito a mano.
 2. Ejecutar `/probar-caso-de-uso` en el emulador: el caso feliz y cada error o estado del boceto (vacío, sin cupo, el mensaje de error de la API). Comparar la captura del emulador con el boceto y mostrar las dos.
 3. Marcar la casilla en `TAREAS.md` si el ítem quedó completo.
 4. Proponer el commit (código + boceto) y sugerir `/registrar-ia`, sobre todo si el usuario cambió el boceto.
