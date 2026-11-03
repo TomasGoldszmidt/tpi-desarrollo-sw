@@ -109,10 +109,33 @@ export function comprar({ eventoId, tipoEntradaId, cantidad }, comprador, ahora 
   });
 }
 
+const UN_DIA = 24 * 60 * 60 * 1000;
+
+function inicioDelDia(fecha) {
+  const dia = new Date(fecha);
+  dia.setHours(0, 0, 0, 0);
+  return dia;
+}
+
+// Caso de uso 1: días que faltan para el evento, solo si la compra está CONFIRMADA.
+// Son días de calendario: hoy es 0 y mañana es 1 aunque falten pocas horas.
+// Si el evento ya se realizó no falta nada: null.
+/** @param {Compra} compra @param {Evento} evento @param {Date} [ahora] @returns {number | null} */
+export function diasRestantes(compra, evento, ahora = new Date()) {
+  if (compra.estado !== CONFIRMADA || yaSeRealizo(evento, ahora)) return null;
+  return Math.round((inicioDelDia(evento.fecha) - inicioDelDia(ahora)) / UN_DIA);
+}
+
+// La compra la ven el comprador y el organizador del evento, que también usa su chat.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {boolean} */
+export function puedeVer(compra, evento, usuario) {
+  return esComprador(usuario, compra) || esOrganizador(usuario, compra, evento);
+}
+
 // Forma de la compra para la app: resúmenes del evento, el tipo de entrada y el comprador
-// en lugar de sus ids. El historial y el chat van tal cual.
-/** @param {Compra} compra @param {Evento} evento @param {Usuario} comprador */
-export function detalleCompra(compra, evento, comprador) {
+// en lugar de sus ids, y los días que faltan (calculados). El historial y el chat van tal cual.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} comprador @param {Date} [ahora] */
+export function detalleCompra(compra, evento, comprador, ahora = new Date()) {
   const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, ...resto } = compra;
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
   return {
@@ -121,5 +144,6 @@ export function detalleCompra(compra, evento, comprador) {
     tipoEntrada: { id: tipoEntrada.id, nombre: tipoEntrada.nombre, precio: tipoEntrada.precio },
     comprador: { id: comprador.id, nombre: comprador.nombre, apellido: comprador.apellido },
     ...resto,
+    diasRestantes: diasRestantes(compra, evento, ahora),
   };
 }

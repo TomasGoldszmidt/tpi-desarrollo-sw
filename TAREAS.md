@@ -23,7 +23,7 @@
 - [x] Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
 - [x] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
 - [x] Cancelación / reembolso con sus reglas
-- [ ] Listado de compras del comprador (estado + días restantes)
+- [x] Listado de compras del comprador (estado + días restantes)
 - [ ] Listado de compras por evento para el organizador (estado + disponibles por tipo)
 - [ ] Chat de la compra: enviar y listar mensajes
 - [ ] Reseñas: crear (solo compra utilizada) y listar por organizador

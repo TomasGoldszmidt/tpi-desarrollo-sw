@@ -7,7 +7,9 @@ const router = Router();
 // Todas las rutas de compras necesitan saber quién hace el pedido.
 router.use(requireUsuario);
 
+router.get('/', compraController.list);
 router.post('/', compraController.create);
+router.get('/:id', compraController.getById);
 router.post('/:id/pago', compraController.pay);
 router.post('/:id/utilizacion', compraController.markUtilizada);
 router.post('/:id/cancelacion', compraController.cancel);

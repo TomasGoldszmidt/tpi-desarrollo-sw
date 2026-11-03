@@ -1,9 +1,9 @@
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar } from '../domain/compra.js';
+import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
-import { NotFoundError } from '../http/errors.js';
+import { ForbiddenError, NotFoundError } from '../http/errors.js';
 import { requireId, requireInteger } from '../http/validation.js';
 
 function toDetalle(compra) {
@@ -30,6 +30,21 @@ function changeEstado(destino) {
     const actualizada = actualizarEstado(compra, evento, destino(compra), req.usuario);
     res.status(200).json(toDetalle(actualizada));
   };
+}
+
+// Caso de uso 1: las compras del usuario activo como comprador, de la más reciente a la más vieja.
+export async function list(req, res) {
+  const fechaDeCompra = (compra) => compra.historial[0].fechaHora;
+  const compras = compraRepository.findByComprador(req.usuario.id)
+    .sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a));
+  res.status(200).json(compras.map(toDetalle));
+}
+
+export async function getById(req, res) {
+  const compra = findCompra(req);
+  const evento = eventoRepository.findById(compra.eventoId);
+  if (!puedeVer(compra, evento, req.usuario)) throw new ForbiddenError('No podés ver esta compra');
+  res.status(200).json(toDetalle(compra));
 }
 
 export async function create(req, res) {

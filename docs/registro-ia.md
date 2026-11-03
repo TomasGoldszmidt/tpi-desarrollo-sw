@@ -385,3 +385,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía.
   - La IA quiso reiniciar el backend escribiendo `rs` en la pestaña de nodemon, pero la herramienta no permite reusar esa pestaña. No hizo falta: nodemon ya se había reiniciado al cambiar los archivos.
 - **Aprendizaje:** dejar las reglas de negocio en el dominio desde el principio hace que cada endpoint nuevo sea chico y que el análisis se concentre en las decisiones que de verdad quedan abiertas.
+
+### 2026-11-02 · Mis compras y detalle de compra
+- **Tarea:** Listado de compras del comprador (estado + días restantes)
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `GET /compras` (caso 1), que devuelve las compras del usuario activo como comprador y nunca recibe un `compradorId`. Propuso además `GET /compras/:id`, que no está en `TAREAS.md` pero lo necesita la pantalla de detalle. Cuatro dudas aprobadas: sumar el detalle ahora, `diasRestantes` en todas las respuestas de compra, orden de la más reciente a la más vieja, y dejar las "acciones disponibles" para la pantalla de detalle.
+  - Con el ok, agregó a `domain/compra.js` `diasRestantes` (días de calendario, solo si está CONFIRMADA y el evento no pasó) y `puedeVer` (comprador u organizador), y sumó `diasRestantes` a `detalleCompra`. En el controlador agregó `list` y `getById`.
+  - 5 tests nuevos, incluidos los bordes de calendario: a las 00:30 del día del evento da 0, y a las 23:59 del día anterior da 1. La suite quedó en 38.
+  - `/probar-caso-de-uso` probó con `curl` las compras de Sofía, Juan y Lucía (vacía), el orden, que una compra nueva y pagada aparezca primera con sus días, el detalle visto por la compradora y por la organizadora, y 403, 404, 400 y 401.
+- **Bien:** la compra CONFIRMADA de Juan del stand-up pasado, que se armó en el seed de la sección 1, mostró el caso borde de `diasRestantes` en `null` aunque esté confirmada.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - En un test la IA dejó una línea con un comentario que dudaba de sí mismo ("¿18:00…? no"). La reescribió sola antes de commitear.
+  - Se agregó un endpoint que no estaba en `TAREAS.md` (`GET /compras/:id`). Quedó propuesto y aprobado en el análisis, no se metió en silencio.
+- **Aprendizaje:** pedirle a la IA que mire qué van a necesitar las pantallas de la sección 3 evita volver al backend más adelante. Igual conviene que lo proponga como duda y no lo agregue por su cuenta.

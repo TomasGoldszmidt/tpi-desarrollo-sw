@@ -7,7 +7,7 @@ import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDes
 import { calcularPuntajes } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
-import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra } from '../src/domain/compra.js';
+import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer } from '../src/domain/compra.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
 import { BusinessRuleError, ForbiddenError } from '../src/http/errors.js';
 
@@ -286,5 +286,43 @@ describe('comprar', () => {
     assert.deepEqual(detalle.tipoEntrada, { id: 1, nombre: 'Campo', precio: 45000 });
     assert.deepEqual(detalle.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
     assert.equal(detalle.mensajes.length, 2);
+  });
+});
+
+describe('días restantes y quién ve una compra', () => {
+  const { sofiaRock, sofiaObra, sofiaAcustico, juanStandup } = seed.compras;
+  const { rock, obra, acustico, standup } = seed.eventos;
+
+  it('cuenta días de calendario solo para las CONFIRMADAS', () => {
+    assert.equal(diasRestantes(sofiaRock, rock), 20);
+    assert.equal(diasRestantes(sofiaObra, obra), null); // PENDIENTE
+    assert.equal(diasRestantes(sofiaAcustico, acustico), null); // UTILIZADA
+  });
+
+  it('el mismo día es 0 y el día anterior es 1, aunque falten pocas horas', () => {
+    // El rock es a las 21 h: a las 00:30 de ese día es 0, y a las 23:59 del día anterior es 1.
+    const tempranoElDia = new Date(rock.fecha);
+    tempranoElDia.setHours(0, 30);
+    const laNocheAnterior = new Date(rock.fecha);
+    laNocheAnterior.setDate(laNocheAnterior.getDate() - 1);
+    laNocheAnterior.setHours(23, 59);
+    assert.equal(diasRestantes(sofiaRock, rock, tempranoElDia), 0);
+    assert.equal(diasRestantes(sofiaRock, rock, laNocheAnterior), 1);
+  });
+
+  it('es null si el evento ya se realizó, aunque esté CONFIRMADA', () => {
+    assert.equal(diasRestantes(juanStandup, standup), null);
+  });
+
+  it('la ven el comprador y el organizador, nadie más', () => {
+    const { sofia, lucia, juan, martin } = seed.usuarios;
+    assert.equal(puedeVer(sofiaRock, rock, sofia), true);
+    assert.equal(puedeVer(sofiaRock, rock, lucia), true);
+    assert.equal(puedeVer(sofiaRock, rock, juan), false);
+    assert.equal(puedeVer(sofiaRock, rock, martin), false);
+  });
+
+  it('detalleCompra incluye diasRestantes', () => {
+    assert.equal(detalleCompra(sofiaRock, rock, seed.usuarios.sofia).diasRestantes, 20);
   });
 });

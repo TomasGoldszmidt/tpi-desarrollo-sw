@@ -212,6 +212,28 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /compras:
+    get:
+      tags: [Compras]
+      summary: Listar mis compras
+      description: >-
+        Las compras del usuario activo como comprador, de la más reciente a la más
+        vieja. Cada una trae `diasRestantes` si está CONFIRMADA.
+      operationId: listCompras
+      security:
+        - usuarioActivo: []
+      responses:
+        '200':
+          description: Las compras del usuario activo (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompraDetalle'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
     post:
       tags: [Compras]
       summary: Comprar entradas
@@ -254,6 +276,39 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: 'No hay cupo suficiente: quedan 0 entradas'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}:
+    get:
+      tags: [Compras]
+      summary: Ver el detalle de una compra
+      description: La pueden ver el comprador y el organizador del evento.
+      operationId: getCompraById
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '200':
+          description: La compra
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador ni el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No podés ver esta compra
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /compras/{id}/pago:
@@ -657,6 +712,13 @@ components:
           description: Chat de la compra
           items:
             $ref: '#/components/schemas/Mensaje'
+        diasRestantes:
+          type: integer
+          nullable: true
+          description: >-
+            Calculado. Días de calendario hasta el evento (0 = hoy). Solo si la
+            compra está CONFIRMADA y el evento no se realizó; si no, null.
+          example: 20
     NuevaCompra:
       type: object
       required: [eventoId, tipoEntradaId, cantidad]
