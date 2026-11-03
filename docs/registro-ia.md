@@ -647,3 +647,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - No se llegaron a capturar las pantallas "Creando el evento…" ni "Cargando el formulario…", porque el backend local respondió antes de la captura. Las dos usan los mismos componentes de carga que las otras pantallas.
   - La IA cambió dos cosas respecto del análisis: `TipoEntradaForm` quedó dentro de la pantalla y no en `components/`, porque se usa en un solo lugar, y se sumó la validación de precio, cupo y link en la app.
 - **Aprendizaje:** antes de mostrar un mensaje del backend tal cual, hay que mirar qué dice. Los de las reglas de negocio sirven para el usuario, pero los de validación de formato nombran campos técnicos, así que esos casos conviene validarlos en la app.
+
+### 2026-11-03 · Campos faltantes marcados en "Crear evento"
+- **Tarea:** ajuste sobre la pantalla de creación de evento (sección 3)
+- **Herramienta / skill:** Claude Code + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "en el formulario no agregamos asterisco a los campos obligatorios, sino que pusimos opcional a los que no lo son, esta bien eso? es un buen patron?". Después, "dale" a la propuesta.
+- **Resultado:**
+  - La IA respondió que marcar el campo opcional está bien cuando la mayoría de los campos son obligatorios, como en este formulario: un opcional contra unos doce obligatorios. Pero señaló otro problema: el botón deshabilitado no decía qué faltaba. Propuso dejarlo siempre habilitado y marcar lo que falta al tocarlo.
+  - Boceto actualizado: el estado E muestra los campos faltantes en rojo, con un aviso arriba del botón. El error del backend pasó a ser el estado E2.
+  - `eventos/nuevo.js`: el botón está siempre habilitado. Si falta algo, no llama al backend: marca en rojo cada campo con lo que hay que hacer ("Elegí una categoría", "Completá el cupo"), muestra "Completá los campos marcados en rojo" y baja hasta el primero que falta. La marca se va apenas se completa el campo.
+  - Prueba en el emulador: con solo el nombre cargado, al tocar "Crear evento" bajó hasta "Descripción" y marcó todo lo que faltaba, incluidos los campos del tipo de entrada. Al elegir "Música" se fue la marca de la categoría.
+- **Bien:** la pregunta sobre los asteriscos llevó a encontrar un problema real de la pantalla que había quedado aprobada.
+- **Corregido / problemas:**
+  - Para bajar hasta el primer campo, la IA guardó las posiciones en un `useRef`, y el lint lo rechazó (`react-hooks/refs`, por escribir el ref desde un handler armado durante el render). Se pasaron a un estado que se actualiza en `onLayout`.
+  - Después del cambio, no se volvió a probar en el emulador la creación correcta ni los errores del backend. Ese código no cambió, salvo el chequeo previo.
+- **Aprendizaje:** que una pantalla esté aprobada no significa que esté bien diseñada. Preguntarle a la IA "¿es un buen patrón?" sobre algo concreto sirve para revisarla con criterio y encontrar problemas que en el boceto no se veían.

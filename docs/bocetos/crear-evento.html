@@ -32,6 +32,9 @@ body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0
 .url{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#5F5E5A;padding:5px 0;border-bottom:0.5px solid #D3D1C7}
 .cta{position:relative;margin:10px 12px;background:#3B6D11;color:#fff;border-radius:8px;text-align:center;padding:9px;font-size:13px;font-weight:500}
 .cta.dis{background:#D3D1C7;color:#5F5E5A}
+.bad{border-color:#A32D2D!important}
+.hint{font-size:11px;color:#A32D2D;margin-top:3px}
+.ph2{color:#888780}
 .err{background:#FCEBEB;color:#791F1F;border-radius:8px;padding:8px;font-size:12px;margin:0 12px}
 .vacio{border:0.5px dashed #B4B2A9;border-radius:10px;padding:14px;text-align:center;color:#5F5E5A;font-size:12px;margin-top:10px}
 .tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
@@ -144,7 +147,36 @@ body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0
 
 <!-- E -->
 <div>
-<div class="cap">E · Faltan datos / error al crear</div>
+<div class="cap">E · Faltan datos (después de tocar Crear evento)</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div class="lbl" style="margin-top:0">Descripción</div><div class="in area">Charlas cortas sobre el ecosistema JS</div>
+<div class="lbl">Categoría</div>
+<div class="cats"><span class="cat bad">Música</span><span class="cat bad">Teatro</span><span class="cat bad">Deportes</span><span class="cat bad">Festivales</span><span class="cat bad">Conferencias</span></div>
+<div class="hint">Elegí una categoría</div>
+<div class="duo">
+<div><div class="lbl">Fecha</div><div class="in pick bad"><span class="ph2">Elegir</span><span>▾</span></div><div class="hint">Elegí la fecha</div></div>
+<div><div class="lbl">Hora</div><div class="in pick">19:00<span>▾</span></div></div>
+</div>
+<div class="lbl">Lugar</div><div class="in">UTN FRBA, Medrano 951, CABA</div>
+<div class="sec">Tipos de entrada</div>
+<div class="tipo">
+<div class="top">Tipo 1</div>
+<div class="in">General</div>
+<div class="in" style="margin-top:4px">Entrada libre con registro</div>
+<div class="duo" style="margin-top:4px"><div><div class="lbl" style="margin-top:0">Precio</div><div class="in">$ 0</div></div><div><div class="lbl" style="margin-top:0">Cupo</div><div class="in bad"><span class="ph2">100</span></div></div></div>
+<div class="hint">Completá el cupo</div>
+</div>
+</div>
+<div class="err">Completá los campos marcados en rojo</div>
+<div class="cta">Crear evento<span class="n abs">7</span></div>
+</div>
+</div>
+
+<!-- E2 -->
+<div>
+<div class="cap">E2 · Error al crear</div>
 <div class="phone">
 <div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
 <div class="scr">
@@ -165,8 +197,6 @@ body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0
 </div>
 <div class="err">Hay tipos de entrada con el nombre repetido</div>
 <div class="cta">Crear evento</div>
-<div style="font-size:11px;color:#888780;text-align:center;margin:-4px 0 6px">— si falta completar algo —</div>
-<div class="cta dis" style="margin-top:0">Crear evento</div>
 </div>
 </div>
 
@@ -193,6 +223,6 @@ body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0
 <div><span class="n">4</span> Opcional: agrega el link a la lista de imágenes (<code>multimedia</code>); "Quitar" lo saca. Si el link no es http/https, el backend responde 400 y se muestra el mensaje (E).</div>
 <div><span class="n">5</span> Quita ese tipo de entrada. El primero no se puede quitar: siempre hay al menos uno.</div>
 <div><span class="n">6</span> Agrega un tipo de entrada vacío al final.</div>
-<div><span class="n">7</span> <code>POST /eventos</code> con <code>X-User-Id</code> del usuario activo. Deshabilitado hasta que estén completos todos los campos obligatorios (nombre, descripción, categoría, fecha, hora, lugar y cada tipo con nombre, descripción, precio y cupo). Mientras responde, <code>CargaEncima</code> "Creando el evento…" (F). Con 201 va al detalle del evento creado (<code>router.replace('/eventos/:id')</code>), así "volver" lleva a Mis eventos y no al formulario. Con 400/409 (fecha no futura, nombre repetido, cupo &lt; 1) muestra el mensaje del backend arriba del botón y los datos cargados quedan (E).</div>
+<div><span class="n">7</span> <code>POST /eventos</code> con <code>X-User-Id</code> del usuario activo. El botón está siempre habilitado. Si falta algo obligatorio (nombre, descripción, categoría, fecha, hora, lugar y cada tipo con nombre, descripción, precio y cupo), no llama al backend: marca en rojo cada campo que falta con lo que hay que hacer, muestra "Completá los campos marcados en rojo" arriba del botón y baja hasta el primero (E). Los avisos de cupo menor a 1, precio inválido y link aparecen mientras se escribe. Mientras responde, <code>CargaEncima</code> "Creando el evento…" (F). Con 201 va al detalle del evento creado (<code>router.replace('/eventos/:id')</code>), así "volver" lleva a Mis eventos y no al formulario. Con 409 (fecha no futura, nombre repetido) muestra el mensaje del backend arriba del botón y los datos cargados quedan (E2).</div>
 </div>
 </body></html>

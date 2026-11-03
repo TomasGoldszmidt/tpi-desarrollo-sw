@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
@@ -21,9 +21,25 @@ const cupoValido = (texto) => /^\d+$/.test(texto) && Number(texto) >= 1;
 const linkValido = (texto) => /^https?:\/\/\S+$/i.test(texto);
 const lleno = (texto) => texto.trim() !== '';
 
-function tipoCompleto(tipo) {
-  return lleno(tipo.nombre) && lleno(tipo.descripcion) && precioValido(tipo.precio) && cupoValido(tipo.cupo);
+// Qué le falta a un tipo de entrada, campo por campo (null si está bien). El cupo y el
+// precio mal escritos se avisan siempre; los vacíos, solo después de tocar "Crear evento".
+function erroresTipo(tipo, intentado) {
+  const errores = {
+    nombre: !lleno(tipo.nombre) ? 'Completá el nombre' : null,
+    descripcion: !lleno(tipo.descripcion) ? 'Completá la descripción' : null,
+    precio: tipo.precio === '' ? 'Completá el precio' : !precioValido(tipo.precio) ? 'Revisá el precio (ej: 15000 o 15000,50)' : null,
+    cupo: tipo.cupo === '' ? 'Completá el cupo' : !cupoValido(tipo.cupo) ? 'El cupo tiene que ser al menos 1' : null,
+  };
+  if (!intentado) {
+    errores.nombre = null;
+    errores.descripcion = null;
+    if (tipo.precio === '') errores.precio = null;
+    if (tipo.cupo === '') errores.cupo = null;
+  }
+  return errores;
 }
+
+const tipoCompleto = (tipo) => Object.values(erroresTipo(tipo, true)).every((error) => error === null);
 
 // Caso de uso 4: el organizador (usuario activo) crea un evento con varios tipos de
 // entrada, cada uno con precio y cupo. Al crearlo, va al detalle del evento.
@@ -31,6 +47,7 @@ export default function NuevoEvento() {
   const { data: categorias, loading, error, recargar } = useCarga(getCategorias);
   const insets = useSafeAreaInsets();
   const alturaTeclado = useAlturaTeclado();
+  const scroll = useRef(null);
 
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
@@ -41,6 +58,10 @@ export default function NuevoEvento() {
   const [multimedia, setMultimedia] = useState([]);
   const [link, setLink] = useState('');
   const [tipos, setTipos] = useState([tipoVacio()]);
+  // Se marcan los campos que faltan recién después de tocar "Crear evento".
+  const [intentado, setIntentado] = useState(false);
+  // Posición vertical de cada bloque del formulario, para bajar hasta el primero que falta.
+  const [posiciones, setPosiciones] = useState({});
   const [enviando, setEnviando] = useState(false);
   const [errorCrear, setErrorCrear] = useState(null);
 
@@ -55,8 +76,23 @@ export default function NuevoEvento() {
     );
   }
 
-  const completo =
-    lleno(nombre) && lleno(descripcion) && categoriaId !== null && dia && hora && lleno(lugar) && tipos.every(tipoCompleto);
+  // Lo que falta, en el orden del formulario: la clave es el bloque al que se baja.
+  const faltan = [
+    ['nombre', !lleno(nombre)],
+    ['descripcion', !lleno(descripcion)],
+    ['categoria', categoriaId === null],
+    ['fechaHora', !dia || !hora],
+    ['lugar', !lleno(lugar)],
+    ...tipos.map((tipo, i) => [`tipo${i}`, !tipoCompleto(tipo)]),
+  ]
+    .filter(([, falta]) => falta)
+    .map(([clave]) => clave);
+  const marcar = (falta) => intentado && falta;
+
+  const registrar = (clave) => (event) => {
+    const { y } = event.nativeEvent.layout;
+    setPosiciones((anteriores) => (anteriores[clave] === y ? anteriores : { ...anteriores, [clave]: y }));
+  };
 
   // Selectores nativos de Android. Lo que se elige se lee como hora local del celular
   // y se interpreta como hora argentina al armar la fecha.
@@ -92,8 +128,15 @@ export default function NuevoEvento() {
   }
 
   async function crear() {
-    setEnviando(true);
     setErrorCrear(null);
+    if (faltan.length > 0) {
+      setIntentado(true);
+      const y = posiciones[faltan[0]] ?? 0;
+      scroll.current?.scrollTo({ y: Math.max(0, y - spacing.lg), animated: true });
+      return;
+    }
+
+    setEnviando(true);
     try {
       const evento = await crearEvento({
         nombre: nombre.trim(),
@@ -117,17 +160,29 @@ export default function NuevoEvento() {
     }
   }
 
+  const avisoPie = errorCrear ?? (intentado && faltan.length > 0 ? 'Completá los campos marcados en rojo' : null);
+
   return (
     <View style={[styles.pantalla, { paddingBottom: alturaTeclado }]}>
-      <ScrollView contentContainerStyle={styles.contenido} keyboardShouldPersistTaps="handled">
+      <ScrollView ref={scroll} contentContainerStyle={styles.contenido} keyboardShouldPersistTaps="handled">
         <Text style={styles.titulo}>Crear evento</Text>
 
-        <Campo etiqueta="Nombre">
-          <TextInput style={styles.input} value={nombre} onChangeText={setNombre} placeholder="Ej: Meetup de JavaScript" placeholderTextColor={colors.textMuted} />
-        </Campo>
-        <Campo etiqueta="Descripción">
+        <Campo etiqueta="Nombre" error={marcar(!lleno(nombre)) && 'Completá el nombre'} onLayout={registrar('nombre')}>
           <TextInput
-            style={[styles.input, styles.multilinea]}
+            style={[styles.input, marcar(!lleno(nombre)) && styles.inputError]}
+            value={nombre}
+            onChangeText={setNombre}
+            placeholder="Ej: Meetup de JavaScript"
+            placeholderTextColor={colors.textMuted}
+          />
+        </Campo>
+        <Campo
+          etiqueta="Descripción"
+          error={marcar(!lleno(descripcion)) && 'Completá la descripción'}
+          onLayout={registrar('descripcion')}
+        >
+          <TextInput
+            style={[styles.input, styles.multilinea, marcar(!lleno(descripcion)) && styles.inputError]}
             value={descripcion}
             onChangeText={setDescripcion}
             multiline
@@ -136,14 +191,14 @@ export default function NuevoEvento() {
           />
         </Campo>
 
-        <Campo etiqueta="Categoría">
+        <Campo etiqueta="Categoría" error={marcar(categoriaId === null) && 'Elegí una categoría'} onLayout={registrar('categoria')}>
           <View style={styles.chips}>
             {categorias.map((categoria) => {
               const elegida = categoria.id === categoriaId;
               return (
                 <Pressable
                   key={categoria.id}
-                  style={[styles.chip, elegida && styles.chipElegido]}
+                  style={[styles.chip, elegida && styles.chipElegido, marcar(categoriaId === null) && styles.inputError]}
                   onPress={() => setCategoriaId(categoria.id)}
                 >
                   <Text style={[styles.chipTexto, elegida && styles.chipTextoElegido]}>{categoria.nombre}</Text>
@@ -153,21 +208,27 @@ export default function NuevoEvento() {
           </View>
         </Campo>
 
-        <View style={styles.fila}>
+        <View style={styles.fila} onLayout={registrar('fechaHora')}>
           <View style={styles.columnaAncha}>
-            <Campo etiqueta="Fecha">
-              <Selector texto={dia ? formatDiaElegido(dia) : 'Elegir'} onPress={elegirDia} />
+            <Campo etiqueta="Fecha" error={marcar(!dia) && 'Elegí la fecha'}>
+              <Selector texto={dia ? formatDiaElegido(dia) : 'Elegir'} onPress={elegirDia} conError={marcar(!dia)} />
             </Campo>
           </View>
           <View style={styles.columna}>
-            <Campo etiqueta="Hora">
-              <Selector texto={hora ? formatHoraElegida(hora) : 'Elegir'} onPress={elegirHora} />
+            <Campo etiqueta="Hora" error={marcar(!hora) && 'Elegí la hora'}>
+              <Selector texto={hora ? formatHoraElegida(hora) : 'Elegir'} onPress={elegirHora} conError={marcar(!hora)} />
             </Campo>
           </View>
         </View>
 
-        <Campo etiqueta="Lugar">
-          <TextInput style={styles.input} value={lugar} onChangeText={setLugar} placeholder="Ej: UTN FRBA, Medrano 951, CABA" placeholderTextColor={colors.textMuted} />
+        <Campo etiqueta="Lugar" error={marcar(!lleno(lugar)) && 'Completá el lugar'} onLayout={registrar('lugar')}>
+          <TextInput
+            style={[styles.input, marcar(!lleno(lugar)) && styles.inputError]}
+            value={lugar}
+            onChangeText={setLugar}
+            placeholder="Ej: UTN FRBA, Medrano 951, CABA"
+            placeholderTextColor={colors.textMuted}
+          />
         </Campo>
 
         <Text style={styles.seccion}>
@@ -207,13 +268,15 @@ export default function NuevoEvento() {
 
         <Text style={styles.seccion}>Tipos de entrada</Text>
         {tipos.map((tipo, i) => (
-          <TipoEntradaForm
-            key={i}
-            numero={i + 1}
-            tipo={tipo}
-            onChange={(campo, valor) => cambiarTipo(i, campo, valor)}
-            onQuitar={i > 0 ? () => setTipos(tipos.filter((_, j) => j !== i)) : null}
-          />
+          <View key={i} onLayout={registrar(`tipo${i}`)}>
+            <TipoEntradaForm
+              numero={i + 1}
+              tipo={tipo}
+              errores={erroresTipo(tipo, intentado)}
+              onChange={(campo, valor) => cambiarTipo(i, campo, valor)}
+              onQuitar={i > 0 ? () => setTipos(tipos.filter((_, j) => j !== i)) : null}
+            />
+          </View>
         ))}
         <Pressable style={styles.agregar} onPress={() => setTipos([...tipos, tipoVacio()])}>
           <Ionicons name="add" size={18} color={colors.primaryText} />
@@ -222,8 +285,8 @@ export default function NuevoEvento() {
       </ScrollView>
 
       <View style={[styles.pie, { paddingBottom: spacing.md + (alturaTeclado > 0 ? 0 : insets.bottom) }]}>
-        {errorCrear ? <Text style={styles.error}>{errorCrear}</Text> : null}
-        <Pressable style={[styles.boton, (!completo || enviando) && styles.apagado]} onPress={crear} disabled={!completo || enviando}>
+        {avisoPie ? <Text style={styles.error}>{avisoPie}</Text> : null}
+        <Pressable style={[styles.boton, enviando && styles.apagado]} onPress={crear} disabled={enviando}>
           <Text style={styles.botonTexto}>Crear evento</Text>
         </Pressable>
       </View>
@@ -232,18 +295,19 @@ export default function NuevoEvento() {
   );
 }
 
-function Campo({ etiqueta, children }) {
+function Campo({ etiqueta, error, onLayout, children }) {
   return (
-    <View style={styles.campo}>
+    <View style={styles.campo} onLayout={onLayout}>
       <Text style={styles.etiqueta}>{etiqueta}</Text>
       {children}
+      {error ? <Text style={styles.ayuda}>{error}</Text> : null}
     </View>
   );
 }
 
-function Selector({ texto, onPress }) {
+function Selector({ texto, onPress, conError }) {
   return (
-    <Pressable style={[styles.input, styles.selector]} onPress={onPress}>
+    <Pressable style={[styles.input, styles.selector, conError && styles.inputError]} onPress={onPress}>
       <Text style={texto === 'Elegir' ? styles.placeholder : styles.valor}>{texto}</Text>
       <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
     </Pressable>
@@ -251,7 +315,7 @@ function Selector({ texto, onPress }) {
 }
 
 // Un tipo de entrada del formulario. onQuitar es null en el primero: siempre queda uno.
-function TipoEntradaForm({ numero, tipo, onChange, onQuitar }) {
+function TipoEntradaForm({ numero, tipo, errores, onChange, onQuitar }) {
   return (
     <View style={styles.tipo}>
       <View style={styles.tipoArriba}>
@@ -263,23 +327,25 @@ function TipoEntradaForm({ numero, tipo, onChange, onQuitar }) {
         ) : null}
       </View>
       <TextInput
-        style={styles.input}
+        style={[styles.input, errores.nombre && styles.inputError]}
         value={tipo.nombre}
         onChangeText={(valor) => onChange('nombre', valor)}
         placeholder="Nombre (ej: General)"
         placeholderTextColor={colors.textMuted}
       />
+      {errores.nombre ? <Text style={styles.ayuda}>{errores.nombre}</Text> : null}
       <TextInput
-        style={[styles.input, styles.separado]}
+        style={[styles.input, styles.separado, errores.descripcion && styles.inputError]}
         value={tipo.descripcion}
         onChangeText={(valor) => onChange('descripcion', valor)}
         placeholder="Descripción (ej: Sin ubicación asignada)"
         placeholderTextColor={colors.textMuted}
       />
+      {errores.descripcion ? <Text style={styles.ayuda}>{errores.descripcion}</Text> : null}
       <View style={[styles.fila, styles.separado]}>
         <View style={styles.columna}>
           <Text style={styles.etiqueta}>Precio</Text>
-          <View style={[styles.input, styles.conPrefijo]}>
+          <View style={[styles.input, styles.conPrefijo, errores.precio && styles.inputError]}>
             <Text style={styles.valor}>$ </Text>
             <TextInput
               style={styles.inputPelado}
@@ -294,7 +360,7 @@ function TipoEntradaForm({ numero, tipo, onChange, onQuitar }) {
         <View style={styles.columna}>
           <Text style={styles.etiqueta}>Cupo</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errores.cupo && styles.inputError]}
             value={tipo.cupo}
             onChangeText={(valor) => onChange('cupo', valor.replace(/\D/g, ''))}
             keyboardType="number-pad"
@@ -303,8 +369,8 @@ function TipoEntradaForm({ numero, tipo, onChange, onQuitar }) {
           />
         </View>
       </View>
-      {tipo.cupo !== '' && !cupoValido(tipo.cupo) ? <Text style={styles.ayuda}>El cupo tiene que ser al menos 1</Text> : null}
-      {tipo.precio !== '' && !precioValido(tipo.precio) ? <Text style={styles.ayuda}>Revisá el precio (ej: 15000 o 15000,50)</Text> : null}
+      {errores.precio ? <Text style={styles.ayuda}>{errores.precio}</Text> : null}
+      {errores.cupo ? <Text style={styles.ayuda}>{errores.cupo}</Text> : null}
     </View>
   );
 }
@@ -345,6 +411,9 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     color: colors.text,
     backgroundColor: colors.background,
+  },
+  inputError: {
+    borderColor: colors.danger,
   },
   multilinea: {
     minHeight: 72,
