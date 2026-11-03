@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
-import { tuPrecioEstaEntre, crearEvento, detalleEvento } from '../src/domain/evento.js';
+import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde } from '../src/domain/evento.js';
+import { calcularPuntajes } from '../src/domain/resenia.js';
+import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import { actualizarEstado, estadoAlCancelar } from '../src/domain/compra.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
@@ -194,5 +196,50 @@ describe('detalle de evento', () => {
     assert.deepEqual(detalle.categoria, { id: seed.categorias.festivales.id, nombre: 'Festivales' });
     assert.deepEqual(detalle.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández' });
     assert.deepEqual(detalle.tiposEntrada.map((t) => [t.nombre, t.disponibles]), [['General', 1000], ['VIP', 100], ['Backstage', 0]]);
+  });
+});
+
+describe('puntaje del organizador', () => {
+  it('promedia las reseñas de los eventos de cada organizador', () => {
+    const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
+    assert.deepEqual(puntajes.get(seed.usuarios.lucia.id), { puntaje: 4.5, cantidadResenias: 2 });
+    assert.equal(puntajes.has(seed.usuarios.martin.id), false); // sin reseñas
+  });
+});
+
+describe('búsqueda de eventos', () => {
+  const { rock, obra, festival, partido, acustico, standup } = seed.eventos;
+  // Otros tests crean eventos; se compara solo contra los del seed.
+  const delSeed = new Set(Object.values(seed.eventos).map((e) => e.id));
+  const ids = (resultado) => resultado.map((e) => e.id).filter((id) => delSeed.has(id));
+
+  it('por defecto ordena por fecha y oculta los eventos pasados', () => {
+    const resultado = ids(buscarEventos());
+    assert.deepEqual(resultado, [obra.id, partido.id, rock.id, festival.id]);
+    assert.equal(resultado.includes(acustico.id) || resultado.includes(standup.id), false);
+  });
+
+  it('ordena por precio desde la entrada más barata', () => {
+    assert.equal(precioDesde(festival), 90000);
+    assert.deepEqual(ids(buscarEventos({ orden: 'precio' })), [partido.id, obra.id, rock.id, festival.id]);
+  });
+
+  it('ordena por puntaje con los organizadores sin reseñas al final', () => {
+    assert.deepEqual(ids(buscarEventos({ orden: 'puntaje' })), [obra.id, rock.id, festival.id, partido.id]);
+  });
+
+  it('filtra por texto sin tildes, por categoría y por rango de precio', () => {
+    assert.deepEqual(ids(buscarEventos({ texto: 'musica' })), [festival.id]);
+    assert.deepEqual(ids(buscarEventos({ categoriaId: seed.categorias.musica.id })), [rock.id]);
+    assert.deepEqual(ids(buscarEventos({ precioMin: 100000 })), [festival.id]);
+    assert.deepEqual(buscarEventos({ categoriaId: 99 }), []);
+  });
+
+  it('cada resultado es un resumen con imagen, precio y puntaje', () => {
+    const [primero] = buscarEventos({ texto: 'Bernarda' });
+    assert.deepEqual(primero.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 2 });
+    assert.equal(primero.precioDesde, 20000);
+    assert.equal(primero.imagen, 'https://picsum.photos/seed/bernarda/800/400');
+    assert.equal(primero.tiposEntrada, undefined);
   });
 });

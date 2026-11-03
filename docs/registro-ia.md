@@ -335,3 +335,22 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El evento creado en la prueba (id 7) queda en memoria hasta que se reinicie el backend.
   - `domain/evento.js`, `tipoEntrada.js` y `compra.js` se importan en círculo. Funciona porque solo se usan funciones declaradas, pero conviene tenerlo en cuenta si se agregan constantes.
 - **Aprendizaje:** cuando la IA propone varias dudas con su recomendación, puedo aprobarlas juntas sin perder control, porque cada una viene con su porqué.
+
+### 2026-11-02 · Búsqueda de eventos
+- **Tarea:** Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `GET /eventos` (casos 3 y 11) con filtros opcionales: `texto`, `categoriaId`, `precioMin`/`precioMax` (usa `tuPrecioEstaEntre`) y `orden=fecha|precio|puntaje`. Cuatro dudas aprobadas con la recomendación: ocultar siempre los eventos pasados, dirección del orden fija, cada evento como resumen para la tarjeta, y una categoría inexistente devuelve `[]` y no un error.
+  - Con el ok, creó `domain/resenia.js` (`calcularPuntajes`: promedio por organizador, que se llega desde el evento reseñado) y agregó a `domain/evento.js` `precioDesde`, los comparadores de orden y `buscarEventos`. Los organizadores sin reseñas van al final y la fecha desempata.
+  - Agregó `eventoController.list` y la ruta `GET /eventos`. 6 tests nuevos: la suite quedó en 28 y pasan todos.
+  - `/swagger` agregó el endpoint con sus parámetros y el schema `EventoResumen`, con los campos calculados documentados.
+  - `/probar-caso-de-uso` probó con `curl` los tres órdenes, el texto sin tildes ni mayúsculas, la categoría, el rango de precio, la categoría inexistente, el texto vacío y 5 errores 400.
+  - Corrigió en `docs/persistencia.md` nombres viejos que habían quedado del renombre (`persistence/repositorios/` y `crear`).
+- **Bien:** el seed que se armó en la sección 1 (Martín sin reseñas, dos eventos pasados) permitió verificar los tres órdenes y el filtro de pasados sin crear datos.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - La prueba mostró que `?texto=a&texto=b` respondía "Falta el campo texto". La IA cambió el mensaje por uno que explica el problema.
+  - El `sed` del renombre al inglés no había corregido todo `docs/persistencia.md`. Lo encontró recién ahora, al releerlo para esta tarea.
+  - Los tests de dominio comparten el estado en memoria (un test crea un evento que aparece en la búsqueda), así que se comparan solo los ids del seed.
+- **Aprendizaje:** un renombre automático (`sed`) hay que revisarlo con un `grep` de los nombres viejos en todos los archivos, no solo en el código. Si no, queda documentación desactualizada.

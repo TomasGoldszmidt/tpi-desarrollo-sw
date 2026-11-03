@@ -2,8 +2,8 @@ import * as eventoRepository from '../persistence/repositories/eventoRepository.
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { crearEvento, detalleEvento } from '../domain/evento.js';
-import { NotFoundError } from '../http/errors.js';
+import { crearEvento, detalleEvento, buscarEventos, ORDENES } from '../domain/evento.js';
+import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString,
 } from '../http/validation.js';
@@ -25,6 +25,34 @@ function parseTipoEntrada(tipo, i) {
     precio: requireNumber(tipo?.precio, campo('precio'), { min: 0 }),
     cupo: requireInteger(tipo?.cupo, campo('cupo'), { min: 1 }),
   };
+}
+
+// Los filtros son opcionales: un parámetro vacío (`?texto=`) cuenta como ausente.
+function optional(value, parse) {
+  return value === undefined || value === '' ? undefined : parse(value);
+}
+
+export async function list(req, res) {
+  const { texto, categoriaId, precioMin, precioMax, orden } = req.query;
+  const filtros = {
+    texto: optional(texto, (v) => {
+      // `?texto=a&texto=b` llega como array.
+      if (typeof v !== 'string') throw new ValidationError('El campo texto tiene que ser un solo texto');
+      return v.trim() || undefined;
+    }),
+    categoriaId: optional(categoriaId, (v) => requireId(v, 'categoriaId')),
+    precioMin: optional(precioMin, (v) => requireNumber(v, 'precioMin', { min: 0 })),
+    precioMax: optional(precioMax, (v) => requireNumber(v, 'precioMax', { min: 0 })),
+    orden: optional(orden, (v) => {
+      if (!ORDENES.includes(v)) throw new ValidationError(`El campo orden tiene que ser uno de: ${ORDENES.join(', ')}`);
+      return v;
+    }),
+  };
+  if (filtros.precioMin !== undefined && filtros.precioMax !== undefined && filtros.precioMin > filtros.precioMax) {
+    throw new ValidationError('El campo precioMin no puede ser mayor que precioMax');
+  }
+
+  res.status(200).json(buscarEventos(filtros));
 }
 
 export async function create(req, res) {

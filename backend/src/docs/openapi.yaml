@@ -70,6 +70,64 @@ paths:
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /eventos:
+    get:
+      tags: [Eventos]
+      summary: Buscar eventos
+      description: >-
+        Solo muestra eventos que todavía no se realizaron. Todos los filtros son
+        opcionales. Orden: fecha y precio de menor a mayor; puntaje de mayor a
+        menor, con los organizadores sin reseñas al final. Si empatan, desempata
+        la fecha.
+      operationId: listEventos
+      parameters:
+        - name: texto
+          in: query
+          description: Se busca en el nombre, la descripción y el lugar, sin distinguir mayúsculas ni tildes
+          schema:
+            type: string
+          example: rock
+        - name: categoriaId
+          in: query
+          schema:
+            type: integer
+          example: 1
+        - name: precioMin
+          in: query
+          description: Algún tipo de entrada tiene que costar al menos esto
+          schema:
+            type: number
+            minimum: 0
+        - name: precioMax
+          in: query
+          description: Algún tipo de entrada tiene que costar como mucho esto
+          schema:
+            type: number
+            minimum: 0
+        - name: orden
+          in: query
+          schema:
+            type: string
+            enum: [fecha, precio, puntaje]
+            default: fecha
+      responses:
+        '200':
+          description: Los eventos que cumplen los filtros (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoResumen'
+        '400':
+          description: Un filtro tiene un formato inválido o precioMin es mayor que precioMax
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'El campo orden tiene que ser uno de: fecha, precio, puntaje'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
     post:
       tags: [Eventos]
       summary: Crear un evento con sus tipos de entrada
@@ -267,6 +325,61 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TipoEntrada'
+    EventoResumen:
+      type: object
+      description: Un evento en el catálogo, sin los tipos de entrada
+      properties:
+        id:
+          type: integer
+          example: 2
+        nombre:
+          type: string
+          example: La casa de Bernarda Alba
+        lugar:
+          type: string
+          example: Teatro San Martín, Av. Corrientes 1530, CABA
+        fecha:
+          type: string
+          format: date-time
+          example: '2026-11-07T23:00:00.000Z'
+        imagen:
+          type: string
+          nullable: true
+          description: Primera URL de multimedia, o null si no tiene
+          example: https://picsum.photos/seed/bernarda/800/400
+        categoria:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 2
+            nombre:
+              type: string
+              example: Teatro
+        organizador:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nombre:
+              type: string
+              example: Lucía
+            apellido:
+              type: string
+              example: Fernández
+            puntaje:
+              type: number
+              nullable: true
+              description: Calculado. Promedio de las reseñas de sus eventos; null si no tiene
+              example: 4.5
+            cantidadResenias:
+              type: integer
+              example: 2
+        precioDesde:
+          type: number
+          description: Calculado. Precio de su entrada más barata
+          example: 20000
     NuevoEvento:
       type: object
       required: [nombre, descripcion, lugar, categoriaId, fecha, tiposEntrada]

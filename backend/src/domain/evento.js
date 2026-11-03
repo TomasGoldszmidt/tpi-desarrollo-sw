@@ -1,6 +1,9 @@
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
+import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
+import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
 import { calcularDisponibles } from './tipoEntrada.js';
+import { calcularPuntajes } from './resenia.js';
 import { BusinessRuleError, ValidationError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Evento} Evento */
@@ -62,4 +65,48 @@ export function detalleEvento(evento, compras, categoria, organizador) {
     organizador: { id: organizador.id, nombre: organizador.nombre, apellido: organizador.apellido },
     tiposEntrada: evento.tiposEntrada.map((tipo) => ({ ...tipo, disponibles: calcularDisponibles(tipo, compras) })),
   };
+}
+
+// Precio con el que se ordena y se muestra un evento: su entrada más barata.
+/** @param {Evento} evento @returns {number} */
+export function precioDesde(evento) {
+  return Math.min(...evento.tiposEntrada.map(({ precio }) => precio));
+}
+
+// Casos de uso 3 y 11. Dirección fija: fecha y precio de menor a mayor, puntaje de mayor
+// a menor con los organizadores sin reseñas al final. Si empatan, desempata la fecha.
+const porFecha = (a, b) => a.fecha - b.fecha;
+const COMPARADORES = {
+  fecha: porFecha,
+  precio: (a, b) => a.precioDesde - b.precioDesde || porFecha(a, b),
+  puntaje: (a, b) => (b.organizador.puntaje ?? -1) - (a.organizador.puntaje ?? -1) || porFecha(a, b),
+};
+export const ORDENES = Object.freeze(Object.keys(COMPARADORES));
+
+// Forma de cada evento en el catálogo: lo que necesita la tarjeta, sin los tipos de entrada.
+function resumenEvento(evento, categoria, organizador, puntajes) {
+  const { puntaje = null, cantidadResenias = 0 } = puntajes.get(organizador.id) ?? {};
+  return {
+    id: evento.id,
+    nombre: evento.nombre,
+    lugar: evento.lugar,
+    fecha: evento.fecha,
+    imagen: evento.multimedia[0] ?? null,
+    categoria: { id: categoria.id, nombre: categoria.nombre },
+    organizador: { id: organizador.id, nombre: organizador.nombre, apellido: organizador.apellido, puntaje, cantidadResenias },
+    precioDesde: precioDesde(evento),
+  };
+}
+
+// Los filtros llegan validados por el controlador; todos son opcionales.
+// Los eventos que ya se realizaron no se muestran: el catálogo es para comprar.
+export function buscarEventos({ texto, categoriaId, precioMin, precioMax, orden = 'fecha' } = {}, ahora = new Date()) {
+  const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
+  const categorias = new Map(categoriaRepository.findAll().map((c) => [c.id, c]));
+  const usuarios = new Map(usuarioRepository.findAll().map((u) => [u.id, u]));
+
+  return eventoRepository.search({ texto, categoriaId })
+    .filter((evento) => !yaSeRealizo(evento, ahora) && tuPrecioEstaEntre(evento, precioMin, precioMax))
+    .map((evento) => resumenEvento(evento, categorias.get(evento.categoriaId), usuarios.get(evento.organizadorId), puntajes))
+    .sort(COMPARADORES[orden]);
 }

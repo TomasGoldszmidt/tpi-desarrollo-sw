@@ -47,8 +47,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | organizador de eventos | Se guarda en Evento (`organizadorId`) | Evita mantener la relación en los dos lados |
 | reputación del organizador | Se calcula, no se persiste | Es el promedio de sus reseñas; guardarla aparte podría desincronizarse |
 
-**Repositorio** (`backend/src/persistence/repositorios/usuarioRepository.js`):
-- `crear`
+**Repositorio** (`backend/src/persistence/repositories/usuarioRepository.js`):
+- `create`
 - `findById`
 - `findAll`, para la selección de usuario activo
 - `addFavorito` y `removeFavorito`, que no generan duplicados
@@ -83,10 +83,10 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 |---|---|---|
 | Evento → Categoria | Referencia (`categoriaId` en el evento) | Compartida por muchos eventos; filtrar es comparar ids |
 
-**Repositorio** (`backend/src/persistence/repositorios/categoriaRepository.js`):
+**Repositorio** (`backend/src/persistence/repositories/categoriaRepository.js`):
 - `findAll`, para los filtros del catálogo y el selector
 - `findById`, para validar el `categoriaId` al crear un evento
-- `crear`, que solo usa el seed
+- `create`, que solo usa el seed
 
 **Decisiones aprobadas:**
 - Solo lectura para la API: ningún caso de uso pide crear, editar ni borrar categorías.
@@ -130,8 +130,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | precio para ordenar | Se calcula | Mínimo de `tiposEntrada[].precio` |
 | puntaje del organizador | Se calcula | Decidido en Usuario: promedio de sus reseñas |
 
-**Repositorio** (`backend/src/persistence/repositorios/eventoRepository.js`):
-- `crear`, que asigna los ids locales de los tipos de entrada y convierte la fecha a `Date`
+**Repositorio** (`backend/src/persistence/repositories/eventoRepository.js`):
+- `create`, que asigna los ids locales de los tipos de entrada y convierte la fecha a `Date`
 - `findById` y `findAll`
 - `search({ texto, categoriaId })`, ambos opcionales. El texto se busca en el nombre, la descripción y el lugar, sin distinguir mayúsculas ni tildes
 - `findByOrganizador`, para las ventas del organizador y sus reseñas
@@ -188,8 +188,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | mensajes → Mensaje[] | Embebe | El chat es de cada compra y solo se lee en su detalle |
 | total | Se guarda | Es lo que se pagó y lo que se reembolsa; no debe cambiar si cambia el precio |
 
-**Repositorio** (`backend/src/persistence/repositorios/compraRepository.js`):
-- `crear`, que arranca en `PENDIENTE` con el primer registro del historial y sin mensajes
+**Repositorio** (`backend/src/persistence/repositories/compraRepository.js`):
+- `create`, que arranca en `PENDIENTE` con el primer registro del historial y sin mensajes
 - `findById`, para el detalle, el chat y las acciones
 - `findByComprador`, para "Mis compras" y para comprobar la compra UTILIZADA antes de reseñar
 - `findByEvento`, para las ventas del organizador y las entradas disponibles
@@ -227,8 +227,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | organizador | No se guarda: se llega por `evento.organizadorId` | Evita duplicar un dato de Evento |
 | puntaje del organizador | Se calcula | Decidido en Usuario: promedio de las reseñas de sus eventos |
 
-**Repositorio** (`backend/src/persistence/repositorios/reseniaRepository.js`):
-- `crear`
+**Repositorio** (`backend/src/persistence/repositories/reseniaRepository.js`):
+- `create`
 - `findByEventos`, para las reseñas de un organizador a partir de `eventoRepository.findByOrganizador`
 - `findByCompradorAndEvento`, para no reseñar dos veces el mismo evento
 - `findAll`, para calcular de una vez el puntaje de todos los organizadores

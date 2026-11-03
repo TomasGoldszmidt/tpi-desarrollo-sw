@@ -20,7 +20,7 @@
 - [x] Lógica de dominio: cupo disponible, `hayCupoPara`, `tuPrecioEstaEntre`, transiciones de estado con historial
 - [x] Endpoints de usuarios y categorías
 - [x] Endpoints de eventos: crear con tipos de entrada, detalle
-- [ ] Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
+- [x] Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
 - [ ] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
 - [ ] Cancelación / reembolso con sus reglas
 - [ ] Listado de compras del comprador (estado + días restantes)
