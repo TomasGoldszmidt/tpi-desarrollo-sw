@@ -401,3 +401,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - En un test la IA dejó una línea con un comentario que dudaba de sí mismo ("¿18:00…? no"). La reescribió sola antes de commitear.
   - Se agregó un endpoint que no estaba en `TAREAS.md` (`GET /compras/:id`). Quedó propuesto y aprobado en el análisis, no se metió en silencio.
 - **Aprendizaje:** pedirle a la IA que mire qué van a necesitar las pantallas de la sección 3 evita volver al backend más adelante. Igual conviene que lo proponga como duda y no lo agregue por su cuenta.
+
+### 2026-11-02 · Ventas por evento para el organizador
+- **Tarea:** Listado de compras por evento para el organizador (estado + disponibles por tipo)
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `GET /eventos/:id/compras` (caso 2), solo para el organizador. La IA notó que el organizador no tenía forma de encontrar sus eventos (la búsqueda oculta los pasados y es de todos) y propuso `GET /eventos/organizados`. Tres dudas aprobadas: las disponibles por tipo salen del detalle del evento que ya existe (dos pedidos, el listado sigue siendo un array), sumar `organizados`, y no agregar totales por tipo.
+  - Con el ok, agregó a `domain/evento.js` `verificarOrganizador` (403) y `eventosOrganizados`. Para no repetir código, extrajo un helper `resumenes` que ahora usan la búsqueda y los organizados. Movió el orden "más reciente primero" a `domain/compra.js` (`masRecientesPrimero`), así lo comparten "Mis compras" y las ventas.
+  - En el router, `/organizados` quedó antes de `/:id` para que Express no lo tome como un id. 3 tests nuevos: la suite quedó en 41.
+  - `/probar-caso-de-uso` probó con `curl` los eventos de Lucía (con el acústico pasado), de Martín y de Sofía (vacío); las ventas del rock (CONFIRMADA y REEMBOLSADA), del acústico pasado y del partido (CANCELADA); y los errores 403 (Martín pidiendo las ventas del rock), 404, 400 y 401.
+- **Bien:** la IA pensó en cómo iba a llegar el organizador a la pantalla de ventas, no solo en el endpoint que pedía la tarea.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - Agregó otro endpoint que no estaba en `TAREAS.md` (`/eventos/organizados`), propuesto y aprobado en el análisis.
+- **Aprendizaje:** antes de dar por cerrada una tarea conviene preguntarse cómo llega el usuario a usarla desde la app. Así salió a la luz que faltaba `organizados`.

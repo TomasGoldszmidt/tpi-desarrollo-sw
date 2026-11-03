@@ -1,7 +1,7 @@
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer } from '../domain/compra.js';
+import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
 import { ForbiddenError, NotFoundError } from '../http/errors.js';
 import { requireId, requireInteger } from '../http/validation.js';
@@ -34,9 +34,7 @@ function changeEstado(destino) {
 
 // Caso de uso 1: las compras del usuario activo como comprador, de la más reciente a la más vieja.
 export async function list(req, res) {
-  const fechaDeCompra = (compra) => compra.historial[0].fechaHora;
-  const compras = compraRepository.findByComprador(req.usuario.id)
-    .sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a));
+  const compras = masRecientesPrimero(compraRepository.findByComprador(req.usuario.id));
   res.status(200).json(compras.map(toDetalle));
 }
 

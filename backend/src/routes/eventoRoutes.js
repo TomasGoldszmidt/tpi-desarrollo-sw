@@ -6,6 +6,9 @@ const router = Router();
 
 router.get('/', eventoController.list);
 router.post('/', requireUsuario, eventoController.create);
+// Antes de /:id, para que "organizados" no se tome como un id.
+router.get('/organizados', requireUsuario, eventoController.listOrganizados);
 router.get('/:id', eventoController.getById);
+router.get('/:id/compras', requireUsuario, eventoController.listCompras);
 
 export default router;

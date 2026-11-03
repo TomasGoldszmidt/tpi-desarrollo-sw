@@ -4,7 +4,7 @@ import * as usuarioRepository from '../persistence/repositories/usuarioRepositor
 import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
 import { calcularDisponibles } from './tipoEntrada.js';
 import { calcularPuntajes } from './resenia.js';
-import { BusinessRuleError, ValidationError } from '../http/errors.js';
+import { BusinessRuleError, ForbiddenError, ValidationError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Evento} Evento */
 /** @typedef {import('../persistence/schemas.js').Categoria} Categoria */
@@ -98,15 +98,35 @@ function resumenEvento(evento, categoria, organizador, puntajes) {
   };
 }
 
-// Los filtros llegan validados por el controlador; todos son opcionales.
-// Los eventos que ya se realizaron no se muestran: el catálogo es para comprar.
-export function buscarEventos({ texto, categoriaId, precioMin, precioMax, orden = 'fecha' } = {}, ahora = new Date()) {
+// Arma los resúmenes de una lista de eventos, buscando de una vez las categorías,
+// los organizadores y los puntajes.
+function resumenes(eventos) {
   const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
   const categorias = new Map(categoriaRepository.findAll().map((c) => [c.id, c]));
   const usuarios = new Map(usuarioRepository.findAll().map((u) => [u.id, u]));
+  return eventos.map((evento) =>
+    resumenEvento(evento, categorias.get(evento.categoriaId), usuarios.get(evento.organizadorId), puntajes));
+}
 
-  return eventoRepository.search({ texto, categoriaId })
-    .filter((evento) => !yaSeRealizo(evento, ahora) && tuPrecioEstaEntre(evento, precioMin, precioMax))
-    .map((evento) => resumenEvento(evento, categorias.get(evento.categoriaId), usuarios.get(evento.organizadorId), puntajes))
-    .sort(COMPARADORES[orden]);
+// Los filtros llegan validados por el controlador; todos son opcionales.
+// Los eventos que ya se realizaron no se muestran: el catálogo es para comprar.
+export function buscarEventos({ texto, categoriaId, precioMin, precioMax, orden = 'fecha' } = {}, ahora = new Date()) {
+  const eventos = eventoRepository.search({ texto, categoriaId })
+    .filter((evento) => !yaSeRealizo(evento, ahora) && tuPrecioEstaEntre(evento, precioMin, precioMax));
+  return resumenes(eventos).sort(COMPARADORES[orden]);
+}
+
+// Los eventos que organiza el usuario, incluidos los pasados: los necesita para ver
+// las ventas y marcar entradas como utilizadas.
+/** @param {Usuario} organizador */
+export function eventosOrganizados(organizador) {
+  return resumenes(eventoRepository.findByOrganizador(organizador.id)).sort(porFecha);
+}
+
+// Caso de uso 2: las ventas de un evento solo las ve su organizador.
+/** @param {Evento} evento @param {Usuario} usuario */
+export function verificarOrganizador(evento, usuario) {
+  if (evento.organizadorId !== usuario.id) {
+    throw new ForbiddenError('Solo el organizador puede ver las ventas de este evento');
+  }
 }

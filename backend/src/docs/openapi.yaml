@@ -173,6 +173,29 @@ paths:
                 error: La fecha del evento tiene que ser futura
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /eventos/organizados:
+    get:
+      tags: [Eventos]
+      summary: Listar los eventos que organizo
+      description: >-
+        Los eventos del usuario activo como organizador, incluidos los que ya se
+        realizaron, ordenados por fecha. Sirve para entrar a las ventas de cada uno.
+      operationId: listEventosOrganizados
+      security:
+        - usuarioActivo: []
+      responses:
+        '200':
+          description: Los eventos que organiza (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoResumen'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
   /eventos/{id}:
     get:
       tags: [Eventos]
@@ -201,6 +224,55 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: El campo id tiene que ser un id válido
+        '404':
+          description: No existe el evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el evento 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /eventos/{id}/compras:
+    get:
+      tags: [Eventos]
+      summary: Ver las ventas de un evento
+      description: >-
+        Todas las compras del evento, en cualquier estado, de la más reciente a la
+        más vieja. Solo para el organizador. Las entradas disponibles por tipo
+        salen de GET /eventos/{id}.
+      operationId: listComprasEvento
+      security:
+        - usuarioActivo: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Las compras del evento (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Solo el organizador puede ver las ventas de este evento
         '404':
           description: No existe el evento
           content:

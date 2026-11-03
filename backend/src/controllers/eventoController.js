@@ -2,7 +2,8 @@ import * as eventoRepository from '../persistence/repositories/eventoRepository.
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { crearEvento, detalleEvento, buscarEventos, ORDENES } from '../domain/evento.js';
+import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
+import { detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString,
@@ -80,4 +81,20 @@ export async function getById(req, res) {
   const evento = eventoRepository.findById(id);
   if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
   res.status(200).json(toDetalle(evento));
+}
+
+export async function listOrganizados(req, res) {
+  res.status(200).json(eventosOrganizados(req.usuario));
+}
+
+// Caso de uso 2. Las disponibles por tipo salen de GET /eventos/:id.
+export async function listCompras(req, res) {
+  const id = requireId(req.params.id);
+  const evento = eventoRepository.findById(id);
+  if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
+  verificarOrganizador(evento, req.usuario);
+
+  const compras = masRecientesPrimero(compraRepository.findByEvento(evento.id));
+  res.status(200).json(compras.map((compra) =>
+    detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId))));
 }

@@ -3,11 +3,11 @@ import assert from 'node:assert/strict';
 import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
-import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde } from '../src/domain/evento.js';
+import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador } from '../src/domain/evento.js';
 import { calcularPuntajes } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
-import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer } from '../src/domain/compra.js';
+import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero } from '../src/domain/compra.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
 import { BusinessRuleError, ForbiddenError } from '../src/http/errors.js';
 
@@ -324,5 +324,30 @@ describe('días restantes y quién ve una compra', () => {
 
   it('detalleCompra incluye diasRestantes', () => {
     assert.equal(detalleCompra(sofiaRock, rock, seed.usuarios.sofia).diasRestantes, 20);
+  });
+});
+
+describe('ventas del organizador', () => {
+  const { lucia, martin } = seed.usuarios;
+  const { rock, obra, festival, acustico } = seed.eventos;
+  const delSeed = new Set(Object.values(seed.eventos).map((e) => e.id));
+
+  it('eventosOrganizados trae solo los suyos, con los pasados, por fecha', () => {
+    const ids = eventosOrganizados(lucia).map((e) => e.id).filter((id) => delSeed.has(id));
+    assert.deepEqual(ids, [acustico.id, obra.id, rock.id, festival.id]);
+    assert.equal(eventosOrganizados(lucia).every((e) => e.organizador.id === lucia.id), true);
+  });
+
+  it('solo el organizador ve las ventas de su evento', () => {
+    assert.doesNotThrow(() => verificarOrganizador(rock, lucia));
+    assert.throws(() => verificarOrganizador(rock, martin),
+      (err) => err instanceof ForbiddenError && err.message === 'Solo el organizador puede ver las ventas de este evento');
+  });
+
+  it('masRecientesPrimero ordena por la fecha de compra, sin modificar la lista', () => {
+    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    const compras = [juanRockReembolsada, sofiaRock]; // −8 y −5 días
+    assert.deepEqual(masRecientesPrimero(compras).map((c) => c.id), [sofiaRock.id, juanRockReembolsada.id]);
+    assert.deepEqual(compras.map((c) => c.id), [juanRockReembolsada.id, sofiaRock.id]);
   });
 });

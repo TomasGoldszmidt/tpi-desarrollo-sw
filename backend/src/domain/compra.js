@@ -126,6 +126,13 @@ export function diasRestantes(compra, evento, ahora = new Date()) {
   return Math.round((inicioDelDia(evento.fecha) - inicioDelDia(ahora)) / UN_DIA);
 }
 
+// Orden de los listados de compras (las del comprador y las ventas del organizador).
+/** @param {Compra[]} compras @returns {Compra[]} */
+export function masRecientesPrimero(compras) {
+  const fechaDeCompra = (compra) => compra.historial[0].fechaHora;
+  return [...compras].sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a));
+}
+
 // La compra la ven el comprador y el organizador del evento, que también usa su chat.
 /** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {boolean} */
 export function puedeVer(compra, evento, usuario) {

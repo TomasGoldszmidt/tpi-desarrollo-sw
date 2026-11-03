@@ -24,7 +24,7 @@
 - [x] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
 - [x] Cancelación / reembolso con sus reglas
 - [x] Listado de compras del comprador (estado + días restantes)
-- [ ] Listado de compras por evento para el organizador (estado + disponibles por tipo)
+- [x] Listado de compras por evento para el organizador (estado + disponibles por tipo)
 - [ ] Chat de la compra: enviar y listar mensajes
 - [ ] Reseñas: crear (solo compra utilizada) y listar por organizador
 - [ ] Manejo de errores y validaciones
