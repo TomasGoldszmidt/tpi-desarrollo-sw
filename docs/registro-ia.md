@@ -354,3 +354,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El `sed` del renombre al inglés no había corregido todo `docs/persistencia.md`. Lo encontró recién ahora, al releerlo para esta tarea.
   - Los tests de dominio comparten el estado en memoria (un test crea un evento que aparece en la búsqueda), así que se comparan solo los ids del seed.
 - **Aprendizaje:** un renombre automático (`sed`) hay que revisarlo con un `grep` de los nombres viejos en todos los archivos, no solo en el código. Si no, queda documentación desactualizada.
+
+### 2026-11-02 · Endpoints de compras: crear, pagar y marcar utilizada
+- **Tarea:** Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `POST /compras` (caso 12), `POST /compras/:id/pago` y `POST /compras/:id/utilizacion`, con una respuesta común. Cuatro dudas aprobadas con la recomendación: acciones como sustantivos en lugar de `PATCH` con el estado, el organizador no puede comprar en su propio evento, los días restantes quedan para "Mis compras", y un evento o tipo inexistente en el body da 400.
+  - Con el ok, agregó a `domain/compra.js` `comprar` (evento y tipo existentes, no organizador, evento no realizado, `hayCupoPara`, total calculado) y `detalleCompra` (resúmenes de evento, tipo de entrada y comprador). Pago y utilización reusan `actualizarEstado`, que ya existía.
+  - Creó `compraController` (`create`, `pay`, `markUtilizada`, los dos últimos con un mismo helper) y `compraRoutes`, con `requireUsuario` para todo `/compras`. 5 tests nuevos: la suite quedó en 33.
+  - `/swagger` agregó el tag `Compras`, los tres endpoints, los schemas `CompraDetalle`, `NuevaCompra`, `CambioEstadoCompra` y `Mensaje`, y respuestas y parámetros reusables (`IdInvalido`, `CompraNoEncontrada`, `CompraId`).
+  - `/probar-caso-de-uso` probó con `curl` unos 20 casos: comprar y ver que la Platea del rock baja de 200 a 195, pagar, pagar dos veces, utilizar antes del día, utilizar la compra CONFIRMADA del stand-up pasado como Martín, permisos 403, 404, 400 y los 409 de cupo, evento pasado y organizador comprando.
+- **Bien:** como las transiciones ya estaban en el dominio con sus tests, pagar y utilizar fueron dos líneas en el controlador.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - Como todo `/compras` pide usuario activo, una ruta inexistente bajo `/compras` responde 401 y no 404. Es aceptable.
+  - Las compras de prueba (ids 10 y 11) y la compra 9, que quedó UTILIZADA, siguen en memoria hasta reiniciar el backend.
+- **Aprendizaje:** haber hecho primero la lógica de dominio con tests separados de los endpoints hizo que esta tarea fuera casi solo conectar piezas. El orden de `TAREAS.md` funcionó.

@@ -21,7 +21,7 @@
 - [x] Endpoints de usuarios y categorías
 - [x] Endpoints de eventos: crear con tipos de entrada, detalle
 - [x] Búsqueda de eventos: texto, categoría y orden (precio, fecha, puntaje del organizador)
-- [ ] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
+- [x] Endpoints de compras: crear (validando cupo), pagar, marcar utilizada
 - [ ] Cancelación / reembolso con sus reglas
 - [ ] Listado de compras del comprador (estado + días restantes)
 - [ ] Listado de compras por evento para el organizador (estado + disponibles por tipo)

@@ -7,7 +7,7 @@ import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDes
 import { calcularPuntajes } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
-import { actualizarEstado, estadoAlCancelar } from '../src/domain/compra.js';
+import { actualizarEstado, estadoAlCancelar, comprar, detalleCompra } from '../src/domain/compra.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
 import { BusinessRuleError, ForbiddenError } from '../src/http/errors.js';
 
@@ -241,5 +241,50 @@ describe('búsqueda de eventos', () => {
     assert.equal(primero.precioDesde, 20000);
     assert.equal(primero.imagen, 'https://picsum.photos/seed/bernarda/800/400');
     assert.equal(primero.tiposEntrada, undefined);
+  });
+});
+
+describe('comprar', () => {
+  const { sofia, juan, lucia } = seed.usuarios;
+  const { rock, festival, acustico } = seed.eventos;
+
+  function rechaza(fn, status, mensaje) {
+    assert.throws(fn, (err) => err.status === status && err.message === mensaje);
+  }
+
+  it('crea la compra PENDIENTE con el total calculado y ocupa cupo', () => {
+    const platea = tipo(rock, 'Platea');
+    const antes = calcularDisponibles(platea, compraRepository.findByEvento(rock.id));
+    const compra = comprar({ eventoId: rock.id, tipoEntradaId: platea.id, cantidad: 2 }, sofia);
+    assert.equal(compra.estado, EstadoCompra.PENDIENTE);
+    assert.equal(compra.compradorId, sofia.id);
+    assert.equal(compra.total, 160000);
+    assert.equal(calcularDisponibles(platea, compraRepository.findByEvento(rock.id)), antes - 2);
+  });
+
+  it('rechaza si no hay cupo, diciendo cuántas quedan', () => {
+    rechaza(() => comprar({ eventoId: festival.id, tipoEntradaId: tipo(festival, 'Backstage').id, cantidad: 1 }, sofia),
+      409, 'No hay cupo suficiente: quedan 0 entradas');
+  });
+
+  it('rechaza un evento o tipo de entrada inexistente', () => {
+    rechaza(() => comprar({ eventoId: 99, tipoEntradaId: 1, cantidad: 1 }, sofia), 400, 'No existe el evento 99');
+    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 9, cantidad: 1 }, sofia), 400, 'El evento no tiene el tipo de entrada 9');
+  });
+
+  it('rechaza un evento pasado y que el organizador compre en su evento', () => {
+    rechaza(() => comprar({ eventoId: acustico.id, tipoEntradaId: 1, cantidad: 1 }, juan), 409, 'El evento ya se realizó');
+    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 1, cantidad: 1 }, lucia), 409, 'No podés comprar entradas de un evento que organizás');
+  });
+
+  it('detalleCompra reemplaza los ids por resúmenes', () => {
+    const detalle = detalleCompra(seed.compras.sofiaRock, rock, sofia);
+    assert.equal(detalle.eventoId, undefined);
+    assert.equal(detalle.compradorId, undefined);
+    assert.equal(detalle.tipoEntradaId, undefined);
+    assert.deepEqual(detalle.evento, { id: rock.id, nombre: rock.nombre, fecha: rock.fecha, lugar: rock.lugar, organizadorId: lucia.id });
+    assert.deepEqual(detalle.tipoEntrada, { id: 1, nombre: 'Campo', precio: 45000 });
+    assert.deepEqual(detalle.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
+    assert.equal(detalle.mensajes.length, 2);
   });
 });

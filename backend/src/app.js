@@ -7,6 +7,7 @@ import { notFound, errorHandler } from './http/middlewares/errorHandler.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import eventoRoutes from './routes/eventoRoutes.js';
+import compraRoutes from './routes/compraRoutes.js';
 
 const openapi = YAML.parse(readFileSync(new URL('./docs/openapi.yaml', import.meta.url), 'utf8'));
 
@@ -26,6 +27,7 @@ export function createApp() {
   app.use('/usuarios', usuarioRoutes);
   app.use('/categorias', categoriaRoutes);
   app.use('/eventos', eventoRoutes);
+  app.use('/compras', compraRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

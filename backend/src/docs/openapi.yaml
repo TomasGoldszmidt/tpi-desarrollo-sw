@@ -17,6 +17,8 @@ tags:
     description: Categorías para explorar y clasificar los eventos
   - name: Eventos
     description: Eventos con sus tipos de entrada
+  - name: Compras
+    description: Compras de entradas y sus cambios de estado
 paths:
   /health:
     get:
@@ -209,7 +211,146 @@ paths:
                 error: No existe el evento 99
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /compras:
+    post:
+      tags: [Compras]
+      summary: Comprar entradas
+      description: >-
+        El comprador es el usuario activo. La compra arranca PENDIENTE y ya ocupa
+        cupo. El total lo calcula el servidor (precio × cantidad). No se puede
+        comprar en un evento pasado, sin cupo suficiente, ni en un evento que el
+        usuario organiza.
+      operationId: createCompra
+      security:
+        - usuarioActivo: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NuevaCompra'
+      responses:
+        '201':
+          description: La compra creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          description: Falta un campo o es inválido, o no existe el evento o el tipo de entrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El evento no tiene el tipo de entrada 9
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '409':
+          description: El evento ya se realizó, no hay cupo suficiente o el usuario organiza el evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'No hay cupo suficiente: quedan 0 entradas'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}/pago:
+    post:
+      tags: [Compras]
+      summary: Pagar una compra
+      description: >-
+        Pago simulado: PENDIENTE → CONFIRMADA. Solo lo puede hacer el comprador y
+        antes de que el evento se realice.
+      operationId: payCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '200':
+          description: La compra confirmada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No podés pasar esta compra a CONFIRMADA
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '409':
+          description: La compra no está PENDIENTE o el evento ya se realizó
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No se puede pasar de CONFIRMADA a CONFIRMADA
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}/utilizacion:
+    post:
+      tags: [Compras]
+      summary: Marcar una compra como utilizada
+      description: >-
+        CONFIRMADA → UTILIZADA. Solo lo puede hacer el organizador del evento,
+        desde las 00:00 del día del evento. Habilita al comprador a reseñar.
+      operationId: markUtilizadaCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '200':
+          description: La compra utilizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el organizador del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No podés pasar esta compra a UTILIZADA
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '409':
+          description: La compra no está CONFIRMADA o todavía no es el día del evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Todavía no es el día del evento
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
+  parameters:
+    CompraId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+      example: 1
   securitySchemes:
     usuarioActivo:
       type: apiKey
@@ -380,6 +521,113 @@ components:
           type: number
           description: Calculado. Precio de su entrada más barata
           example: 20000
+    CambioEstadoCompra:
+      type: object
+      properties:
+        estado:
+          type: string
+          enum: [PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA]
+        usuarioId:
+          type: integer
+          description: Quién hizo el cambio
+        fechaHora:
+          type: string
+          format: date-time
+    Mensaje:
+      type: object
+      properties:
+        usuarioId:
+          type: integer
+        mensaje:
+          type: string
+        enviado:
+          type: string
+          format: date-time
+    CompraDetalle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 10
+        evento:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            nombre:
+              type: string
+              example: Noche de Rock Nacional
+            fecha:
+              type: string
+              format: date-time
+            lugar:
+              type: string
+              example: Estadio Obras, Av. del Libertador 7395, CABA
+            organizadorId:
+              type: integer
+              example: 1
+        tipoEntrada:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 2
+            nombre:
+              type: string
+              example: Platea
+            precio:
+              type: number
+              example: 80000
+        comprador:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+            nombre:
+              type: string
+              example: Sofía
+            apellido:
+              type: string
+              example: Pérez
+        cantidad:
+          type: integer
+          example: 2
+        total:
+          type: number
+          description: Precio al momento de comprar × cantidad
+          example: 160000
+        estado:
+          type: string
+          enum: [PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA]
+          example: PENDIENTE
+        historial:
+          type: array
+          description: Cambios de estado en orden cronológico
+          items:
+            $ref: '#/components/schemas/CambioEstadoCompra'
+        mensajes:
+          type: array
+          description: Chat de la compra
+          items:
+            $ref: '#/components/schemas/Mensaje'
+    NuevaCompra:
+      type: object
+      required: [eventoId, tipoEntradaId, cantidad]
+      properties:
+        eventoId:
+          type: integer
+        tipoEntradaId:
+          type: integer
+          description: Id del tipo de entrada dentro del evento (1, 2, 3…)
+        cantidad:
+          type: integer
+          minimum: 1
+      example:
+        eventoId: 1
+        tipoEntradaId: 2
+        cantidad: 2
     NuevoEvento:
       type: object
       required: [nombre, descripcion, lugar, categoriaId, fecha, tiposEntrada]
@@ -435,6 +683,22 @@ components:
             precio: 5000
             cupo: 30
   responses:
+    IdInvalido:
+      description: El id no es un número válido
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: El campo id tiene que ser un id válido
+    CompraNoEncontrada:
+      description: No existe la compra
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: No existe la compra 99
     SinUsuarioActivo:
       description: Falta el header X-User-Id, es inválido o el usuario no existe
       content:

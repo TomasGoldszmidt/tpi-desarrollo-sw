@@ -1,7 +1,9 @@
 import { EstadoCompra } from './estadoCompra.js';
 import { yaSeRealizo, esElDiaOPosterior } from './evento.js';
+import { calcularDisponibles, hayCupoPara } from './tipoEntrada.js';
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
-import { BusinessRuleError, ForbiddenError } from '../http/errors.js';
+import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
+import { BusinessRuleError, ForbiddenError, ValidationError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
 /** @typedef {import('../persistence/schemas.js').Evento} Evento */
@@ -69,4 +71,55 @@ export function actualizarEstado(compra, evento, nuevoEstado, usuario, ahora = n
   }
 
   return compraRepository.addCambioEstado(compra.id, { estado: nuevoEstado, usuarioId: usuario.id, fechaHora: ahora });
+}
+
+// Caso de uso 12. La compra arranca PENDIENTE y ya ocupa cupo. El total lo calcula el
+// dominio con el precio actual: es lo que se paga y lo que se reembolsa.
+/**
+ * @param {{ eventoId: number, tipoEntradaId: number, cantidad: number }} datos Forma ya validada.
+ * @param {Usuario} comprador @param {Date} [ahora]
+ * @returns {Compra}
+ */
+export function comprar({ eventoId, tipoEntradaId, cantidad }, comprador, ahora = new Date()) {
+  const evento = eventoRepository.findById(eventoId);
+  if (!evento) throw new ValidationError(`No existe el evento ${eventoId}`);
+
+  const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
+  if (!tipoEntrada) throw new ValidationError(`El evento no tiene el tipo de entrada ${tipoEntradaId}`);
+
+  // Si el organizador comprara en su evento, se mezclarían los roles en el chat y en las ventas.
+  if (evento.organizadorId === comprador.id) {
+    throw new BusinessRuleError('No podés comprar entradas de un evento que organizás');
+  }
+  if (yaSeRealizo(evento, ahora)) throw new BusinessRuleError('El evento ya se realizó');
+
+  const compras = compraRepository.findByEvento(evento.id);
+  if (!hayCupoPara(tipoEntrada, compras, cantidad)) {
+    const disponibles = calcularDisponibles(tipoEntrada, compras);
+    throw new BusinessRuleError(`No hay cupo suficiente: quedan ${disponibles} entradas`);
+  }
+
+  return compraRepository.create({
+    compradorId: comprador.id,
+    eventoId: evento.id,
+    tipoEntradaId,
+    cantidad,
+    total: tipoEntrada.precio * cantidad,
+    fechaHora: ahora,
+  });
+}
+
+// Forma de la compra para la app: resúmenes del evento, el tipo de entrada y el comprador
+// en lugar de sus ids. El historial y el chat van tal cual.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} comprador */
+export function detalleCompra(compra, evento, comprador) {
+  const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, ...resto } = compra;
+  const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
+  return {
+    id: compra.id,
+    evento: { id: evento.id, nombre: evento.nombre, fecha: evento.fecha, lugar: evento.lugar, organizadorId: evento.organizadorId },
+    tipoEntrada: { id: tipoEntrada.id, nombre: tipoEntrada.nombre, precio: tipoEntrada.precio },
+    comprador: { id: comprador.id, nombre: comprador.nombre, apellido: comprador.apellido },
+    ...resto,
+  };
 }
