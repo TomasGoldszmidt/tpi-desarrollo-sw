@@ -32,3 +32,9 @@ export function formatPrecio(precio) {
 export function formatPuntaje(puntaje) {
   return String(Math.round(puntaje * 10) / 10).replace('.', ',');
 }
+
+// "2026-10-20T00:00:00.000Z" → "oct 2026" (en hora argentina).
+export function formatMesAnio(iso) {
+  const fecha = new Date(new Date(iso).getTime() + OFFSET_ARGENTINA_MS);
+  return `${MESES[fecha.getUTCMonth()]} ${fecha.getUTCFullYear()}`;
+}

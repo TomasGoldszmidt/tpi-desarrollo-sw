@@ -523,3 +523,22 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Metro no tomaba los cambios: Expo Go seguía conectado a una sesión vieja. La IA se dio cuenta de que la prueba de Reintentar de la subtarea anterior había corrido el código viejo, lo reconoció y la repitió acá. Dejó anotado en `probar-caso-de-uso` cómo verificar que la app corre el código nuevo.
   - Tocar un evento todavía no lleva a ningún lado: el detalle es la subtarea siguiente.
 - **Aprendizaje:** una prueba solo vale si se sabe qué versión del código se está probando. La IA dio por buena una prueba que en realidad corrió código viejo, y solo lo descubrió porque una pantalla nueva no aparecía. Conviene verificar que el bundle se haya recargado antes de dar algo por probado.
+
+### 2026-11-03 · Detalle de evento y reseñas del organizador
+- **Tarea:** Pantalla de detalle de evento con reseñas del organizador
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí". Sobre el boceto: "no entendi los bocetos, cuando aparece cada pantalla", y después "no deberia mostrar informacion del codigo de la app" y la propuesta de "que aparezca unicamente el organizador y que me deje ir a ver sus resenas [...] esa pantalla se puede reutilizar". Luego "Aprobado, en el back" y "Aprobado, los dos".
+- **Resultado:**
+  - El primer boceto mostraba la misma pantalla en tres columnas (arriba, scrolleada y otro evento) y no se entendía. Además tenía dibujada dentro del celular una nota técnica ("si el evento no existe...").
+  - Con mi propuesta, la IA verificó contra el caso 10 ("que las reseñas se visualicen en los Eventos de cada organizador"). Propuso una versión intermedia: en el detalle, la tarjeta del organizador con su puntaje, una reseña de muestra y "Ver las N reseñas", y una pantalla aparte y reutilizable con todas las reseñas. Rehizo el boceto como un solo celular largo, con las notas afuera.
+  - El detalle no traía el puntaje del organizador. En lugar de calcularlo en la app, con `/nuevo-endpoint` se agregó `organizador.puntaje` y `cantidadResenias` a `GET /eventos/:id` y un endpoint nuevo `GET /usuarios/:id` (el usuario con su puntaje), los dos con `puntajeDe` en el dominio, que reusa `calcularPuntajes`. 2 tests nuevos (suite en 53), swagger actualizado y probado con curl: 200, 404, 400 y 405.
+  - En la app: `eventos/[id].js` (galería deslizable, tipos de entrada con disponibles o "Agotado", la tarjeta del organizador y el botón Comprar fijo abajo), `usuarios/[id]/resenias.js` y los componentes `Estrellas` y `ReseniaItem`.
+  - Prueba en el emulador: el Festival con las dos imágenes, Backstage agotado, la reseña de muestra de Juan, las 2 reseñas de Lucía con el promedio 4,5, el partido de Martín sin reseñas y sin enlace, y "No existe el evento 99" con un enlace directo.
+- **Bien:** la propuesta de pantalla aparte fue mía, y la IA no la aceptó ni la rechazó sin más: la contrastó con el texto del caso de uso y propuso cómo cumplirlo sin perder la idea.
+- **Corregido / problemas:**
+  - El primer boceto era confuso y mezclaba notas para mí con lo que ve el usuario. Lo marqué yo.
+  - En el emulador, el botón Comprar quedaba debajo de la barra de gestos de Android. Se corrigió con el margen seguro (`useSafeAreaInsets`).
+  - Al aplicar ese arreglo apareció un error en pantalla ("useSafeAreaInsets doesn't exist"), porque Fast Refresh tomó el archivo a mitad de la edición. Se fue al recargar.
+  - El subtítulo "Organizadora" del boceto se cambió por "Reseñas de sus eventos", para no deducir el género a partir del nombre.
+  - El botón Comprar todavía no lleva a ningún lado: es la subtarea siguiente.
+- **Aprendizaje:** un boceto también tiene que ser claro para quien lo aprueba: si muestra la misma pantalla partida en columnas, o mezcla notas para mí con lo que ve el usuario, no sirve para decidir. Y vale la pena proponer ideas propias de diseño, pero pidiéndole a la IA que las contraste con la consigna.

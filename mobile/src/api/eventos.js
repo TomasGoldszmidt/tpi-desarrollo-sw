@@ -13,3 +13,8 @@ function queryString(params) {
 export function buscarEventos({ texto, categoriaId, orden } = {}) {
   return request(`/eventos${queryString({ texto: texto?.trim(), categoriaId, orden })}`);
 }
+
+// Detalle: tipos de entrada con sus disponibles y el organizador con su puntaje.
+export function getEvento(id) {
+  return request(`/eventos/${id}`);
+}
