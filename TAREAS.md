@@ -30,7 +30,7 @@
 - [x] Manejo de errores y validaciones
 
 ## 3. Front-End
-- [ ] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
+- [x] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
 - [ ] Navegación, cliente HTTP y selección de usuario activo
 - [ ] Pantalla de catálogo: búsqueda, categorías y ordenamiento
 - [ ] Pantalla de detalle de evento con reseñas del organizador

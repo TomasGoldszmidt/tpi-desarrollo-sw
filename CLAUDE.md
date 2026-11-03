@@ -16,6 +16,7 @@ TP individual de DDS (UTN FRBA, 2C 2026): plataforma de venta de entradas para e
 | `/nuevo-endpoint <MÉTODO /ruta>` | Para crear o modificar un endpoint: analiza, frena hasta el ok, implementa, documenta y prueba |
 | `/swagger` | **Cada vez que se crea, modifica o elimina un endpoint**, en el mismo commit |
 | `/probar-caso-de-uso` | Después de implementar un endpoint o una pantalla |
+| `/nueva-pantalla <pantalla>` | Para crear o modificar una pantalla: boceto con datos del seed, frena hasta que se apruebe, implementa y prueba en el emulador |
 | `/registrar-ia` | Al cerrar cada subtarea |
 
 ## Convenciones

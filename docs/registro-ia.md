@@ -459,3 +459,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Los bugs numéricos venían de la subtarea 3 de la skill `nuevo-endpoint` y sus tests no los habían detectado, porque nunca probaron tipos raros.
   - La app mobile todavía no usa la API, así que mover `/eventos/organizados` no rompió nada.
 - **Aprendizaje:** una revisión final con criterios explícitos (en este caso REST) encuentra cosas que la revisión por endpoint no ve, y vale la pena pedirla aunque cada tarea se haya probado por separado. También aprendí a probar tipos raros (booleanos, arrays) y no solo valores fuera de rango.
+
+### 2026-11-02 · Skill `nueva-pantalla`
+- **Tarea:** Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
+- **Herramienta / skill:** Claude Code + `registrar-ia`
+- **Pedido (prompt):** "sigamos con la proxima tarea que es frontend". Después de la primera propuesta: "en el analisis lo mas importante que deberia aprobar yo es la pantalla, podes crear un boceto y que yo lo tenga q aprobar".
+- **Resultado:**
+  - Skill en `.claude/skills/nueva-pantalla/SKILL.md`, con el mismo esquema que `nuevo-endpoint`: una pantalla por vez, aprobación antes del código, prueba y cierre.
+  - El centro del análisis es un boceto HTML del tamaño de un celular, con datos reales del seed, los estados que importan (vacío, error, sin cupo) y anotaciones numeradas en cada elemento tocable. Se muestra en la conversación y se guarda en `docs/bocetos/`. Debajo va un análisis breve (caso de uso, ruta, endpoints, acciones, archivos, dudas).
+  - Convenciones: Expo Router (como pide `mobile/AGENTS.md`), cliente HTTP con `fetch` que manda `X-User-Id` y muestra el `{ error }` del backend, usuario activo en un Context, componentes y `theme.js` compartidos, y volver a pedir los datos después de cada acción.
+  - En la prueba, la captura del emulador se compara con el boceto aprobado.
+  - Se sumó a la tabla de skills de `CLAUDE.md`.
+- **Bien:** la IA reusó la estructura de las skills anteriores, y quedó avisado de antemano que Expo Router trae dependencias nuevas (se deciden en la subtarea siguiente).
+- **Corregido / problemas:** la primera propuesta tenía un análisis técnico (endpoints, archivos, estados) y no mostraba la pantalla. Le pedí que lo que apruebe sea un boceto visual.
+- **Aprendizaje:** en el frontend, lo que conviene aprobar antes de que la IA escriba código es cómo se ve la pantalla, no la lista de archivos. Un boceto con datos reales permite corregir el diseño cuando todavía no cuesta nada.
