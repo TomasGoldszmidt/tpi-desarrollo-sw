@@ -609,3 +609,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El organizador ve la compra pero todavía no puede "Marcar como utilizada": queda para las ventas (3.9).
   - No se verificó directamente que la consulta periódica se corte al salir del chat, porque el backend no registra los pedidos. Se confía en la limpieza de `useFocusEffect`.
 - **Aprendizaje:** la IA da por cerradas algunas opciones ("sin websockets no hay actualización") que tienen alternativas simples. Vale la pena preguntarle "¿y si hacemos X?". Y lo que en la documentación parece resuelto (el teclado) hay que probarlo en el emulador.
+
+### 2026-11-03 · Cargas que faltaban y "Pendiente de pago"
+- **Tarea:** ajustes pedidos sobre la sección 3 (no son un ítem de TAREAS.md)
+- **Herramienta / skill:** Claude Code + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Recorda agregar las pantallas de carga" y "Cuando compras dice 'PENDIENTE de pago' deberia ir 'Pendiente de pago'".
+- **Resultado:**
+  - La IA revisó todas las pantallas buscando procesos sin carga y encontró tres. En el detalle de la compra, después de pagar o cancelar, el velo se iba antes de que llegara el estado nuevo; ahora sigue con "Actualizando tu compra…" hasta que llega. En la compra, al volver a pedir las entradas después de un error de cupo, aparece "Actualizando las entradas…". En el chat, al enviar, aparece "Enviando tu mensaje…".
+  - La compra hecha ahora usa `EstadoBadge`, la misma etiqueta de estado que el resto de la app, en lugar de un texto escrito a mano en mayúsculas.
+  - Prueba en el emulador: la etiqueta "Pendiente de pago" después de comprar, y con la red demorada, el velo sobre la compra hasta que aparece Confirmada.
+- **Bien:** la IA no se limitó al caso que yo había visto: revisó todas las pantallas y encontró el estado viejo que se veía un instante después de pagar.
+- **Corregido / problemas:**
+  - Las dos cosas las marqué yo: la IA había dejado procesos sin carga a la vista, aunque eso ya estaba en la skill, y había escrito el estado a mano en lugar de reusar el componente.
+  - El velo del chat no se pudo capturar, porque la demora de red del emulador no se aplicó a tiempo en ninguno de los dos intentos. Quedó sin verificar en pantalla.
+- **Aprendizaje:** las reglas de la skill no alcanzan si no se revisan al cerrar cada pantalla. Para el resto, conviene pedirle a la IA que verifique explícitamente la carga en cada proceso antes de dar la pantalla por terminada.

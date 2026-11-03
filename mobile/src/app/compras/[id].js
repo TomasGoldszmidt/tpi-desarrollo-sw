@@ -210,7 +210,8 @@ export default function DetalleCompra() {
         </View>
       ) : null}
 
-      {procesando ? <CargaEncima mensaje={procesando} /> : null}
+      {/* El velo sigue hasta que llega la compra actualizada, para no mostrar el estado viejo. */}
+      {procesando || loading ? <CargaEncima mensaje={procesando ?? 'Actualizando tu compra…'} /> : null}
     </View>
   );
 }

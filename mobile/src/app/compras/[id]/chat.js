@@ -7,7 +7,7 @@ import { enviarMensaje, getMensajes } from '../../../api/compras.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
 import { useAlturaTeclado } from '../../../hooks/useAlturaTeclado.js';
 import { useCarga } from '../../../hooks/useCarga.js';
-import { PantallaCarga } from '../../../components/Carga.js';
+import { CargaEncima, PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { formatDia, formatHora } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
@@ -115,6 +115,7 @@ export default function Chat() {
           </Pressable>
         </View>
       </View>
+      {enviando ? <CargaEncima mensaje="Enviando tu mensaje…" /> : null}
     </View>
   );
 }

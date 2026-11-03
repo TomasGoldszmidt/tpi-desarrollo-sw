@@ -7,6 +7,7 @@ import { getEvento } from '../../../api/eventos.js';
 import { crearCompra } from '../../../api/compras.js';
 import { useCarga } from '../../../hooks/useCarga.js';
 import { CargaEncima, PantallaCarga } from '../../../components/Carga.js';
+import { EstadoBadge } from '../../../components/EstadoBadge.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
@@ -139,6 +140,7 @@ export default function Comprar() {
         </Pressable>
       </View>
       {enviando ? <CargaEncima mensaje="Confirmando tu compra…" /> : null}
+      {!enviando && loading ? <CargaEncima mensaje="Actualizando las entradas…" /> : null}
     </View>
   );
 }
@@ -175,7 +177,9 @@ function CompraHecha({ compra, evento }) {
         <Text style={styles.meta}>
           {evento.nombre} · {formatFecha(evento.fecha)}
         </Text>
-        <Text style={styles.pendiente}>PENDIENTE de pago</Text>
+        <View style={styles.pendiente}>
+          <EstadoBadge estado={compra.estado} />
+        </View>
         <Text style={styles.hechaTotal}>{formatPrecio(compra.total)}</Text>
         <Text style={[styles.meta, styles.centradoTexto]}>
           Las entradas ya están reservadas.{'\n'}Pagá desde el detalle de la compra.
@@ -365,14 +369,6 @@ const styles = StyleSheet.create({
   },
   pendiente: {
     marginTop: spacing.lg,
-    backgroundColor: '#FAEEDA',
-    color: '#633806',
-    borderRadius: 999,
-    paddingVertical: 2,
-    paddingHorizontal: spacing.md,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
-    overflow: 'hidden',
   },
   hechaTotal: {
     color: colors.text,
