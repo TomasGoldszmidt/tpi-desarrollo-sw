@@ -27,7 +27,7 @@
 - [x] Listado de compras por evento para el organizador (estado + disponibles por tipo)
 - [x] Chat de la compra: enviar y listar mensajes
 - [x] Reseñas: crear (solo compra utilizada) y listar por organizador
-- [ ] Manejo de errores y validaciones
+- [x] Manejo de errores y validaciones
 
 ## 3. Front-End
 - [ ] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)

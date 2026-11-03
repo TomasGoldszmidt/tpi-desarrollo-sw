@@ -22,7 +22,7 @@ Archivos de apoyo:
 
 Definir, justificando contra los casos de uso:
 
-1. **Método y URL.** Recursos del dominio en español y en plural (`/eventos`, `/compras/:id/mensajes`). Una acción que no es CRUD es un sustantivo bajo el recurso: `POST /compras/:id/pago`, `POST /compras/:id/cancelacion`.
+1. **Método y URL (RESTful).** Recursos del dominio en español y en plural (`/eventos`, `/compras/:id/mensajes`); nada de filtros escondidos en la ruta (`/eventos/organizados` no: es `/usuarios/:id/eventos`). Lo que pertenece a otro recurso va anidado bajo él. Una acción que no es CRUD es un sustantivo bajo el recurso: `POST /compras/:id/pago`, `POST /compras/:id/cancelacion`.
 2. **Usuario activo.** ¿Necesita saber quién hace el pedido? Si sí, usa `requireUsuario` y toma comprador u organizador de `req.usuario`, **nunca del body**. Catálogo, detalle de evento y categorías son públicos.
 3. **Entrada.** Parámetros de path, query y body, con tipo, si son obligatorios y su rango.
 4. **Validaciones del controlador** (forma del dato) y **reglas del dominio** (cupo, estados, permisos). Para cada regla: qué función de `domain/` la resuelve, si ya existe o hay que crearla.
@@ -51,7 +51,7 @@ Si el usuario corrige algo, ajustar el análisis y volver a presentarlo hasta qu
 
 Convenciones de `backend/src/` (lo técnico en inglés, lo del dominio en español):
 
-- `routes/<entidad>Routes.js`: un `express.Router()` que solo mapea método + URL al controlador, con `requireUsuario` donde haga falta. Se monta en `app.js` con `app.use('/<recurso>', <entidad>Routes)`, antes del `errorHandler`.
+- `routes/<entidad>Routes.js`: un `express.Router()` que solo mapea método + URL al controlador. Cada URL se declara con `router.route('/x').get(...).post(...).all(methodNotAllowed)`, así un método no soportado responde 405 con el header `Allow`. `requireUsuario` va **en cada ruta** que lo necesite, nunca con `router.use` (si no, una URL inexistente da 401 en vez de 404). Se monta en `app.js` con `app.use('/<recurso>', <entidad>Routes)`, antes del `errorHandler`.
 - `controllers/<entidad>Controller.js`: funciones `async (req, res)` con verbo en inglés (`create`, `getById`, `list`, `pay`, `cancel`).
   - Valida la forma del dato con los helpers de `http/validation.js` (`requireId`, `requireInteger`, `requireString`, …), que lanzan `ValidationError`.
   - Lecturas simples: llama directo al repositorio. Si hay una regla de negocio, pasa siempre por `domain/`.
@@ -67,13 +67,13 @@ Convenciones de `backend/src/` (lo técnico en inglés, lo del dominio en españ
 | `NotFoundError` | 404 | No existe el recurso |
 | `BusinessRuleError` | 409 | Se viola una regla de negocio |
 
-- `http/middlewares/`: `requireUsuario` (lee el header `X-User-Id`, deja el documento en `req.usuario` o lanza 401) y `errorHandler` (responde `{ "error": "mensaje" }` con el status del error; 404 para rutas inexistentes, 400 para JSON mal formado y 500 genérico para lo no previsto, registrándolo en consola).
+- `http/middlewares/`: `requireUsuario` (lee el header `X-User-Id`, deja el documento en `req.usuario` o lanza 401) y `errorHandler` (responde `{ "error": "mensaje" }` con el status del error; 404 para rutas inexistentes, 405 con `Allow` para métodos no soportados, 400/413 para errores del body y 500 genérico para lo no previsto, registrándolo en consola).
 
 Respuestas:
 
 | Caso | Status | Cuerpo |
 |---|---|---|
-| Crear | 201 | El documento creado |
+| Crear | 201 | El documento creado, con el header `Location` si tiene URL propia (`res.location('/compras/10')`) |
 | Consultar o acción (pagar, cancelar) | 200 | El documento actualizado |
 | Quitar algo | 204 | Vacío |
 | Listado | 200 | El array directo, sin envoltorio ni paginación |

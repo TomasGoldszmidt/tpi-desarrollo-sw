@@ -3,7 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yaml';
-import { notFound, errorHandler } from './http/middlewares/errorHandler.js';
+import { notFound, errorHandler, methodNotAllowed } from './http/middlewares/errorHandler.js';
 import usuarioRoutes from './routes/usuarioRoutes.js';
 import categoriaRoutes from './routes/categoriaRoutes.js';
 import eventoRoutes from './routes/eventoRoutes.js';
@@ -20,9 +20,9 @@ export function createApp() {
 
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openapi));
 
-  app.get('/health', (req, res) => {
-    res.json({ status: 'ok' });
-  });
+  app.route('/health')
+    .get((req, res) => res.json({ status: 'ok' }))
+    .all(methodNotAllowed);
 
   // Las rutas de cada recurso se montan acá, antes del manejo de errores.
   app.use('/usuarios', usuarioRoutes);

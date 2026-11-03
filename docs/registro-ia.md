@@ -442,3 +442,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el seed preparado desde la sección 1 (Sofía con el stand-up UTILIZADO sin reseñar y Juan con el suyo CONFIRMADO) cubrió los casos sin crear datos. La IA aplicó sola la nota de la skill sobre los acentos.
 - **Corregido / problemas:** ninguno.
 - **Aprendizaje:** dejar escrito en la skill lo que se aprendió en la tarea anterior (los acentos con curl) hizo que esta prueba saliera bien de entrada. Las skills mejoran con el uso.
+
+### 2026-11-02 · Revisión de errores, validaciones y REST (cierre de la sección 2)
+- **Tarea:** Manejo de errores y validaciones
+- **Herramienta / skill:** Claude Code + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** la IA propuso usar la tarea como revisión final. Le sumé: "cuando recorras cada endpoint revisá si cumple que sea RESTful". Después, "Aplicar todo".
+- **Resultado:**
+  - Recorrió las 18 rutas y probó casos borde contra el backend antes de proponer nada. Encontró 3 bugs reales: un body de más de 100 KB daba 500; `true` y `[2]` se aceptaban como números (`Number(true)` es 1), así que `cantidad: true` creaba una compra; y bajo `/compras` una URL inexistente daba 401 en lugar de 404, por el `router.use(requireUsuario)`.
+  - En lo RESTful marcó: `GET /eventos/organizados` no era un recurso sino un filtro escondido en la ruta; un método equivocado daba 404 en lugar de 405; los 201 no traían `Location`. Recomendó no tocar `/pago`, `/utilizacion` y `/cancelacion`: la alternativa más REST (`POST /compras/:id/historial` con el estado) obligaba a la app a decidir entre CANCELADA y REEMBOLSADA.
+  - Con el ok: los helpers numéricos aceptan solo números o textos numéricos; las fechas, solo texto ISO; `requireUrl` para `multimedia`; el `errorHandler` responde 400/413 en español para los errores del body; `MethodNotAllowedError` y `methodNotAllowed` con el header `Allow`, y todos los routers pasaron a `router.route(...).all(methodNotAllowed)`; `requireUsuario` quedó en cada ruta; `Location` en `POST /eventos` y `POST /compras`; `/eventos/organizados` pasó a `GET /usuarios/:id/eventos`, público.
+  - Agregó `test/validation.test.js`: la suite quedó en 52 tests. Sincronizó el swagger (ruta movida, `Location`, respuestas comunes en la descripción) y comprobó con un script que las 18 rutas del código coinciden con las 18 del swagger. Actualizó la skill `nuevo-endpoint` y `CLAUDE.md` con las convenciones REST.
+  - Prueba de punta a punta con 30 chequeos, todos OK: los casos de la revisión y el flujo completo. Martín crea un evento, Sofía compra el cupo entero, Juan se queda sin cupo, Sofía paga, chatean, Martín ve la venta y marca la entrada UTILIZADA, ya no se puede cancelar, Sofía reseña con 5 y Martín pasa a tener puntaje 5 en la búsqueda.
+- **Bien:** la IA probó cada sospecha antes de reportarla, así que los hallazgos eran bugs confirmados y no teóricos.
+- **Corregido / problemas:**
+  - El pedido de revisar lo RESTful fue mío. La IA no lo había incluido en su propuesta de revisión, y salieron cuatro mejoras de diseño que no eran bugs.
+  - Los bugs numéricos venían de la subtarea 3 de la skill `nuevo-endpoint` y sus tests no los habían detectado, porque nunca probaron tipos raros.
+  - La app mobile todavía no usa la API, así que mover `/eventos/organizados` no rompió nada.
+- **Aprendizaje:** una revisión final con criterios explícitos (en este caso REST) encuentra cosas que la revisión por endpoint no ve, y vale la pena pedirla aunque cada tarea se haya probado por separado. También aprendí a probar tipos raros (booleanos, arrays) y no solo valores fuera de rango.

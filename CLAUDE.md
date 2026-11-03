@@ -30,7 +30,7 @@ TP individual de DDS (UTN FRBA, 2C 2026): plataforma de venta de entradas para e
   - Las decisiones de cada entidad están en `docs/persistencia.md`.
   - Los repositorios solo guardan y consultan; las reglas de negocio van en el dominio.
 - **Dominio:** funciones en `backend/src/domain/` que reciben los documentos; los métodos del diagrama conservan su nombre (`hayCupoPara`). Se prueban con `node --test` (`npm test` en `backend/`, archivos `test/*.test.js`), sin dependencias.
-- **API:** capas `routes/` → `controllers/` → `domain/` → `persistence/repositories/`, con errores y validaciones en `http/` (detalle en la skill `nuevo-endpoint`). El usuario activo viaja en el header `X-User-Id` y los errores responden `{ "error": "mensaje" }`. Documentada en `backend/src/docs/openapi.yaml` y servida en `/api-docs`.
+- **API:** capas `routes/` → `controllers/` → `domain/` → `persistence/repositories/`, con errores y validaciones en `http/` (detalle en la skill `nuevo-endpoint`). RESTful: recursos en plural, subrecursos anidados, 201 con `Location` y 405 con `Allow`. El usuario activo viaja en el header `X-User-Id` y los errores responden `{ "error": "mensaje" }`. Documentada en `backend/src/docs/openapi.yaml` y servida en `/api-docs`.
 - **Mobile:** Expo SDK 58 con la plantilla en blanco, en JavaScript. Seguir `mobile/AGENTS.md`: instalar paquetes con `npx expo install` y consultar la documentación de la versión instalada. La URL del backend se arma en `mobile/src/config.js`.
 - No agregar dependencias sin avisar.
 

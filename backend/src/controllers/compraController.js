@@ -56,7 +56,7 @@ export async function create(req, res) {
   };
 
   const compra = comprar(datos, req.usuario);
-  res.status(201).json(toDetalle(compra));
+  res.status(201).location(`/compras/${compra.id}`).json(toDetalle(compra));
 }
 
 export const pay = changeEstado(() => EstadoCompra.CONFIRMADA);

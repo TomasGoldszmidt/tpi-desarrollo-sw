@@ -4,6 +4,12 @@ info:
   description: >-
     Backend de AI Ticket It, plataforma de venta de entradas para eventos.
     Persistencia en memoria: los datos vuelven al seed en cada reinicio.
+
+
+    Respuestas comunes a todas las rutas, además de las que documenta cada una:
+    404 si la URL no existe; 405 (con el header Allow) si la URL existe pero no
+    acepta ese método; 400 si el cuerpo no es un JSON válido; 413 si el cuerpo
+    pasa los 100 KB. Todos los errores tienen la forma { "error": "mensaje" }.
   version: 1.0.0
 servers:
   - url: http://localhost:3000
@@ -55,6 +61,43 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Usuario'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/eventos:
+    get:
+      tags: [Usuarios, Eventos]
+      summary: Ver los eventos de un organizador
+      description: >-
+        Los eventos que organiza el usuario, incluidos los que ya se realizaron,
+        ordenados por fecha. La app lo usa con el usuario activo para entrar a las
+        ventas de cada evento. Si no organiza nada, devuelve [].
+      operationId: listEventosOrganizador
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Los eventos que organiza (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoResumen'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /usuarios/{id}/resenias:
@@ -187,6 +230,12 @@ paths:
       responses:
         '201':
           description: El evento creado, con la misma forma que el detalle
+          headers:
+            Location:
+              description: URL del evento creado
+              schema:
+                type: string
+              example: /eventos/7
           content:
             application/json:
               schema:
@@ -209,29 +258,6 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: La fecha del evento tiene que ser futura
-        '500':
-          $ref: '#/components/responses/ErrorInterno'
-  /eventos/organizados:
-    get:
-      tags: [Eventos]
-      summary: Listar los eventos que organizo
-      description: >-
-        Los eventos del usuario activo como organizador, incluidos los que ya se
-        realizaron, ordenados por fecha. Sirve para entrar a las ventas de cada uno.
-      operationId: listEventosOrganizados
-      security:
-        - usuarioActivo: []
-      responses:
-        '200':
-          description: Los eventos que organiza (puede ser vacío)
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EventoResumen'
-        '401':
-          $ref: '#/components/responses/SinUsuarioActivo'
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /eventos/{id}:
@@ -364,6 +390,12 @@ paths:
       responses:
         '201':
           description: La compra creada
+          headers:
+            Location:
+              description: URL de la compra creada
+              schema:
+                type: string
+              example: /compras/10
           content:
             application/json:
               schema:
@@ -1070,7 +1102,7 @@ components:
           description: Tiene que ser futura
         multimedia:
           type: array
-          description: URLs de imágenes. Si falta, queda vacío.
+          description: URLs de imágenes (http o https). Si falta, queda vacío.
           items:
             type: string
         tiposEntrada:

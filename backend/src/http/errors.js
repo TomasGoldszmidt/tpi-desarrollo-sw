@@ -42,3 +42,11 @@ export class BusinessRuleError extends AppError {
     super(message, 409);
   }
 }
+
+// La URL existe pero no acepta ese método. El errorHandler agrega el header Allow.
+export class MethodNotAllowedError extends AppError {
+  constructor(method, permitidos) {
+    super(`La ruta no acepta ${method}; acepta ${permitidos.join(', ')}`, 405);
+    this.permitidos = permitidos;
+  }
+}

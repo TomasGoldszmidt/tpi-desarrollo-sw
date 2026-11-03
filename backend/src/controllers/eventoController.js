@@ -6,7 +6,7 @@ import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados,
 import { detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
-  requireArray, requireDate, requireId, requireInteger, requireNumber, requireString,
+  requireArray, requireDate, requireId, requireInteger, requireNumber, requireString, requireUrl,
 } from '../http/validation.js';
 
 function toDetalle(evento) {
@@ -60,7 +60,7 @@ export async function create(req, res) {
   const body = req.body ?? {};
   const multimedia = body.multimedia === undefined
     ? []
-    : requireArray(body.multimedia, 'multimedia').map((url, i) => requireString(url, `multimedia[${i}]`));
+    : requireArray(body.multimedia, 'multimedia').map((url, i) => requireUrl(url, `multimedia[${i}]`));
 
   const datos = {
     nombre: requireString(body.nombre, 'nombre'),
@@ -73,7 +73,7 @@ export async function create(req, res) {
   };
 
   const evento = crearEvento(datos, req.usuario);
-  res.status(201).json(toDetalle(evento));
+  res.status(201).location(`/eventos/${evento.id}`).json(toDetalle(evento));
 }
 
 export async function getById(req, res) {
@@ -83,8 +83,12 @@ export async function getById(req, res) {
   res.status(200).json(toDetalle(evento));
 }
 
-export async function listOrganizados(req, res) {
-  res.status(200).json(eventosOrganizados(req.usuario));
+// GET /usuarios/:id/eventos: los eventos que organiza, incluidos los pasados. Son públicos.
+export async function listByOrganizador(req, res) {
+  const id = requireId(req.params.id);
+  const organizador = usuarioRepository.findById(id);
+  if (!organizador) throw new NotFoundError(`No existe el usuario ${id}`);
+  res.status(200).json(eventosOrganizados(organizador));
 }
 
 // Caso de uso 2. Las disponibles por tipo salen de GET /eventos/:id.
