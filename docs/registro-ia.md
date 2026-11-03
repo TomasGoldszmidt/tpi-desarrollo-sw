@@ -683,3 +683,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El seed no tiene eventos sin ventas: el vacío se probó con un evento creado antes desde la app, que se pierde al reiniciar el backend.
   - No se probó en el emulador el 403, que aparece cuando el usuario no es el organizador: desde la app no se llega a esa pantalla con otro usuario. Se verificó por API.
 - **Aprendizaje:** antes de pedir una pantalla conviene revisar qué endpoints del backend no usa ninguna. Así apareció que nadie podía marcar una compra como utilizada, una acción que de otro modo se habría descubierto recién en la prueba integral.
+
+### 2026-11-03 · Imagen del evento en las ventas
+- **Tarea:** ajuste sobre la pantalla de ventas por evento (sección 3)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `/registrar-ia`
+- **Pedido (prompt):** "lo que falto agregar es la imagen del evento encima". Después, "Aprobado" al boceto actualizado.
+- **Resultado:**
+  - Boceto actualizado: las pantallas de ventas tienen arriba la galería del evento. El header pasó a mostrar la flecha y el logo, como ya estaba en la app.
+  - La galería del detalle de evento se movió a `components/Galeria.js`, porque ahora la usan dos pantallas, y se agregó arriba de las ventas.
+  - Prueba en el emulador: en Bernarda se ve la imagen; en el Festival se ven los dos puntos y al deslizar pasa a la segunda imagen. El detalle de evento sigue igual.
+- **Bien:** al reusar la galería, las dos pantallas muestran las imágenes igual, sin código repetido.
+- **Corregido / problemas:**
+  - La imagen se me ocurrió a mí después de aprobar el boceto: la IA no la había propuesto, aunque el detalle de evento ya la tenía.
+  - No se capturó en esta ronda el caso sin imágenes (el bloque gris). Es el mismo componente que ya se usaba en el detalle de evento.
+- **Aprendizaje:** al aprobar un boceto conviene compararlo con las pantallas que ya existen del mismo recurso. Lo que una tiene y la otra no (como la imagen del evento) salta enseguida.

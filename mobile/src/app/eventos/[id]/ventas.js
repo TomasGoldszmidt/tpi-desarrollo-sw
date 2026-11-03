@@ -6,6 +6,7 @@ import { useCarga } from '../../../hooks/useCarga.js';
 import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge, ESTADOS_INACTIVOS } from '../../../components/EstadoBadge.js';
+import { Galeria } from '../../../components/Galeria.js';
 import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
@@ -50,30 +51,32 @@ export default function VentasEvento() {
   return (
     <ScrollView
       style={styles.pantalla}
-      contentContainerStyle={styles.contenido}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
     >
-      <Text style={styles.etiqueta}>Ventas</Text>
-      <Text style={styles.nombre}>{evento.nombre}</Text>
-      <Text style={styles.meta}>
-        {formatFecha(evento.fecha)} · {lugar}
-      </Text>
+      <Galeria imagenes={evento.multimedia} />
+      <View style={styles.contenido}>
+        <Text style={styles.etiqueta}>Ventas</Text>
+        <Text style={styles.nombre}>{evento.nombre}</Text>
+        <Text style={styles.meta}>
+          {formatFecha(evento.fecha)} · {lugar}
+        </Text>
 
-      <Text style={styles.seccion}>Entradas disponibles</Text>
-      {evento.tiposEntrada.map((tipo) => (
-        <DisponiblesFila key={tipo.id} tipo={tipo} />
-      ))}
+        <Text style={styles.seccion}>Entradas disponibles</Text>
+        {evento.tiposEntrada.map((tipo) => (
+          <DisponiblesFila key={tipo.id} tipo={tipo} />
+        ))}
 
-      <Text style={styles.seccion}>Compras ({compras.length})</Text>
-      {compras.length === 0 ? (
-        <View style={styles.vacio}>
-          <Text style={styles.vacioTexto}>Todavía nadie compró entradas para este evento.</Text>
-        </View>
-      ) : (
-        compras.map((compra) => (
-          <VentaCard key={compra.id} compra={compra} onPress={() => router.push(`/compras/${compra.id}`)} />
-        ))
-      )}
+        <Text style={styles.seccion}>Compras ({compras.length})</Text>
+        {compras.length === 0 ? (
+          <View style={styles.vacio}>
+            <Text style={styles.vacioTexto}>Todavía nadie compró entradas para este evento.</Text>
+          </View>
+        ) : (
+          compras.map((compra) => (
+            <VentaCard key={compra.id} compra={compra} onPress={() => router.push(`/compras/${compra.id}`)} />
+          ))
+        )}
+      </View>
     </ScrollView>
   );
 }

@@ -56,6 +56,9 @@ code{font-size:12px}
 .retry{display:block;margin:10px auto 0;width:max-content;border:0.5px solid #3B6D11;color:#27500A;border-radius:8px;padding:6px 14px;font-size:12px}
 .n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500;margin-right:4px;flex-shrink:0}
 .abs{position:absolute;right:-6px;top:-6px}
+.hero{position:relative;height:110px;flex-shrink:0;background:#B4B2A9;display:flex;align-items:center;justify-content:center;color:#2C2C2A;font-size:11px}
+.dots{position:absolute;bottom:6px;left:0;right:0;display:flex;justify-content:center;gap:4px}
+.dots span{width:6px;height:6px;border-radius:50%;background:#fff;opacity:.6}.dots span.on{opacity:1}
 .center{flex:1;display:flex;flex-direction:column;justify-content:center}
 </style></head><body>
 <h1 style="font-size:18px;font-weight:500">Ventas por evento (organizador)</h1>
@@ -84,9 +87,10 @@ code{font-size:12px}
 <div>
 <div class="cap">B · Ventas de Noche de Rock Nacional</div>
 <div class="phone">
-<div class="bar"><span class="l"><span class="back">←</span><span>Ventas</span></span></div>
+<div class="bar"><span class="l"><span class="back" style="color:#3B6D11">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="hero">imagen del evento</div>
 <div class="scr">
-<div class="h" style="margin-bottom:2px">Noche de Rock Nacional</div>
+<div style="font-size:10px;font-weight:500;color:#27500A">Ventas</div><div class="h" style="margin-bottom:2px">Noche de Rock Nacional</div>
 <div class="mt">lun 23 nov · 21:00 · Estadio Obras</div>
 <div class="sec">Entradas disponibles</div>
 <div class="tipo"><div><div class="nm">Campo</div><div class="mt">$ 45.000</div></div><div class="r"><div class="disp">498 de 500</div><div class="prog"><i style="width:0.4%"></i></div></div></div>
@@ -102,9 +106,10 @@ code{font-size:12px}
 <div>
 <div class="cap">C · Ventas de Festival de Verano (un tipo agotado)</div>
 <div class="phone">
-<div class="bar"><span class="l"><span class="back">←</span><span>Ventas</span></span></div>
+<div class="bar"><span class="l"><span class="back" style="color:#3B6D11">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="hero">imagen 1 de 2<div class="dots"><span class="on"></span><span></span></div><span class="n abs" style="right:4px;top:4px">4</span></div>
 <div class="scr">
-<div class="h" style="margin-bottom:2px">Festival de Verano</div>
+<div style="font-size:10px;font-weight:500;color:#27500A">Ventas</div><div class="h" style="margin-bottom:2px">Festival de Verano</div>
 <div class="mt">sáb 2 ene · 16:00 · Hipódromo de San Isidro</div>
 <div class="sec">Entradas disponibles</div>
 <div class="tipo"><div><div class="nm">General</div><div class="mt">$ 90.000</div></div><div class="r"><div class="disp">1000 de 1000</div><div class="prog"><i style="width:0%"></i></div></div></div>
@@ -120,9 +125,10 @@ code{font-size:12px}
 <div>
 <div class="cap">D · Evento recién creado, sin ventas</div>
 <div class="phone">
-<div class="bar"><span class="l"><span class="back">←</span><span>Ventas</span></span></div>
+<div class="bar"><span class="l"><span class="back" style="color:#3B6D11">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="hero" style="background:#D3D1C7"></div>
 <div class="scr">
-<div class="h" style="margin-bottom:2px">Meetup de JavaScript</div>
+<div style="font-size:10px;font-weight:500;color:#27500A">Ventas</div><div class="h" style="margin-bottom:2px">Meetup de JavaScript</div>
 <div class="mt">lun 15 mar · 19:00 · UTN FRBA</div>
 <div class="sec">Entradas disponibles</div>
 <div class="tipo"><div><div class="nm">General</div><div class="mt">$ 0</div></div><div class="r"><div class="disp">100 de 100</div><div class="prog"><i style="width:0%"></i></div></div></div>
@@ -137,7 +143,7 @@ code{font-size:12px}
 <div>
 <div class="cap">E · Abriendo las ventas</div>
 <div class="phone">
-<div class="bar"><span class="l"><span class="back">←</span><span>Ventas</span></span></div>
+<div class="bar"><span class="l"><span class="back" style="color:#3B6D11">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
 <div class="scr center"><div class="spin"></div><div class="msg">Cargando las ventas…</div></div>
 </div>
 </div>
@@ -146,7 +152,7 @@ code{font-size:12px}
 <div>
 <div class="cap">F · Sin conexión</div>
 <div class="phone">
-<div class="bar"><span class="l"><span class="back">←</span><span>Ventas</span></span></div>
+<div class="bar"><span class="l"><span class="back" style="color:#3B6D11">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
 <div class="scr center"><div class="msg">No se pudo conectar. Revisá tu conexión e intentá de nuevo.</div><span class="retry">Reintentar<span class="n" style="margin:0 0 0 6px">3</span></span></div>
 </div>
 </div>
@@ -156,6 +162,7 @@ code{font-size:12px}
 <div><span class="n">1</span> La pestaña "Mis eventos" suma la lista de <code>GET /usuarios/:id/eventos</code> (usuario activo), partida en "Próximos" y "Ya realizados" según la fecha. Cada tarjeta abre <code>eventos/:id/ventas</code>. El botón "Crear evento" y el vacío ("Todavía no organizaste ningún evento.") quedan como en el boceto de crear evento. Al volver a la pestaña se vuelve a pedir la lista (para que aparezca un evento recién creado). Al abrir: <code>PantallaCarga</code> "Cargando tus eventos…".</div>
 <div><span class="n">2</span> Abre el detalle de compra existente (<code>compras/:id</code>), que para el organizador ya muestra el chat con el comprador (caso de uso 6). Al volver, se vuelven a pedir las ventas.</div>
 <div><span class="n">3</span> Reintentar vuelve a pedir <code>GET /eventos/:id</code> y <code>GET /eventos/:id/compras</code>. "Entradas disponibles" sale del primero (<code>cupo</code> y <code>disponibles</code> por tipo); las compras, del segundo (estado con <code>EstadoBadge</code>, comprador, tipo × cantidad, total, fecha del primer cambio de <code>historial</code> y cantidad de mensajes). Canceladas y reembolsadas se ven apagadas, como en Mis compras. Si el usuario activo no es el organizador (403) o el evento no existe (404), se muestra el mensaje del backend con el mismo componente.</div>
+<div><span class="n">4</span> Arriba, las imágenes del evento (<code>multimedia</code> de <code>GET /eventos/:id</code>) con la misma galería del detalle de evento: se deslizan de costado y los puntos marcan cuál se ve. Sin imágenes, queda el bloque gris vacío (D), igual que en el detalle.</div>
 <div style="margin-top:6px">D: el seed no tiene eventos sin compras; el vacío se prueba con un evento creado desde "Crear evento".</div>
 </div>
 </body></html>
