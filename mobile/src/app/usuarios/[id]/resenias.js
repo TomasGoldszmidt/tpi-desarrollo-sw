@@ -5,6 +5,7 @@ import { getReseniasOrganizador, getUsuario } from '../../../api/usuarios.js';
 import { useCarga } from '../../../hooks/useCarga.js';
 import { Avatar } from '../../../components/Avatar.js';
 import { Estrellas } from '../../../components/Estrellas.js';
+import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { ReseniaItem } from '../../../components/ReseniaItem.js';
 import { formatPuntaje } from '../../../format.js';
@@ -20,6 +21,9 @@ export default function ReseniasOrganizador() {
   );
   const { data, loading, error, recargar } = useCarga(pedir);
 
+  if (loading && !data) {
+    return <PantallaCarga mensaje="Cargando las reseñas…" />;
+  }
   if (error || !data) {
     return (
       <View style={styles.centrado}>

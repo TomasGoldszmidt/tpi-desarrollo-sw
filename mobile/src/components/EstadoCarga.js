@@ -1,13 +1,14 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Lo que muestra una pantalla mientras carga o si falló el pedido, con el botón para reintentar.
-// detalle es un texto opcional debajo del error (ej: la URL del backend).
-export function EstadoCarga({ loading, error, detalle, onRetry }) {
+// Dentro de una pantalla ya abierta: un spinner con un mensaje mientras carga
+// (ej: "Buscando eventos…"), o el error con el botón para reintentar.
+export function EstadoCarga({ loading, error, onRetry, mensaje }) {
   if (loading) {
     return (
       <View style={styles.contenedor}>
         <ActivityIndicator size="large" color={colors.primary} />
+        {mensaje ? <Text style={styles.mensaje}>{mensaje}</Text> : null}
       </View>
     );
   }
@@ -15,7 +16,6 @@ export function EstadoCarga({ loading, error, detalle, onRetry }) {
   return (
     <View style={styles.contenedor}>
       <Text style={styles.error}>{error}</Text>
-      {detalle ? <Text style={styles.detalle}>{detalle}</Text> : null}
       <Pressable style={styles.boton} onPress={onRetry}>
         <Text style={styles.botonTexto}>Reintentar</Text>
       </Pressable>
@@ -30,15 +30,15 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.sm,
   },
+  mensaje: {
+    color: colors.textSecondary,
+    fontSize: fontSize.body,
+    marginTop: spacing.xs,
+  },
   error: {
     color: colors.danger,
     fontSize: fontSize.body,
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  detalle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.small,
     textAlign: 'center',
   },
   boton: {

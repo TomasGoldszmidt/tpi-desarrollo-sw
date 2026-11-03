@@ -6,6 +6,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getEvento } from '../../../api/eventos.js';
 import { crearCompra } from '../../../api/compras.js';
 import { useCarga } from '../../../hooks/useCarga.js';
+import { CargaEncima, PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
@@ -28,6 +29,9 @@ export default function Comprar() {
     return <CompraHecha compra={compra} evento={evento} />;
   }
 
+  if (loading && !evento) {
+    return <PantallaCarga mensaje="Cargando las entradas…" />;
+  }
   if (error || !evento) {
     return (
       <View style={styles.centrado}>
@@ -134,6 +138,7 @@ export default function Comprar() {
           )}
         </Pressable>
       </View>
+      {enviando ? <CargaEncima mensaje="Confirmando tu compra…" /> : null}
     </View>
   );
 }

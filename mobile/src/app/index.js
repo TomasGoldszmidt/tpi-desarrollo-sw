@@ -2,10 +2,10 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getUsuarios } from '../api/usuarios.js';
-import { API_URL } from '../config.js';
 import { useUsuario } from '../context/UsuarioContext.js';
 import { useCarga } from '../hooks/useCarga.js';
 import { Avatar } from '../components/Avatar.js';
+import { PantallaCarga } from '../components/Carga.js';
 import { EstadoCarga } from '../components/EstadoCarga.js';
 import { Logo, Marca } from '../components/Logo.js';
 import { colors, fontSize, spacing } from '../theme.js';
@@ -20,7 +20,11 @@ export default function ElegirUsuario() {
     router.replace('/catalogo');
   }
 
-  const conLista = !loading && !error;
+  if (loading) {
+    return <PantallaCarga mensaje="Cargando…" />;
+  }
+
+  const conLista = !error;
 
   return (
     <SafeAreaView style={styles.pantalla}>
@@ -46,15 +50,9 @@ export default function ElegirUsuario() {
                 </Text>
               </Pressable>
             ))}
-            <Text style={styles.backend}>Backend: {API_URL.replace('http://', '')}</Text>
           </>
         ) : (
-          <EstadoCarga
-            loading={loading}
-            error={error}
-            detalle={`${API_URL}\nRevisá que esté levantado.`}
-            onRetry={recargar}
-          />
+          <EstadoCarga loading={loading} error={error} onRetry={recargar} />
         )}
       </ScrollView>
     </SafeAreaView>
@@ -103,10 +101,5 @@ const styles = StyleSheet.create({
   nombre: {
     color: colors.text,
     fontSize: 16,
-  },
-  backend: {
-    color: colors.textMuted,
-    fontSize: fontSize.small,
-    marginTop: spacing.lg,
   },
 });

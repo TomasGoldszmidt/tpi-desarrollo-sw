@@ -556,3 +556,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El primer boceto tenía otra vez texto técnico dentro del celular ("409", "la pantalla vuelve a pedir el evento"). Es la segunda vez que lo marco: la IA lo agregó como regla en la skill `nueva-pantalla` y en su memoria, y rehizo la pantalla del error tal como la vería el usuario.
   - Otra vez Fast Refresh mostró un error en pantalla porque la IA agregó el uso de `useUsuario` antes del import. Quedó anotado en la skill: primero el import.
 - **Aprendizaje:** cuando corrijo lo mismo dos veces, tiene que quedar escrito en la skill o en la memoria, no alcanza con que la IA lo arregle esa vez. Y conviene probar los casos de concurrencia simulándolos, porque en el emulador solo no se pueden provocar.
+
+### 2026-11-03 · Sin información técnica y pantallas de carga
+- **Tarea:** ajustes pedidos antes de seguir con la sección 3 (no son un ítem de TAREAS.md)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "quita el texto cuando ingresas de en donde esta levantado el back (todo lo que tenga q ver con el codigo borralo)" y "agrega entre procesos una pantalla de carga con un spinner". Sobre el boceto: que la pantalla B tuviera los íconos de las pestañas, y la pregunta de si el griseado de la C era a propósito.
+- **Resultado:**
+  - Se sacó de la pantalla de inicio la dirección del backend y "Revisá que esté levantado". Los errores de conexión ahora dicen "No pudimos conectarnos. Revisá tu conexión e intentá de nuevo." y los inesperados "Algo salió mal. Intentá de nuevo." También se actualizó el boceto de esa pantalla.
+  - Boceto de carga (`docs/bocetos/carga.html`) con tres variantes: pantalla completa con el logo al abrir una pantalla, spinner en el lugar de la lista al buscar o filtrar, y un velo sobre la pantalla al confirmar una acción. Con mis observaciones se agregaron los íconos a las pestañas y se dibujó entera la pantalla de compra debajo del velo, que antes parecía un texto suelto.
+  - `useCarga` ahora sabe a qué pedido corresponde cada respuesta, así que `loading` también es `true` cuando cambian los filtros. Componentes nuevos `PantallaCarga` y `CargaEncima`, y `EstadoCarga` con mensaje. Se usaron en el inicio, el catálogo, el detalle, las reseñas y la compra.
+  - Prueba con la red del emulador demorada a propósito: "Buscando eventos…", "Cargando el evento…" con el logo, el velo "Confirmando tu compra…" y el error sin red con el mensaje nuevo.
+- **Bien:** demorar la red del emulador (`adb emu network delay`) permitió ver y capturar estados que con la red normal duran milisegundos.
+- **Corregido / problemas:**
+  - En el boceto, la IA había simplificado las pestañas a solo texto y la pantalla de compra debajo del velo no se entendía. Lo marqué yo.
+  - El velo salió abajo del botón en vez de cubrir la pantalla: `StyleSheet.absoluteFillObject` no aplicaba. Se cambió por la posición absoluta escrita a mano.
+  - En la prueba la IA cometió varios errores con el emulador: las teclas para recargar se escribieron en el buscador, la red lenta cortó la descarga del bundle y Expo Go quedó roto hasta recargar, un script tocó botones en la pantalla equivocada, y llegó a reabrir la app sin red. Todo se resolvió, pero llevó varias vueltas.
+  - Las compras de prueba quedaron en el backend y se volvió al seed reiniciándolo.
+- **Aprendizaje:** la app tiene que hablarle al usuario, no al programador: los mensajes técnicos que me sirvieron para depurar no tienen que llegar a la pantalla. Y para probar estados que duran muy poco (una carga) hay que provocarlos a propósito, en este caso con la red lenta.

@@ -102,8 +102,8 @@ export default function Catalogo() {
         </View>
       ) : null}
 
-      {error || !eventos ? (
-        <EstadoCarga loading={loading} error={error} onRetry={recargar} />
+      {loading || error || !eventos ? (
+        <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Buscando eventos…" />
       ) : (
         <FlatList
           data={eventos}

@@ -27,7 +27,7 @@ export async function request(path, { method = 'GET', body } = {}) {
       body: body !== undefined ? JSON.stringify(body) : undefined,
     });
   } catch {
-    throw new Error('No se pudo conectar con el backend');
+    throw new Error('No pudimos conectarnos. Revisá tu conexión e intentá de nuevo.');
   }
 
   if (response.status === 204) {
@@ -36,7 +36,7 @@ export async function request(path, { method = 'GET', body } = {}) {
 
   const data = await response.json().catch(() => null);
   if (!response.ok) {
-    throw new Error(data?.error ?? `Error ${response.status} del backend`);
+    throw new Error(data?.error ?? 'Algo salió mal. Intentá de nuevo.');
   }
   return data;
 }
