@@ -4,7 +4,7 @@ import * as categoriaRepository from '../persistence/repositories/categoriaRepos
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
 import { detalleCompra, masRecientesPrimero } from '../domain/compra.js';
-import { puntajeDe } from '../domain/resenia.js';
+import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString, requireUrl,
@@ -102,6 +102,8 @@ export async function listCompras(req, res) {
   verificarOrganizador(evento, req.usuario);
 
   const compras = masRecientesPrimero(compraRepository.findByEvento(evento.id));
-  res.status(200).json(compras.map((compra) =>
-    detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId))));
+  res.status(200).json(compras.map((compra) => ({
+    ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId)),
+    resenia: reseniaDeCompra(compra),
+  })));
 }

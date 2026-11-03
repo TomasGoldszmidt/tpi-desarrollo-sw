@@ -5,15 +5,19 @@ import {
   comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
 } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
+import { reseniaDeCompra } from '../domain/resenia.js';
 import { ForbiddenError, NotFoundError } from '../http/errors.js';
 import { requireId, requireInteger, requireString } from '../http/validation.js';
 
 function toDetalle(compra) {
-  return detalleCompra(
-    compra,
-    eventoRepository.findById(compra.eventoId),
-    usuarioRepository.findById(compra.compradorId),
-  );
+  return {
+    ...detalleCompra(
+      compra,
+      eventoRepository.findById(compra.eventoId),
+      usuarioRepository.findById(compra.compradorId),
+    ),
+    resenia: reseniaDeCompra(compra),
+  };
 }
 
 function findCompra(req) {

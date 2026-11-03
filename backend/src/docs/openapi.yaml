@@ -1125,6 +1125,22 @@ components:
             Calculado. Días de calendario hasta el evento (0 = hoy). Solo si la
             compra está CONFIRMADA y el evento no se realizó; si no, null.
           example: 20
+        resenia:
+          type: object
+          nullable: true
+          description: >-
+            La reseña que dejó el comprador para el evento de la compra, o null si
+            todavía no reseñó. La app la muestra en lugar del formulario.
+          properties:
+            id:
+              type: integer
+              example: 1
+            puntuacion:
+              type: integer
+              example: 5
+            detalle:
+              type: string
+              example: Sonido impecable y muy buena organización en la entrada.
     NuevaCompra:
       type: object
       required: [eventoId, tipoEntradaId, cantidad]

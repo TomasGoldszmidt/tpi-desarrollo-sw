@@ -42,6 +42,14 @@ export function detalleResenia(resenia, evento, comprador) {
   };
 }
 
+// La reseña que dejó el comprador de la compra para ese evento, o null. Va en el detalle
+// de la compra para que la app muestre la reseña ya hecha o el formulario (caso de uso 9).
+/** @param {import('../persistence/schemas.js').Compra} compra */
+export function reseniaDeCompra(compra) {
+  const resenia = reseniaRepository.findByCompradorAndEvento(compra.compradorId, compra.eventoId);
+  return resenia ? { id: resenia.id, puntuacion: resenia.puntuacion, detalle: resenia.detalle } : null;
+}
+
 // Caso de uso 9: solo reseña quien usó su entrada, y una vez por evento.
 // La forma (puntuación 1 a 5, detalle) llega validada por el controlador.
 /** @param {{ eventoId: number, puntuacion: number, detalle: string }} datos @param {Usuario} comprador */

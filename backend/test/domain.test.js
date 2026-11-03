@@ -4,7 +4,7 @@ import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
 import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador } from '../src/domain/evento.js';
-import { calcularPuntajes, crearResenia, perfilUsuario, puntajeDe, reseniasDeOrganizador } from '../src/domain/resenia.js';
+import { calcularPuntajes, crearResenia, perfilUsuario, puntajeDe, reseniaDeCompra, reseniasDeOrganizador } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
@@ -413,8 +413,15 @@ describe('reseñas', () => {
     ]);
   });
 
+  it('reseniaDeCompra trae la reseña del comprador para ese evento, o null', () => {
+    assert.deepEqual(reseniaDeCompra(seed.compras.sofiaAcustico),
+      { id: seed.resenias.sofiaAcustico.id, puntuacion: 5, detalle: seed.resenias.sofiaAcustico.detalle });
+    assert.equal(reseniaDeCompra(seed.compras.sofiaStandup), null);
+  });
+
   it('quien usó su entrada puede reseñar, una sola vez', () => {
     const resenia = crearResenia({ eventoId: standup.id, puntuacion: 4, detalle: 'Muy divertido' }, sofia);
+    assert.equal(reseniaDeCompra(seed.compras.sofiaStandup).id, resenia.id);
     assert.deepEqual(resenia.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
     assert.deepEqual(resenia.evento, { id: standup.id, nombre: standup.nombre, fecha: standup.fecha });
     assert.equal(reseniasDeOrganizador(martin).some((r) => r.id === resenia.id), true);
