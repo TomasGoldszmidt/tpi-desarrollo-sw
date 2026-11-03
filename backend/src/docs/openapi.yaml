@@ -19,6 +19,8 @@ tags:
     description: Eventos con sus tipos de entrada
   - name: Compras
     description: Compras de entradas y sus cambios de estado
+  - name: Resenias
+    description: Reseñas de los eventos, que forman el puntaje del organizador
 paths:
   /health:
     get:
@@ -53,6 +55,42 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Usuario'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/resenias:
+    get:
+      tags: [Usuarios, Resenias]
+      summary: Ver las reseñas de un organizador
+      description: >-
+        Las reseñas de todos los eventos que organiza el usuario, del evento más
+        reciente al más viejo. Si no organiza nada o no tiene reseñas, devuelve [].
+      operationId: listReseniasOrganizador
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Las reseñas (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReseniaDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /categorias:
@@ -604,6 +642,64 @@ paths:
           $ref: '#/components/responses/CompraNoEncontrada'
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /resenias:
+    post:
+      tags: [Resenias]
+      summary: Reseñar un evento
+      description: >-
+        El comprador es el usuario activo. Solo puede reseñar si tiene una compra
+        UTILIZADA de ese evento, y una sola vez por evento.
+      operationId: createResenia
+      security:
+        - usuarioActivo: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventoId, puntuacion, detalle]
+              properties:
+                eventoId:
+                  type: integer
+                puntuacion:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                detalle:
+                  type: string
+                  maxLength: 500
+            example:
+              eventoId: 6
+              puntuacion: 4
+              detalle: Muy divertido, aunque el sonido fallaba atrás.
+      responses:
+        '201':
+          description: La reseña creada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReseniaDetalle'
+        '400':
+          description: Falta un campo, es inválido o no existe el evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo puntuacion tiene que ser como máximo 5
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '409':
+          description: No tiene una compra UTILIZADA del evento o ya lo reseñó
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Solo podés reseñar eventos a los que asististe
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
   parameters:
     CompraId:
@@ -805,6 +901,44 @@ components:
         enviado:
           type: string
           format: date-time
+    ReseniaDetalle:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3
+        comprador:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+            nombre:
+              type: string
+              example: Sofía
+            apellido:
+              type: string
+              example: Pérez
+        evento:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 6
+            nombre:
+              type: string
+              example: Noche de Stand-up
+            fecha:
+              type: string
+              format: date-time
+        puntuacion:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 4
+        detalle:
+          type: string
+          example: Muy divertido, aunque el sonido fallaba atrás.
     MensajeConAutor:
       type: object
       properties:

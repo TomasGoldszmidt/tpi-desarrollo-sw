@@ -430,3 +430,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Ninguna corrección mía.
   - En la prueba, "¡Gracias!" se guardó como "�Gracias!". La IA sospechó del cliente y no del servidor (los mensajes del seed se veían bien) y lo confirmó mandando el mismo texto desde un archivo UTF-8 y con `fetch`: el backend estaba bien y el problema era curl en Windows con acentos escritos en el comando. Lo anotó en la skill `probar-caso-de-uso`.
 - **Aprendizaje:** cuando una prueba falla, primero hay que descartar la herramienta de prueba antes de tocar el código. Y conviene dejar anotado en la skill lo que se aprendió, para que no vuelva a pasar.
+
+### 2026-11-02 · Reseñas: crear y listar por organizador
+- **Tarea:** Reseñas: crear (solo compra utilizada) y listar por organizador
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `POST /resenias` (caso 9) y `GET /usuarios/:id/resenias` (caso 10). Cuatro dudas aprobadas: crear con `eventoId` y no colgado de una compra (la reseña es de comprador + evento, como se decidió en persistencia), puntuación entera de 1 a 5, comentario obligatorio porque el caso lo pide, y listar en `/usuarios/:id/resenias`, que devuelve `[]` para quien no organiza.
+  - Con el ok, agregó a `domain/resenia.js` `crearResenia` (evento existente, compra UTILIZADA de ese evento, una sola reseña), `reseniasDeOrganizador` (del evento más reciente al más viejo) y `detalleResenia`. Creó `reseniaController` y `reseniaRoutes`, y colgó el listado de `usuarioRoutes`. 4 tests nuevos: la suite quedó en 49.
+  - `/probar-caso-de-uso` probó con un script de `fetch` (por los acentos): las reseñas de Lucía, Sofía reseñando el stand-up de Martín, el 409 por reseñar dos veces o sin compra UTILIZADA, y los 400 de evento inexistente, puntuación 6 o 4.5 y sin detalle. También verificó que después de la reseña Martín pasa de `null` a 4 en la búsqueda por puntaje.
+- **Bien:** el seed preparado desde la sección 1 (Sofía con el stand-up UTILIZADO sin reseñar y Juan con el suyo CONFIRMADO) cubrió los casos sin crear datos. La IA aplicó sola la nota de la skill sobre los acentos.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** dejar escrito en la skill lo que se aprendió en la tarea anterior (los acentos con curl) hizo que esta prueba saliera bien de entrada. Las skills mejoran con el uso.

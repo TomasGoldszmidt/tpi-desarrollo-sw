@@ -4,7 +4,7 @@ import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
 import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador } from '../src/domain/evento.js';
-import { calcularPuntajes } from '../src/domain/resenia.js';
+import { calcularPuntajes, crearResenia, reseniasDeOrganizador } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
@@ -386,5 +386,39 @@ describe('chat de la compra', () => {
     assert.equal(requireString('  hola  ', 'mensaje', { maxLength: 4 }), 'hola');
     assert.throws(() => requireString('a'.repeat(501), 'mensaje', { maxLength: 500 }),
       (err) => err.status === 400 && err.message === 'El campo mensaje puede tener como máximo 500 caracteres');
+  });
+});
+
+describe('reseñas', () => {
+  const { sofia, juan, lucia, martin } = seed.usuarios;
+  const { standup, acustico } = seed.eventos;
+
+  function rechaza(fn, status, mensaje) {
+    assert.throws(fn, (err) => err.status === status && err.message === mensaje);
+  }
+
+  it('reseniasDeOrganizador trae las de sus eventos con comprador y evento', () => {
+    const resenias = reseniasDeOrganizador(lucia);
+    assert.deepEqual(resenias.map((r) => [r.comprador.nombre, r.evento.nombre, r.puntuacion]), [
+      ['Juan', 'Acústico en el Gran Rex', 4],
+      ['Sofía', 'Acústico en el Gran Rex', 5],
+    ]);
+  });
+
+  it('quien usó su entrada puede reseñar, una sola vez', () => {
+    const resenia = crearResenia({ eventoId: standup.id, puntuacion: 4, detalle: 'Muy divertido' }, sofia);
+    assert.deepEqual(resenia.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
+    assert.deepEqual(resenia.evento, { id: standup.id, nombre: standup.nombre, fecha: standup.fecha });
+    assert.equal(reseniasDeOrganizador(martin).some((r) => r.id === resenia.id), true);
+    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 5, detalle: 'Otra vez' }, sofia), 409, 'Ya reseñaste este evento');
+  });
+
+  it('no puede reseñar quien no tiene la compra UTILIZADA', () => {
+    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 3, detalle: 'x' }, juan), 409, 'Solo podés reseñar eventos a los que asististe'); // CONFIRMADA
+    rechaza(() => crearResenia({ eventoId: acustico.id, puntuacion: 3, detalle: 'x' }, martin), 409, 'Solo podés reseñar eventos a los que asististe'); // sin compra
+  });
+
+  it('rechaza un evento inexistente', () => {
+    rechaza(() => crearResenia({ eventoId: 99, puntuacion: 3, detalle: 'x' }, sofia), 400, 'No existe el evento 99');
   });
 });

@@ -26,7 +26,7 @@
 - [x] Listado de compras del comprador (estado + días restantes)
 - [x] Listado de compras por evento para el organizador (estado + disponibles por tipo)
 - [x] Chat de la compra: enviar y listar mensajes
-- [ ] Reseñas: crear (solo compra utilizada) y listar por organizador
+- [x] Reseñas: crear (solo compra utilizada) y listar por organizador
 - [ ] Manejo de errores y validaciones
 
 ## 3. Front-End
