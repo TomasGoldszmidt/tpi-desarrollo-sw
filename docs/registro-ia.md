@@ -506,3 +506,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el lint encontró un problema que la prueba en el emulador no mostraba, porque la pantalla funcionaba bien.
 - **Corregido / problemas:** el conflicto de `react-dom` volvió a aparecer al instalar ESLint, y hizo falta `typescript`, que no estaba previsto. El primer arreglo del error de lint no alcanzó.
 - **Aprendizaje:** que una pantalla "ande" en el emulador no quiere decir que esté bien escrita. Vale la pena tener el lint desde la primera pantalla, porque el patrón que se corrige ahora (`useCarga`) se repite en todas las que siguen.
+
+### 2026-11-02 · Pantalla de catálogo
+- **Tarea:** Pantalla de catálogo: búsqueda, categorías y ordenamiento
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí". Sobre el boceto: "el buscador esta bien ahi pero quizas los otros filtros podrian agregarse en un modal que se abre con un boton de filtro". Después, "Aprobado".
+- **Resultado:**
+  - El primer boceto (`docs/bocetos/catalogo.html`) tenía buscador, una fila de categorías y un selector de orden, todo arriba de la lista. Con mi pedido, la IA pasó categoría y orden a un modal que se abre desde abajo con un botón de filtros. El botón muestra cuántos filtros hay activos, y debajo del buscador quedan como etiquetas que se pueden quitar.
+  - El filtro por precio (`precioMin`/`precioMax`, `tuPrecioEstaEntre`) quedó afuera porque ningún caso de uso lo pide en la app.
+  - Con el ok creó `api/eventos.js` y `api/categorias.js`, `format.js` (fechas, precios y puntajes en es-AR hechos a mano, sin depender de Intl), `EventoCard`, `FiltrosModal` (con el `Modal` de React Native, sin dependencias) y la pantalla, que usa `useCarga`. La búsqueda espera medio segundo después de la última tecla.
+  - Prueba en el emulador: la lista por fecha, el orden por puntaje con Martín (sin reseñas) al final, Conferencias sin resultados con las dos etiquetas y el contador en 2, Limpiar filtros, la búsqueda "caba" (2 eventos), y el error sin red con Reintentar.
+- **Bien:** el boceto con datos reales permitió discutir dónde van los filtros antes de escribir código. Cambiarlo costó un boceto, no una pantalla.
+- **Corregido / problemas:**
+  - Le pedí el modal de filtros: el primer boceto ponía todos los controles a la vista.
+  - En el emulador las horas salían 3 horas corridas (23:00 en lugar de 20:00), porque el emulador está en UTC. La IA lo corrigió mostrando siempre la hora argentina, ya que los eventos son en Argentina.
+  - Metro no tomaba los cambios: Expo Go seguía conectado a una sesión vieja. La IA se dio cuenta de que la prueba de Reintentar de la subtarea anterior había corrido el código viejo, lo reconoció y la repitió acá. Dejó anotado en `probar-caso-de-uso` cómo verificar que la app corre el código nuevo.
+  - Tocar un evento todavía no lleva a ningún lado: el detalle es la subtarea siguiente.
+- **Aprendizaje:** una prueba solo vale si se sabe qué versión del código se está probando. La IA dio por buena una prueba que en realidad corrió código viejo, y solo lo descubrió porque una pantalla nueva no aparecía. Conviene verificar que el bundle se haya recargado antes de dar algo por probado.

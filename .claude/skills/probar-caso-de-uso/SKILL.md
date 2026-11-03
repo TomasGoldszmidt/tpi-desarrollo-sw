@@ -22,6 +22,10 @@ Objetivo: demostrar con evidencia que un caso de uso funciona, incluidos los cas
 4. **Probar la pantalla** si el caso de uso tiene UI y el emulador está abierto (`adb devices`):
    - Captura: `adb exec-out screencap -p > <scratchpad>/captura.png` y mirarla con Read.
    - Si hay que navegar, describirle al usuario qué tocar o usar `adb shell input tap X Y` con coordenadas tomadas de la captura.
+   - **Antes de probar, confirmar que la app corre el código nuevo:** si la pantalla no cambió después de editar, Expo Go puede haber quedado conectado a un Metro viejo. Abrir de nuevo la app con `adb shell am start -a android.intent.action.VIEW -d exp://<IP>:<puerto> host.exp.exponent` y verificar en la terminal de Expo que aparezca un `Android Bundled` nuevo.
+   - Sin red: `adb shell svc wifi disable` y `adb shell svc data disable` (y `enable` para volver), para probar los errores de conexión.
+   - El emulador está en UTC: las horas se comparan contra la hora argentina que muestra la app (`src/format.js`).
+   - La tecla atrás (`keyevent 4`) en la primera pestaña cierra la app; para cerrar el teclado usar `keyevent 111`.
 5. **Reportar** una tabla corta:
 
 | Caso | Request / acción | Esperado | Obtenido | OK |
