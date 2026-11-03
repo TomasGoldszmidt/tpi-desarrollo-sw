@@ -573,3 +573,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - En la prueba la IA cometió varios errores con el emulador: las teclas para recargar se escribieron en el buscador, la red lenta cortó la descarga del bundle y Expo Go quedó roto hasta recargar, un script tocó botones en la pantalla equivocada, y llegó a reabrir la app sin red. Todo se resolvió, pero llevó varias vueltas.
   - Las compras de prueba quedaron en el backend y se volvió al seed reiniciándolo.
 - **Aprendizaje:** la app tiene que hablarle al usuario, no al programador: los mensajes técnicos que me sirvieron para depurar no tienen que llegar a la pantalla. Y para probar estados que duran muy poco (una carga) hay que provocarlos a propósito, en este caso con la red lenta.
+
+### 2026-11-03 · Mis compras
+- **Tarea:** Pantalla "Mis compras" con estados y días restantes
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "dale" y "Aprobado", sin cambios al boceto.
+- **Resultado:**
+  - Boceto (`docs/bocetos/mis-compras.html`) con las compras reales de Sofía, las de Juan con los cinco estados y la lista vacía de Lucía.
+  - `EstadoBadge` con un color por estado (pendiente ámbar, confirmada verde, utilizada gris, cancelada roja, reembolsada violeta), pensado para reusar en el detalle de la compra y en las ventas. `CompraCard` muestra los días que faltan solo en las confirmadas ("Faltan 20 días", "Es hoy" o "El evento ya pasó") y apaga las canceladas y reembolsadas.
+  - La pestaña vuelve a pedir la lista cada vez que se entra (`useFocusEffect`) y al deslizar hacia abajo. Para eso `recargar` de `useCarga` pasó a ser estable entre renders.
+  - Prueba en el emulador: las 4 compras de Sofía; una compra nueva hecha por la API aparece al volver a la pestaña; las 5 de Juan con todos los estados, incluido el stand-up confirmado que ya pasó; Lucía sin compras, y "Explorar eventos" lleva al catálogo.
+- **Bien:** el seed preparado en la sección 1 tenía todos los estados repartidos entre Sofía y Juan, así que la pantalla se probó entera sin crear datos.
+- **Corregido / problemas:**
+  - Ninguna corrección mía al boceto.
+  - Expo Go se quedó trabado al abrir y hubo que cerrarlo y reabrirlo con un enlace directo.
+  - Tocar una compra todavía no hace nada: el detalle es la subtarea siguiente.
+- **Aprendizaje:** cuando el seed está pensado para cubrir los casos, cada pantalla se prueba completa en un par de minutos. Preparar los datos al principio del TP sigue rindiendo.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Pide datos al backend al montar la pantalla y expone los estados para mostrar
 // cargando, error y reintentar. pedir es una función async (ej: getUsuarios);
@@ -30,11 +30,13 @@ export function useCarga(pedir) {
 
   // Está cargando hasta que llega la respuesta del pedido y el intento actuales.
   const loading = !resultado || resultado.pedir !== pedir || resultado.intento !== intento;
+  // Estable entre renders, para poder usarla en useFocusEffect.
+  const recargar = useCallback(() => setIntento((n) => n + 1), []);
 
   return {
     data: resultado?.data ?? null,
     loading,
     error: loading ? null : resultado.error,
-    recargar: () => setIntento((n) => n + 1),
+    recargar,
   };
 }
