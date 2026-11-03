@@ -1,7 +1,7 @@
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { comprar, detalleCompra, actualizarEstado } from '../domain/compra.js';
+import { comprar, detalleCompra, actualizarEstado, estadoAlCancelar } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
 import { NotFoundError } from '../http/errors.js';
 import { requireId, requireInteger } from '../http/validation.js';
@@ -21,12 +21,13 @@ function findCompra(req) {
   return compra;
 }
 
-// Pago y utilización son el mismo cambio de estado con otro destino; las reglas están en el dominio.
-function changeEstado(nuevoEstado) {
+// Pago, utilización y cancelación son el mismo cambio de estado con otro destino; las reglas
+// están en el dominio. `destino` recibe la compra porque al cancelar depende de su estado.
+function changeEstado(destino) {
   return async (req, res) => {
     const compra = findCompra(req);
     const evento = eventoRepository.findById(compra.eventoId);
-    const actualizada = actualizarEstado(compra, evento, nuevoEstado, req.usuario);
+    const actualizada = actualizarEstado(compra, evento, destino(compra), req.usuario);
     res.status(200).json(toDetalle(actualizada));
   };
 }
@@ -43,5 +44,7 @@ export async function create(req, res) {
   res.status(201).json(toDetalle(compra));
 }
 
-export const pay = changeEstado(EstadoCompra.CONFIRMADA);
-export const markUtilizada = changeEstado(EstadoCompra.UTILIZADA);
+export const pay = changeEstado(() => EstadoCompra.CONFIRMADA);
+export const markUtilizada = changeEstado(() => EstadoCompra.UTILIZADA);
+// PENDIENTE → CANCELADA, CONFIRMADA → REEMBOLSADA (casos de uso 7 y 8).
+export const cancel = changeEstado(estadoAlCancelar);

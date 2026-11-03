@@ -371,3 +371,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Como todo `/compras` pide usuario activo, una ruta inexistente bajo `/compras` responde 401 y no 404. Es aceptable.
   - Las compras de prueba (ids 10 y 11) y la compra 9, que quedó UTILIZADA, siguen en memoria hasta reiniciar el backend.
 - **Aprendizaje:** haber hecho primero la lógica de dominio con tests separados de los endpoints hizo que esta tarea fuera casi solo conectar piezas. El orden de `TAREAS.md` funcionó.
+
+### 2026-11-02 · Cancelación y reembolso
+- **Tarea:** Cancelación / reembolso con sus reglas
+- **Herramienta / skill:** Claude Code + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" y "Aprobado" después del análisis.
+- **Resultado:**
+  - Análisis de `POST /compras/:id/cancelacion` (casos 7 y 8). Todas las reglas ya estaban en el dominio (`estadoAlCancelar` y la tabla de transiciones), así que no había que crear ninguna. Dos dudas aprobadas: mantener el orden de errores de las otras acciones (primero el estado, después el permiso) y no agregar un campo de monto, porque el `total` ya dice cuánto se reembolsa.
+  - Con el ok, generalizó el helper del controlador para que reciba una función que decide el estado de destino. Así `cancel` quedó como `changeEstado(estadoAlCancelar)`. Agregó la ruta y el endpoint en el swagger.
+  - `/probar-caso-de-uso`, con el seed recién cargado (nodemon reinició solo al cambiar los archivos), probó: la CONFIRMADA de Sofía queda REEMBOLSADA y su PENDIENTE queda CANCELADA, las dos con el historial completo; el cupo del rock y de la obra vuelve al total; y respondió 409 para UTILIZADA, evento pasado, ya REEMBOLSADA y ya CANCELADA, 403 para otro comprador, 404, 400 y 401.
+- **Bien:** la tarea fue casi solo conectar piezas, porque la regla del enunciado ya estaba resuelta y testeada desde la tarea de dominio.
+- **Corregido / problemas:**
+  - Ninguna corrección mía.
+  - La IA quiso reiniciar el backend escribiendo `rs` en la pestaña de nodemon, pero la herramienta no permite reusar esa pestaña. No hizo falta: nodemon ya se había reiniciado al cambiar los archivos.
+- **Aprendizaje:** dejar las reglas de negocio en el dominio desde el principio hace que cada endpoint nuevo sea chico y que el análisis se concentre en las decisiones que de verdad quedan abiertas.

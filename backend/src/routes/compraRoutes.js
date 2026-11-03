@@ -10,5 +10,6 @@ router.use(requireUsuario);
 router.post('/', compraController.create);
 router.post('/:id/pago', compraController.pay);
 router.post('/:id/utilizacion', compraController.markUtilizada);
+router.post('/:id/cancelacion', compraController.cancel);
 
 export default router;

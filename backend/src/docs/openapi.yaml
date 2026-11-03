@@ -342,6 +342,51 @@ paths:
                 error: Todavía no es el día del evento
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}/cancelacion:
+    post:
+      tags: [Compras]
+      summary: Cancelar una compra
+      description: >-
+        Solo lo puede hacer el comprador y antes de que el evento se realice. Una
+        compra PENDIENTE queda CANCELADA; una CONFIRMADA queda REEMBOLSADA (se le
+        devuelve el `total`, de forma simulada). Una compra UTILIZADA, CANCELADA o
+        REEMBOLSADA no se puede cancelar. En los dos casos se libera el cupo.
+      operationId: cancelCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '200':
+          description: La compra cancelada o reembolsada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompraDetalle'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No podés pasar esta compra a REEMBOLSADA
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '409':
+          description: La compra no se puede cancelar por su estado o el evento ya se realizó
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No se puede cancelar una compra UTILIZADA
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
 components:
   parameters:
     CompraId:
