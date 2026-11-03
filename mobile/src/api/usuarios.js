@@ -13,3 +13,8 @@ export function getUsuario(id) {
 export function getReseniasOrganizador(id) {
   return request(`/usuarios/${id}/resenias`);
 }
+
+// Los eventos que organiza, incluidos los que ya se realizaron, ordenados por fecha.
+export function getEventosOrganizador(id) {
+  return request(`/usuarios/${id}/eventos`);
+}

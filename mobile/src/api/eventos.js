@@ -25,3 +25,9 @@ export function getEvento(id) {
 export function crearEvento(datos) {
   return request('/eventos', { method: 'POST', body: datos });
 }
+
+// Caso de uso 2: las compras del evento en cualquier estado, de la más reciente a la
+// más vieja. Solo para el organizador; las disponibles por tipo salen de getEvento.
+export function getVentasEvento(id) {
+  return request(`/eventos/${id}/compras`);
+}

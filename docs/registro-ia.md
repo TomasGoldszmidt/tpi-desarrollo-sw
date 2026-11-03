@@ -663,3 +663,23 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Marqué que "Completá el cupo" quedaba mal ubicado: la IA había puesto los avisos de precio y cupo debajo de la fila, y el del cupo aparecía debajo del precio. Se movió cada uno debajo de su campo, como ya estaban los de fecha y hora.
   - Después del cambio, no se volvió a probar en el emulador la creación correcta ni los errores del backend. Ese código no cambió, salvo el chequeo previo.
 - **Aprendizaje:** que una pantalla esté aprobada no significa que esté bien diseñada. Preguntarle a la IA "¿es un buen patrón?" sobre algo concreto sirve para revisarla con criterio y encontrar problemas que en el boceto no se veían.
+
+### 2026-11-03 · Pantalla de ventas por evento
+- **Tarea:** Pantalla de ventas por evento (organizador)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `/registrar-ia`
+- **Pedido (prompt):** "siguiente tarea". Después de ver el boceto: "aprobado, solo estan mal los logos del catalogo, mis compras y mis eventos pero entiendo que es solo el boceto".
+- **Resultado:**
+  - Boceto `docs/bocetos/ventas-evento.html` con datos del seed: Mis eventos de Lucía separados en "Próximos" y "Ya realizados", las ventas de Rock Nacional (una compra confirmada y una reembolsada), el Festival con Backstage agotado, un evento sin ventas, la carga y el error sin conexión.
+  - La pestaña "Mis eventos" ahora lista los eventos del usuario activo (`GET /usuarios/:id/eventos`) y los vuelve a pedir cada vez que se vuelve a la pestaña.
+  - Pantalla nueva `eventos/[id]/ventas.js`: las entradas disponibles por tipo, con una barra de lo vendido, salen de `GET /eventos/:id`, y las compras de `GET /eventos/:id/compras`. Cada compra muestra estado, comprador, tipo × cantidad, mensajes, total y fecha, y abre el detalle de compra existente, donde está el chat con el comprador.
+  - Prueba en el emulador: los estados A a F coincidieron con el boceto. Tocar una compra abrió su detalle con el chat; sin red apareció el error y "Reintentar" recuperó las ventas. Además, se creó por API una compra de Juan en el Meetup de Sofía y, al deslizar para recargar, apareció como pendiente y las disponibles bajaron de 30 a 27.
+- **Bien:** no hizo falta tocar el backend: los endpoints ya devolvían todo, incluidas las disponibles por tipo. El análisis detectó que `POST /compras/:id/utilizacion` no lo usa ninguna pantalla, y quedó como decisión aparte en lugar de meterse sin avisar.
+- **Corregido / problemas:**
+  - Los logos de las pestañas del boceto eran cuadrados genéricos, no los íconos de la app. Lo marqué yo, y lo dejamos así porque es solo el boceto.
+  - La IA cambió tres cosas respecto del boceto y del análisis:
+    - El header lleva la flecha y el logo, como las otras pantallas apiladas, en vez del título "Ventas", que pasó a ser una etiqueta arriba del nombre del evento.
+    - Las tarjetas quedaron dentro de cada pantalla y no en `components/`, porque se usan en un solo lugar.
+    - La carga de Mis eventos usa `EstadoCarga` debajo del botón, como Mis compras, en vez de `PantallaCarga`.
+  - El seed no tiene eventos sin ventas: el vacío se probó con un evento creado antes desde la app, que se pierde al reiniciar el backend.
+  - No se probó en el emulador el 403, que aparece cuando el usuario no es el organizador: desde la app no se llega a esa pantalla con otro usuario. Se verificó por API.
+- **Aprendizaje:** antes de pedir una pantalla conviene revisar qué endpoints del backend no usa ninguna. Así apareció que nadie podía marcar una compra como utilizada, una acción que de otro modo se habría descubierto recién en la prueba integral.

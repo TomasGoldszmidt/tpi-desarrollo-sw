@@ -1,0 +1,255 @@
+import { useCallback, useRef } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
+import { getEvento, getVentasEvento } from '../../../api/eventos.js';
+import { useCarga } from '../../../hooks/useCarga.js';
+import { PantallaCarga } from '../../../components/Carga.js';
+import { EstadoCarga } from '../../../components/EstadoCarga.js';
+import { EstadoBadge, ESTADOS_INACTIVOS } from '../../../components/EstadoBadge.js';
+import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
+import { colors, fontSize, spacing } from '../../../theme.js';
+
+// Caso de uso 2: las compras de un evento con su estado y las entradas que quedan
+// disponibles de cada tipo. Solo la ve el organizador.
+export default function VentasEvento() {
+  const { id } = useLocalSearchParams();
+  const pedir = useCallback(async () => {
+    const [evento, compras] = await Promise.all([getEvento(id), getVentasEvento(id)]);
+    return { evento, compras };
+  }, [id]);
+  const { data, loading, error, recargar } = useCarga(pedir);
+
+  // Al volver del detalle de una compra se vuelven a pedir las ventas.
+  // La primera vez ya lo pide useCarga.
+  const primeraVez = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (primeraVez.current) {
+        primeraVez.current = false;
+        return;
+      }
+      recargar();
+    }, [recargar]),
+  );
+
+  if (loading && !data) {
+    return <PantallaCarga mensaje="Cargando las ventas…" />;
+  }
+  if (error || !data) {
+    return (
+      <View style={styles.centrado}>
+        <EstadoCarga loading={loading} error={error} onRetry={recargar} />
+      </View>
+    );
+  }
+
+  const { evento, compras } = data;
+  // Del lugar se muestra solo el nombre, sin la dirección.
+  const lugar = evento.lugar.split(',')[0];
+
+  return (
+    <ScrollView
+      style={styles.pantalla}
+      contentContainerStyle={styles.contenido}
+      refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+    >
+      <Text style={styles.etiqueta}>Ventas</Text>
+      <Text style={styles.nombre}>{evento.nombre}</Text>
+      <Text style={styles.meta}>
+        {formatFecha(evento.fecha)} · {lugar}
+      </Text>
+
+      <Text style={styles.seccion}>Entradas disponibles</Text>
+      {evento.tiposEntrada.map((tipo) => (
+        <DisponiblesFila key={tipo.id} tipo={tipo} />
+      ))}
+
+      <Text style={styles.seccion}>Compras ({compras.length})</Text>
+      {compras.length === 0 ? (
+        <View style={styles.vacio}>
+          <Text style={styles.vacioTexto}>Todavía nadie compró entradas para este evento.</Text>
+        </View>
+      ) : (
+        compras.map((compra) => (
+          <VentaCard key={compra.id} compra={compra} onPress={() => router.push(`/compras/${compra.id}`)} />
+        ))
+      )}
+    </ScrollView>
+  );
+}
+
+// Un tipo de entrada con cuántas quedan de su cupo; la barra muestra lo vendido.
+function DisponiblesFila({ tipo }) {
+  const vendidas = tipo.cupo - tipo.disponibles;
+  return (
+    <View style={styles.tipo}>
+      <View>
+        <Text style={styles.tipoNombre}>{tipo.nombre}</Text>
+        <Text style={styles.meta}>{formatPrecio(tipo.precio)}</Text>
+      </View>
+      <View style={styles.tipoDerecha}>
+        {tipo.disponibles === 0 ? (
+          <Text style={styles.agotado}>Agotado</Text>
+        ) : (
+          <Text style={styles.disponibles}>
+            {tipo.disponibles} de {tipo.cupo}
+          </Text>
+        )}
+        <View style={styles.barra}>
+          <View style={[styles.barraVendida, { width: `${(vendidas / tipo.cupo) * 100}%` }]} />
+        </View>
+      </View>
+    </View>
+  );
+}
+
+// Una compra del evento: estado, comprador, entradas y total. Abre el detalle con el chat.
+function VentaCard({ compra, onPress }) {
+  const inactiva = ESTADOS_INACTIVOS.includes(compra.estado);
+  // El primer cambio del historial es la creación de la compra.
+  const creada = compra.historial[0].fechaHora;
+  const mensajes = compra.mensajes.length;
+  let detalle = `${compra.tipoEntrada.nombre} × ${compra.cantidad}`;
+  if (mensajes > 0) detalle += mensajes === 1 ? ' · 1 mensaje' : ` · ${mensajes} mensajes`;
+
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.card, inactiva && styles.inactiva, pressed && styles.presionada]}
+      onPress={onPress}
+    >
+      <View style={styles.fila}>
+        <EstadoBadge estado={compra.estado} />
+        <Text style={styles.meta}>{formatDia(creada)}</Text>
+      </View>
+      <Text style={styles.comprador}>
+        {compra.comprador.nombre} {compra.comprador.apellido}
+      </Text>
+      <View style={styles.fila}>
+        <Text style={styles.meta}>{detalle}</Text>
+        <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
+      </View>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  pantalla: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  contenido: {
+    padding: spacing.lg,
+  },
+  centrado: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: colors.background,
+  },
+  etiqueta: {
+    color: colors.primaryText,
+    fontSize: fontSize.small,
+    fontWeight: 'bold',
+  },
+  nombre: {
+    color: colors.text,
+    fontSize: fontSize.title,
+    fontWeight: 'bold',
+  },
+  meta: {
+    color: colors.textSecondary,
+    fontSize: fontSize.small,
+  },
+  seccion: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: spacing.xl,
+    marginBottom: spacing.sm,
+  },
+  tipo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  tipoNombre: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    fontWeight: 'bold',
+  },
+  tipoDerecha: {
+    alignItems: 'flex-end',
+    gap: spacing.xs,
+  },
+  disponibles: {
+    color: colors.primaryText,
+    fontSize: fontSize.body,
+    fontWeight: 'bold',
+  },
+  agotado: {
+    backgroundColor: '#FCEBEB',
+    color: '#791F1F',
+    borderRadius: 999,
+    paddingVertical: 2,
+    paddingHorizontal: 10,
+    fontSize: 11,
+    fontWeight: 'bold',
+    overflow: 'hidden',
+  },
+  barra: {
+    width: 120,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F1EFE8',
+    overflow: 'hidden',
+  },
+  barraVendida: {
+    height: '100%',
+    backgroundColor: colors.primary,
+  },
+  card: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.md,
+    marginBottom: spacing.sm,
+    gap: 2,
+  },
+  inactiva: {
+    opacity: 0.6,
+  },
+  presionada: {
+    backgroundColor: colors.primarySoft,
+  },
+  fila: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  comprador: {
+    color: colors.text,
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginTop: spacing.xs,
+  },
+  total: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    fontWeight: 'bold',
+  },
+  vacio: {
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.border,
+    borderRadius: 12,
+    padding: spacing.lg,
+    alignItems: 'center',
+  },
+  vacioTexto: {
+    color: colors.textSecondary,
+    fontSize: fontSize.body,
+    textAlign: 'center',
+  },
+});

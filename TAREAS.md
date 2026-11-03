@@ -38,7 +38,7 @@
 - [x] Pantalla "Mis compras" con estados y días restantes
 - [x] Detalle de compra: acciones (pagar, cancelar, reseñar) y chat
 - [x] Pantalla de creación de evento (organizador)
-- [ ] Pantalla de ventas por evento (organizador)
+- [x] Pantalla de ventas por evento (organizador)
 
 ## 4. Cierre técnico
 - [ ] Prueba integral de todos los casos de uso en el celular
