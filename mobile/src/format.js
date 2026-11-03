@@ -60,3 +60,20 @@ export function formatDiasRestantes(diasRestantes) {
   if (diasRestantes === 1) return 'Falta 1 día';
   return `Faltan ${diasRestantes} días`;
 }
+
+// Fecha y hora elegidas como hora argentina → ISO en UTC, para mandar al backend.
+// dia: { anio, mes (0-11), dia }; hora: { hora, minuto }.
+export function fechaArgentinaISO(dia, hora) {
+  const utc = Date.UTC(dia.anio, dia.mes, dia.dia, hora.hora, hora.minuto);
+  return new Date(utc - OFFSET_ARGENTINA_MS).toISOString();
+}
+
+// { anio: 2027, mes: 2, dia: 15 } → "lun 15 mar 2027".
+export function formatDiaElegido(dia) {
+  return `${formatDia(fechaArgentinaISO(dia, { hora: 12, minuto: 0 }))} ${dia.anio}`;
+}
+
+// { hora: 19, minuto: 0 } → "19:00".
+export function formatHoraElegida(hora) {
+  return `${dosDigitos(hora.hora)}:${dosDigitos(hora.minuto)}`;
+}

@@ -18,3 +18,10 @@ export function buscarEventos({ texto, categoriaId, orden } = {}) {
 export function getEvento(id) {
   return request(`/eventos/${id}`);
 }
+
+// Caso de uso 4: el organizador es el usuario activo. datos tiene la forma de NuevoEvento
+// (nombre, descripcion, lugar, categoriaId, fecha en ISO, multimedia y tiposEntrada).
+// Devuelve el evento creado, con la misma forma que el detalle.
+export function crearEvento(datos) {
+  return request('/eventos', { method: 'POST', body: datos });
+}

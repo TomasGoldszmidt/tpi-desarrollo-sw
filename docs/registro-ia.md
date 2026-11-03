@@ -623,3 +623,27 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Las dos cosas las marqué yo: la IA había dejado procesos sin carga a la vista, aunque eso ya estaba en la skill, y había escrito el estado a mano en lugar de reusar el componente.
   - El velo del chat no se pudo capturar, porque la demora de red del emulador no se aplicó a tiempo en ninguno de los dos intentos. Quedó sin verificar en pantalla.
 - **Aprendizaje:** las reglas de la skill no alcanzan si no se revisan al cerrar cada pantalla. Para el resto, conviene pedirle a la IA que verifique explícitamente la carga en cada proceso antes de dar la pantalla por terminada.
+
+### 2026-11-03 · Pantalla de creación de evento
+- **Tarea:** 3. Front-End · Pantalla de creación de evento (organizador)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "segui con la siguiente tarea". Con el boceto, "Ok, implementá", que también aprobó el selector de fecha nativo.
+- **Resultado:**
+  - Boceto (`docs/bocetos/crear-evento.html`) con seis estados: Mis eventos con el botón, los datos del evento, el selector de fecha, los tipos de entrada, el error del backend con el botón deshabilitado y "Creando el evento…".
+  - Dependencia nueva, aprobada antes de instalarla: `@react-native-community/datetimepicker` 9.2.1, con `npx expo install … -- --legacy-peer-deps`. Agregó su plugin en `app.json`. Se usa la API imperativa de Android (`DateTimePickerAndroid.open`), leída del README de la versión instalada, porque la página de Expo SDK 58 no la documenta.
+  - App:
+    - `eventos/nuevo.js`: formulario con nombre, descripción, chips de categorías (`GET /categorias`), fecha y hora nativas sin días pasados, lugar, links de imágenes opcionales y tipos de entrada que se agregan y se quitan (siempre queda uno).
+    - Botón "Crear evento" en la pestaña Mis eventos. La lista de eventos queda para la 3.9.
+    - `crearEvento` en la API. `fechaArgentinaISO`, `formatDiaElegido` y `formatHoraElegida` en `format.js`: la fecha elegida se toma como hora argentina.
+  - Validación en la app: el botón queda deshabilitado hasta que todo esté completo, con avisos de cupo menor a 1, precio inválido y link que no empieza con http(s). Los mensajes del backend para esos campos nombran cosas como `tiposEntrada[0].cupo`, que no se pueden mostrar. La fecha no futura y el nombre repetido sí se muestran con el mensaje del backend.
+  - Al crear, `router.replace` lleva al detalle del evento, así "volver" vuelve a Mis eventos.
+  - Pruebas:
+    - API con curl: 201, 409 por nombre repetido y 409 por fecha pasada.
+    - Emulador con Juan: link `ftp://` (aviso y "Agregar" deshabilitado), cupo 0 (aviso y botón deshabilitado), hoy a las 20:00 cuando ya habían pasado ("La fecha del evento tiene que ser futura"), "General" y "general" ("Hay tipos de entrada con el nombre repetido") y la creación correcta. El evento se guardó para el 20 de noviembre a las 20:00 (23:00 UTC), con su imagen, y "volver" llevó a Mis eventos.
+- **Bien:** el boceto se aprobó sin cambios. Los errores del backend que ya estaban en español se mostraron tal cual, sin escribir nada nuevo.
+- **Corregido / problemas:**
+  - Al abrir, Expo Go mostró una versión vieja de la app (la prueba de conexión del setup). Se reabrió contra el Metro actual.
+  - Al manejar el emulador con adb, unos borrados que eran para el campo "Lugar" cayeron en "Nombre", y el evento de prueba quedó como "Taller". Fue un error al manejar el emulador, no de la app.
+  - No se llegaron a capturar las pantallas "Creando el evento…" ni "Cargando el formulario…", porque el backend local respondió antes de la captura. Las dos usan los mismos componentes de carga que las otras pantallas.
+  - La IA cambió dos cosas respecto del análisis: `TipoEntradaForm` quedó dentro de la pantalla y no en `components/`, porque se usa en un solo lugar, y se sumó la validación de precio, cupo y link en la app.
+- **Aprendizaje:** antes de mostrar un mensaje del backend tal cual, hay que mirar qué dice. Los de las reglas de negocio sirven para el usuario, pero los de validación de formato nombran campos técnicos, así que esos casos conviene validarlos en la app.

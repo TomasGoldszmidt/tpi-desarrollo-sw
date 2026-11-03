@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Crear evento</title>
+<style>
+:root{--text-secondary:#5F5E5A;--border-strong:#B4B2A9}
+body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+.cap{font-size:12px;color:var(--text-secondary);margin-bottom:6px}
+.phone{position:relative;border:0.5px solid var(--border-strong);border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:620px;display:flex;flex-direction:column}
+.bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:0.5px solid #D3D1C7;font-size:14px;font-weight:500;background:#fff}
+.bar .l{display:flex;align-items:center;gap:8px}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.chip{width:28px;height:28px;background:#EAF3DE;color:#27500A;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.scr{flex:1;font-size:12px;overflow:hidden;padding:10px 12px;position:relative}
+.h{font-size:16px;font-weight:500;margin-bottom:8px}
+.sec{font-size:13px;font-weight:500;margin:12px 0 6px}
+.lbl{font-size:11px;color:#5F5E5A;margin:8px 0 3px}
+.in{border:0.5px solid #B4B2A9;border-radius:8px;padding:7px 8px;font-size:12px;background:#fff}
+.in.ph{color:#888780}
+.in.area{height:44px;line-height:1.4}
+.duo{display:flex;gap:6px}.duo>div{flex:1}
+.pick{display:flex;justify-content:space-between;align-items:center}
+.cats{display:flex;gap:5px;flex-wrap:wrap}
+.cat{border:0.5px solid #B4B2A9;border-radius:14px;padding:4px 9px;font-size:11px;color:#444441}
+.cat.on{background:#3B6D11;border-color:#3B6D11;color:#fff}
+.tipo{position:relative;border:0.5px solid #D3D1C7;border-radius:10px;padding:8px;margin-bottom:6px}
+.tipo .top{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:500;color:#5F5E5A;margin-bottom:2px}
+.del{color:#A32D2D;font-size:11px}
+.add{position:relative;border:0.5px dashed #3B6D11;color:#27500A;border-radius:8px;padding:7px;text-align:center;font-size:12px;font-weight:500}
+.url{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#5F5E5A;padding:5px 0;border-bottom:0.5px solid #D3D1C7}
+.cta{position:relative;margin:10px 12px;background:#3B6D11;color:#fff;border-radius:8px;text-align:center;padding:9px;font-size:13px;font-weight:500}
+.cta.dis{background:#D3D1C7;color:#5F5E5A}
+.err{background:#FCEBEB;color:#791F1F;border-radius:8px;padding:8px;font-size:12px;margin:0 12px}
+.vacio{border:0.5px dashed #B4B2A9;border-radius:10px;padding:14px;text-align:center;color:#5F5E5A;font-size:12px;margin-top:10px}
+.tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:#3B6D11}
+.ico{display:inline-block;width:14px;height:14px;border:1.5px solid currentColor;border-radius:4px}
+.spin{width:28px;height:28px;border-radius:50%;border:3px solid #EAF3DE;border-top-color:#3B6D11;animation:g 0.9s linear infinite;margin:0 auto}
+@keyframes g{to{transform:rotate(360deg)}}
+.msg{font-size:12px;color:#5F5E5A;text-align:center;margin-top:10px}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500;margin-right:4px;flex-shrink:0}
+.abs{position:absolute;right:-6px;top:-6px}
+.rel{position:relative}
+.dlg{position:absolute;left:18px;right:18px;top:150px;background:#fff;border-radius:14px;box-shadow:0 6px 24px rgba(0,0,0,.25);padding:12px;font-size:12px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center;font-size:11px;margin-top:8px}
+.cal .d{padding:4px 0;border-radius:50%}.cal .on{background:#3B6D11;color:#fff}.cal .w{color:#888780}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Crear evento (organizador)</h1>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:1rem 0;">
+
+<!-- A -->
+<div>
+<div class="cap">A · Mis eventos (Sofía, todavía no organiza)</div>
+<div class="phone">
+<div class="bar"><span class="l"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">SP</span></div>
+<div class="scr">
+<div class="h">Mis eventos</div>
+<div class="add" style="background:#3B6D11;color:#fff;border-style:solid">+ Crear evento<span class="n abs">1</span></div>
+<div class="vacio">Todavía no organizaste ningún evento.</div>
+</div>
+<div class="tabs"><span><b class="ico"></b>Catálogo</span><span><b class="ico"></b>Mis compras</span><span class="on"><b class="ico"></b>Mis eventos</span></div>
+</div>
+</div>
+
+<!-- B -->
+<div>
+<div class="cap">B · Datos del evento</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div class="h">Crear evento</div>
+<div class="lbl">Nombre</div><div class="in">Meetup de JavaScript</div>
+<div class="lbl">Descripción</div><div class="in area">Charlas cortas sobre el ecosistema JS</div>
+<div class="lbl">Categoría</div>
+<div class="cats rel"><span class="cat">Música</span><span class="cat">Teatro</span><span class="cat">Deportes</span><span class="cat">Festivales</span><span class="cat on">Conferencias</span><span class="n abs">2</span></div>
+<div class="duo">
+<div class="rel"><div class="lbl">Fecha</div><div class="in pick">lun 15 mar 2027<span>▾</span></div><span class="n abs" style="top:6px">3</span></div>
+<div class="rel"><div class="lbl">Hora</div><div class="in pick">19:00<span>▾</span></div><span class="n abs" style="top:6px">3</span></div>
+</div>
+<div class="lbl">Lugar</div><div class="in">UTN FRBA, Medrano 951, CABA</div>
+<div class="sec">Imágenes <span style="font-weight:400;color:#888780;font-size:11px">(opcional)</span></div>
+<div class="url">https://picsum.photos/id/1/800/450<span class="del">Quitar</span></div>
+<div class="duo rel" style="margin-top:6px"><div class="in ph" style="flex:3">Link de una imagen</div><div class="add" style="flex:1;padding:7px 0">Agregar</div><span class="n abs">4</span></div>
+</div>
+</div>
+</div>
+
+<!-- C -->
+<div>
+<div class="cap">C · Elegir la fecha</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr" style="opacity:.35">
+<div class="h">Crear evento</div>
+<div class="lbl">Nombre</div><div class="in">Meetup de JavaScript</div>
+<div class="lbl">Descripción</div><div class="in area">Charlas cortas sobre el ecosistema JS</div>
+<div class="lbl">Categoría</div>
+<div class="cats"><span class="cat">Música</span><span class="cat">Teatro</span><span class="cat">Deportes</span><span class="cat">Festivales</span><span class="cat on">Conferencias</span></div>
+<div class="duo"><div><div class="lbl">Fecha</div><div class="in">Elegir</div></div><div><div class="lbl">Hora</div><div class="in">Elegir</div></div></div>
+</div>
+<div class="dlg">
+<div style="font-size:11px;color:#5F5E5A">2027</div>
+<div style="font-size:18px;font-weight:500">lun, 15 mar</div>
+<div style="margin-top:8px;font-weight:500">marzo 2027</div>
+<div class="cal">
+<span class="w">D</span><span class="w">L</span><span class="w">M</span><span class="w">M</span><span class="w">J</span><span class="w">V</span><span class="w">S</span>
+<span></span><span class="d">1</span><span class="d">2</span><span class="d">3</span><span class="d">4</span><span class="d">5</span><span class="d">6</span>
+<span class="d">7</span><span class="d">8</span><span class="d">9</span><span class="d">10</span><span class="d">11</span><span class="d">12</span><span class="d">13</span>
+<span class="d">14</span><span class="d on">15</span><span class="d">16</span><span class="d">17</span><span class="d">18</span><span class="d">19</span><span class="d">20</span>
+<span class="d">21</span><span class="d">22</span><span class="d">23</span><span class="d">24</span><span class="d">25</span><span class="d">26</span><span class="d">27</span>
+<span class="d">28</span><span class="d">29</span><span class="d">30</span><span class="d">31</span>
+</div>
+<div style="text-align:right;margin-top:10px;color:#3B6D11;font-weight:500">Cancelar &nbsp;&nbsp; Aceptar</div>
+</div>
+</div>
+</div>
+
+<!-- D -->
+<div>
+<div class="cap">D · Tipos de entrada (abajo del formulario)</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div class="sec" style="margin-top:0">Tipos de entrada</div>
+<div class="tipo">
+<div class="top">Tipo 1</div>
+<div class="in">General</div>
+<div class="in" style="margin-top:4px">Entrada libre con registro</div>
+<div class="duo" style="margin-top:4px"><div><div class="lbl" style="margin-top:0">Precio</div><div class="in">$ 0</div></div><div><div class="lbl" style="margin-top:0">Cupo</div><div class="in">100</div></div></div>
+</div>
+<div class="tipo">
+<div class="top">Tipo 2<span class="del">Quitar<span class="n" style="margin-left:4px">5</span></span></div>
+<div class="in">Con certificado</div>
+<div class="in" style="margin-top:4px">Incluye certificado de asistencia</div>
+<div class="duo" style="margin-top:4px"><div><div class="lbl" style="margin-top:0">Precio</div><div class="in">$ 5000</div></div><div><div class="lbl" style="margin-top:0">Cupo</div><div class="in">30</div></div></div>
+</div>
+<div class="add">+ Agregar tipo de entrada<span class="n abs">6</span></div>
+</div>
+<div class="cta">Crear evento<span class="n abs">7</span></div>
+</div>
+</div>
+
+<!-- E -->
+<div>
+<div class="cap">E · Faltan datos / error al crear</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div class="sec" style="margin-top:0">Tipos de entrada</div>
+<div class="tipo">
+<div class="top">Tipo 1</div>
+<div class="in">General</div>
+<div class="in" style="margin-top:4px">Entrada libre con registro</div>
+<div class="duo" style="margin-top:4px"><div><div class="lbl" style="margin-top:0">Precio</div><div class="in">$ 0</div></div><div><div class="lbl" style="margin-top:0">Cupo</div><div class="in">100</div></div></div>
+</div>
+<div class="tipo">
+<div class="top">Tipo 2<span class="del">Quitar</span></div>
+<div class="in">general</div>
+<div class="in" style="margin-top:4px">Con certificado</div>
+<div class="duo" style="margin-top:4px"><div><div class="lbl" style="margin-top:0">Precio</div><div class="in">$ 5000</div></div><div><div class="lbl" style="margin-top:0">Cupo</div><div class="in">30</div></div></div>
+</div>
+<div class="add">+ Agregar tipo de entrada</div>
+</div>
+<div class="err">Hay tipos de entrada con el nombre repetido</div>
+<div class="cta">Crear evento</div>
+<div style="font-size:11px;color:#888780;text-align:center;margin:-4px 0 6px">— si falta completar algo —</div>
+<div class="cta dis" style="margin-top:0">Crear evento</div>
+</div>
+</div>
+
+<!-- F -->
+<div>
+<div class="cap">F · Creando el evento</div>
+<div class="phone">
+<div class="bar"><span class="l"><span style="font-size:18px;color:#3B6D11">‹</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div class="sec" style="margin-top:0">Tipos de entrada</div>
+<div class="tipo"><div class="top">Tipo 1</div><div class="in">General</div></div>
+<div class="tipo"><div class="top">Tipo 2</div><div class="in">Con certificado</div></div>
+<div style="position:absolute;inset:0;background:rgba(255,255,255,0.85);display:flex;flex-direction:column;justify-content:center"><div class="spin"></div><div class="msg">Creando el evento…</div></div>
+</div>
+<div class="cta" style="opacity:.5">Crear evento</div>
+</div>
+</div>
+
+</div>
+<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;padding-bottom:1rem;">
+<div><span class="n">1</span> Botón arriba de la pestaña "Mis eventos": abre <code>eventos/nuevo</code>. La lista de eventos del organizador (y el estado vacío) se completa en la subtarea 3.9; acá solo se agrega el botón.</div>
+<div><span class="n">2</span> Chips con las categorías de <code>GET /categorias</code> (al abrir, <code>PantallaCarga</code> "Cargando el formulario…"; si falla, error con reintentar). Se elige una sola → <code>categoriaId</code>.</div>
+<div><span class="n">3</span> Abren el selector nativo de Android de fecha y de hora (C). No deja elegir días pasados. Se arma la fecha en hora argentina y se manda en ISO → <code>fecha</code>.</div>
+<div><span class="n">4</span> Opcional: agrega el link a la lista de imágenes (<code>multimedia</code>); "Quitar" lo saca. Si el link no es http/https, el backend responde 400 y se muestra el mensaje (E).</div>
+<div><span class="n">5</span> Quita ese tipo de entrada. El primero no se puede quitar: siempre hay al menos uno.</div>
+<div><span class="n">6</span> Agrega un tipo de entrada vacío al final.</div>
+<div><span class="n">7</span> <code>POST /eventos</code> con <code>X-User-Id</code> del usuario activo. Deshabilitado hasta que estén completos todos los campos obligatorios (nombre, descripción, categoría, fecha, hora, lugar y cada tipo con nombre, descripción, precio y cupo). Mientras responde, <code>CargaEncima</code> "Creando el evento…" (F). Con 201 va al detalle del evento creado (<code>router.replace('/eventos/:id')</code>), así "volver" lleva a Mis eventos y no al formulario. Con 400/409 (fecha no futura, nombre repetido, cupo &lt; 1) muestra el mensaje del backend arriba del botón y los datos cargados quedan (E).</div>
+</div>
+</body></html>
