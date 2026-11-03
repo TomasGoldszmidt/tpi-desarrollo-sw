@@ -35,8 +35,7 @@ export default function MisCompras() {
         <FlatList
           data={compras}
           keyExtractor={(compra) => String(compra.id)}
-          // El detalle de la compra es la subtarea 3.7: hasta entonces la tarjeta no navega.
-          renderItem={({ item }) => <CompraCard compra={item} />}
+          renderItem={({ item }) => <CompraCard compra={item} onPress={() => router.push(`/compras/${item.id}`)} />}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />
           }

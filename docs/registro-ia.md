@@ -589,3 +589,23 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Expo Go se quedó trabado al abrir y hubo que cerrarlo y reabrirlo con un enlace directo.
   - Tocar una compra todavía no hace nada: el detalle es la subtarea siguiente.
 - **Aprendizaje:** cuando el seed está pensado para cubrir los casos, cada pantalla se prueba completa en un par de minutos. Preparar los datos al principio del TP sigue rindiendo.
+
+### 2026-11-03 · Detalle de compra y chat
+- **Tarea:** Detalle de compra: acciones (pagar, cancelar, reseñar) y chat
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/nuevo-endpoint` + `/swagger` + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Dale, seguí". Sobre el chat: "para actualizar el chat no podemos hacer un pull based?". Después, "dale, implementalo", y "Sí, en el backend" para la reseña.
+- **Resultado:**
+  - Boceto (`docs/bocetos/detalle-compra.html`): compra pendiente con Pagar y Cancelar, confirmada con "Cancelar y pedir reembolso", utilizada con el formulario de reseña, y el chat en una pantalla aparte.
+  - La IA había propuesto que el chat se actualizara solo al entrar, porque se habían descartado los websockets. Le propuse consultar cada tanto, y quedó así: mientras el chat está abierto, pide los mensajes cada 5 segundos (con `useFocusEffect`, así se corta al salir) y, si un pedido falla, muestra "Sin conexión. Reintentando…".
+  - Backend: `GET /compras/:id` (y los listados de compras) ahora traen `resenia`, la reseña del comprador para ese evento o null, con `reseniaDeCompra` en el dominio. Un test nuevo (suite en 54) y swagger actualizado.
+  - App: `compras/[id].js` (estado, días, entradas, reseña, vista previa del chat, historial y acciones con confirmación y velo de carga), `compras/[id]/chat.js`, `ReseniaForm` y las funciones de la API. Las tarjetas de Mis compras y "Ver mi compra" ahora abren el detalle. `formatDiasRestantes` quedó en `format.js`, porque estaba repetido.
+  - Prueba en el emulador: Sofía paga Bernarda Alba (pasa a Confirmada, "Faltan 5 días"), la cancela y confirma (queda Reembolsada, sin acciones), reseña el stand-up con 4 estrellas (Martín pasa a tener puntaje 4) y escribe en el chat del Rock. Lucía contesta por la API y el mensaje aparece solo en menos de 5 segundos. Al volver, la vista previa dice "4 mensajes".
+- **Bien:** la consulta periódica resolvió el chat sin tocar el backend, y la idea fue mía.
+- **Corregido / problemas:**
+  - En el boceto, la IA escribió "Chat con la organizadora", deduciendo el género por el nombre. Lo cambió por el nombre de la persona.
+  - El aviso "Elegí de 1 a 5 estrellas" quedaba visible después de elegirlas; se corrigió.
+  - El teclado tapaba el campo del chat. `KeyboardAvoidingView` no funcionó, ni con el `behavior` que recomienda la guía de Expo, porque la app es de borde a borde. Se resolvió con un hook propio (`useAlturaTeclado`) que mide desde dónde empieza el teclado. Hicieron falta tres intentos.
+  - En un paso intermedio, la IA dejó un comentario JSX en un lugar inválido; lo vio antes de probar.
+  - El organizador ve la compra pero todavía no puede "Marcar como utilizada": queda para las ventas (3.9).
+  - No se verificó directamente que la consulta periódica se corte al salir del chat, porque el backend no registra los pedidos. Se confía en la limpieza de `useFocusEffect`.
+- **Aprendizaje:** la IA da por cerradas algunas opciones ("sin websockets no hay actualización") que tienen alternativas simples. Vale la pena preguntarle "¿y si hacemos X?". Y lo que en la documentación parece resuelto (el teclado) hay que probarlo en el emulador.

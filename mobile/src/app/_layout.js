@@ -26,6 +26,8 @@ export default function RootLayout() {
         <Stack.Screen name="eventos/[id]" options={conHeader} />
         <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
         <Stack.Screen name="usuarios/[id]/resenias" options={conHeader} />
+        <Stack.Screen name="compras/[id]" options={conHeader} />
+        <Stack.Screen name="compras/[id]/chat" options={conHeader} />
       </Stack>
       <StatusBar style="dark" />
     </UsuarioProvider>

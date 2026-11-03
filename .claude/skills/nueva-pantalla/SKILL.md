@@ -63,6 +63,7 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
   - Al abrir una pantalla sin datos todavía: `PantallaCarga` (`src/components/Carga.js`) con un mensaje ("Cargando el evento…").
   - Dentro de una pantalla abierta (buscar, filtrar, reintentar): `EstadoCarga` con `mensaje` en el lugar de la lista; el error, con el mismo componente.
   - Al confirmar una acción (comprar, pagar, cancelar): `CargaEncima` cubriendo la pantalla ("Confirmando tu compra…").
+- **Teclado:** en Android la pantalla es de borde a borde y `KeyboardAvoidingView` no corre el contenido. En las pantallas con un campo de texto abajo (como el chat), usar `src/hooks/useAlturaTeclado.js` y dejar ese alto como `paddingBottom`.
 - **Nada técnico en la app:** ni URLs, ni el backend, ni status. Los errores de conexión y los inesperados ya los traduce `api/client.js`; los del backend vienen en español. Después de una acción (pagar, cancelar) se vuelven a pedir los datos al backend en lugar de modificar el estado a mano.
 - **Fechas y precios** se formatean en un solo lugar (`src/format.js`), en es-AR.
 - JavaScript, sin TypeScript. ES Modules.

@@ -183,12 +183,11 @@ function CompraHecha({ compra, evento }) {
       </View>
 
       <View style={[styles.pie, { paddingBottom: spacing.md + insets.bottom }]}>
-        {/* El detalle de la compra es la subtarea 3.7: por ahora lleva a Mis compras. */}
         <Pressable
           style={styles.boton}
           onPress={() => {
             router.dismissAll();
-            router.navigate('/compras');
+            router.push(`/compras/${compra.id}`);
           }}
         >
           <Text style={styles.botonTexto}>Ver mi compra</Text>

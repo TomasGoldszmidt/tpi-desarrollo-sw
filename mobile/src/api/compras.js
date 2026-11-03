@@ -11,3 +11,27 @@ export function crearCompra({ eventoId, tipoEntradaId, cantidad }) {
 export function getMisCompras() {
   return request('/compras');
 }
+
+// Detalle de una compra: la ven el comprador y el organizador del evento.
+export function getCompra(id) {
+  return request(`/compras/${id}`);
+}
+
+// Pago simulado: PENDIENTE → CONFIRMADA.
+export function pagarCompra(id) {
+  return request(`/compras/${id}/pago`, { method: 'POST' });
+}
+
+// Casos de uso 7 y 8: sin pagar queda CANCELADA; pagada, REEMBOLSADA.
+export function cancelarCompra(id) {
+  return request(`/compras/${id}/cancelacion`, { method: 'POST' });
+}
+
+// Casos de uso 5 y 6: el chat de la compra, cada mensaje con su autor.
+export function getMensajes(id) {
+  return request(`/compras/${id}/mensajes`);
+}
+
+export function enviarMensaje(id, mensaje) {
+  return request(`/compras/${id}/mensajes`, { method: 'POST', body: { mensaje } });
+}

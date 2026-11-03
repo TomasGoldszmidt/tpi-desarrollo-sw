@@ -1,16 +1,7 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { EstadoBadge, ESTADOS_INACTIVOS } from './EstadoBadge.js';
-import { formatFecha, formatPrecio } from '../format.js';
+import { formatDiasRestantes, formatFecha, formatPrecio } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
-
-// Caso de uso 1: cuántos días faltan, solo para las compras CONFIRMADAS.
-// diasRestantes viene del backend; null significa que el evento ya pasó.
-function textoDias(diasRestantes) {
-  if (diasRestantes === null) return 'El evento ya pasó';
-  if (diasRestantes === 0) return 'Es hoy';
-  if (diasRestantes === 1) return 'Falta 1 día';
-  return `Faltan ${diasRestantes} días`;
-}
 
 // Una compra del comprador (CompraDetalle de la API): estado, evento, entradas y total.
 export function CompraCard({ compra, onPress }) {
@@ -26,7 +17,7 @@ export function CompraCard({ compra, onPress }) {
         <EstadoBadge estado={compra.estado} />
         {confirmada ? (
           <Text style={[styles.dias, compra.diasRestantes === null && styles.diasPasado]}>
-            {textoDias(compra.diasRestantes)}
+            {formatDiasRestantes(compra.diasRestantes)}
           </Text>
         ) : null}
       </View>
