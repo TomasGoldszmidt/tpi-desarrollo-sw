@@ -4,17 +4,20 @@ import * as categoriaRepository from '../persistence/repositories/categoriaRepos
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
 import { detalleCompra, masRecientesPrimero } from '../domain/compra.js';
+import { puntajeDe } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString, requireUrl,
 } from '../http/validation.js';
 
 function toDetalle(evento) {
+  const organizador = usuarioRepository.findById(evento.organizadorId);
   return detalleEvento(
     evento,
     compraRepository.findByEvento(evento.id),
     categoriaRepository.findById(evento.categoriaId),
-    usuarioRepository.findById(evento.organizadorId),
+    organizador,
+    puntajeDe(organizador),
   );
 }
 

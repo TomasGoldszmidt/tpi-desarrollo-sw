@@ -4,7 +4,7 @@ import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
 import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador } from '../src/domain/evento.js';
-import { calcularPuntajes, crearResenia, reseniasDeOrganizador } from '../src/domain/resenia.js';
+import { calcularPuntajes, crearResenia, perfilUsuario, puntajeDe, reseniasDeOrganizador } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
@@ -193,11 +193,12 @@ describe('crear evento', () => {
 describe('detalle de evento', () => {
   it('reemplaza los ids por resúmenes y calcula las disponibles por tipo', () => {
     const { festival } = seed.eventos;
-    const detalle = detalleEvento(festival, compraRepository.findByEvento(festival.id), seed.categorias.festivales, seed.usuarios.lucia);
+    const { lucia } = seed.usuarios;
+    const detalle = detalleEvento(festival, compraRepository.findByEvento(festival.id), seed.categorias.festivales, lucia, puntajeDe(lucia));
     assert.equal(detalle.categoriaId, undefined);
     assert.equal(detalle.organizadorId, undefined);
     assert.deepEqual(detalle.categoria, { id: seed.categorias.festivales.id, nombre: 'Festivales' });
-    assert.deepEqual(detalle.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández' });
+    assert.deepEqual(detalle.organizador, { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 2 });
     assert.deepEqual(detalle.tiposEntrada.map((t) => [t.nombre, t.disponibles]), [['General', 1000], ['VIP', 100], ['Backstage', 0]]);
   });
 });
@@ -207,6 +208,13 @@ describe('puntaje del organizador', () => {
     const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
     assert.deepEqual(puntajes.get(seed.usuarios.lucia.id), { puntaje: 4.5, cantidadResenias: 2 });
     assert.equal(puntajes.has(seed.usuarios.martin.id), false); // sin reseñas
+  });
+
+  it('puntajeDe y perfilUsuario dan null y 0 a quien no tiene reseñas', () => {
+    const { lucia, martin } = seed.usuarios;
+    assert.deepEqual(puntajeDe(lucia), { puntaje: 4.5, cantidadResenias: 2 });
+    assert.deepEqual(puntajeDe(martin), { puntaje: null, cantidadResenias: 0 });
+    assert.deepEqual(perfilUsuario(martin), { ...martin, puntaje: null, cantidadResenias: 0 });
   });
 });
 

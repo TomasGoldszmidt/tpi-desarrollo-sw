@@ -63,6 +63,41 @@ paths:
                   $ref: '#/components/schemas/Usuario'
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}:
+    get:
+      tags: [Usuarios]
+      summary: Ver un usuario con su puntaje de organizador
+      description: >-
+        Público. El puntaje es el promedio de las reseñas de los eventos que
+        organiza; si no organiza nada o no tiene reseñas, puntaje es null y
+        cantidadResenias es 0. La app lo usa en la pantalla de reseñas del organizador.
+      operationId: getUsuarioById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: El usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UsuarioPerfil'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
   /usuarios/{id}/eventos:
     get:
       tags: [Usuarios, Eventos]
@@ -264,7 +299,7 @@ paths:
     get:
       tags: [Eventos]
       summary: Ver el detalle de un evento
-      description: Incluye las entradas disponibles de cada tipo, calculadas con las compras que ocupan cupo.
+      description: Incluye las entradas disponibles de cada tipo, calculadas con las compras que ocupan cupo, y el puntaje del organizador.
       operationId: getEventoById
       parameters:
         - name: id
@@ -772,6 +807,20 @@ components:
           items:
             type: integer
           example: []
+    UsuarioPerfil:
+      description: Un usuario con su puntaje como organizador
+      allOf:
+        - $ref: '#/components/schemas/Usuario'
+        - type: object
+          properties:
+            puntaje:
+              type: number
+              nullable: true
+              description: Calculado. Promedio de las reseñas de sus eventos; null si no tiene
+              example: 4.5
+            cantidadResenias:
+              type: integer
+              example: 2
     Categoria:
       type: object
       properties:
@@ -852,6 +901,14 @@ components:
             apellido:
               type: string
               example: Fernández
+            puntaje:
+              type: number
+              nullable: true
+              description: Calculado. Promedio de las reseñas de sus eventos; null si no tiene
+              example: 4.5
+            cantidadResenias:
+              type: integer
+              example: 2
         tiposEntrada:
           type: array
           items:

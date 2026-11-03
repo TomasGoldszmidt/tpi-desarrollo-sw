@@ -61,6 +61,22 @@ export function crearResenia({ eventoId, puntuacion, detalle }, comprador) {
   return detalleResenia(resenia, evento, comprador);
 }
 
+// Puntaje de un solo organizador, con los mismos valores que muestra el catálogo
+// (null y 0 si no tiene reseñas).
+/** @param {Usuario} organizador @returns {{ puntaje: number | null, cantidadResenias: number }} */
+export function puntajeDe(organizador) {
+  const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
+  const { puntaje = null, cantidadResenias = 0 } = puntajes.get(organizador.id) ?? {};
+  return { puntaje, cantidadResenias };
+}
+
+// GET /usuarios/:id: el usuario con su puntaje como organizador. Es la cabecera
+// de la pantalla de reseñas del organizador (caso de uso 10).
+/** @param {Usuario} usuario */
+export function perfilUsuario(usuario) {
+  return { ...usuario, ...puntajeDe(usuario) };
+}
+
 // Caso de uso 10: las reseñas de todos los eventos de un organizador, del evento
 // más reciente al más viejo. Un usuario que no organiza nada no tiene reseñas.
 /** @param {Usuario} organizador */

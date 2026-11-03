@@ -54,15 +54,19 @@ export function crearEvento(datos, organizador, ahora = new Date()) {
   return eventoRepository.create({ ...datos, organizadorId: organizador.id });
 }
 
-// Forma del evento para la app: resúmenes de categoría y organizador en lugar de sus ids,
-// y las entradas disponibles de cada tipo (calculadas, no guardadas).
-/** @param {Evento} evento @param {Compra[]} compras Las compras del evento. @param {Categoria} categoria @param {Usuario} organizador */
-export function detalleEvento(evento, compras, categoria, organizador) {
+// Forma del evento para la app: resúmenes de categoría y organizador (con su puntaje, como
+// en el catálogo) en lugar de sus ids, y las entradas disponibles de cada tipo (calculadas, no guardadas).
+/**
+ * @param {Evento} evento @param {Compra[]} compras Las compras del evento.
+ * @param {Categoria} categoria @param {Usuario} organizador
+ * @param {{ puntaje: number | null, cantidadResenias: number }} puntaje El del organizador (ver puntajeDe).
+ */
+export function detalleEvento(evento, compras, categoria, organizador, { puntaje, cantidadResenias }) {
   const { categoriaId: _categoriaId, organizadorId: _organizadorId, ...resto } = evento;
   return {
     ...resto,
     categoria: { id: categoria.id, nombre: categoria.nombre },
-    organizador: { id: organizador.id, nombre: organizador.nombre, apellido: organizador.apellido },
+    organizador: { id: organizador.id, nombre: organizador.nombre, apellido: organizador.apellido, puntaje, cantidadResenias },
     tiposEntrada: evento.tiposEntrada.map((tipo) => ({ ...tipo, disponibles: calcularDisponibles(tipo, compras) })),
   };
 }
