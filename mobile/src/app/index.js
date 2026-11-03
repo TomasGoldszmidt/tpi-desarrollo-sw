@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { getUsuarios } from '../api/usuarios.js';
 import { API_URL } from '../config.js';
 import { useUsuario } from '../context/UsuarioContext.js';
+import { useCarga } from '../hooks/useCarga.js';
 import { Avatar } from '../components/Avatar.js';
 import { EstadoCarga } from '../components/EstadoCarga.js';
 import { Logo, Marca } from '../components/Logo.js';
@@ -13,25 +13,7 @@ import { colors, fontSize, spacing } from '../theme.js';
 // Primera pantalla: elegir con qué usuario usar la app (no hay login).
 export default function ElegirUsuario() {
   const { elegirUsuario } = useUsuario();
-  const [usuarios, setUsuarios] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const cargar = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      setUsuarios(await getUsuarios());
-    } catch (e) {
-      setError(e.message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    cargar();
-  }, [cargar]);
+  const { data: usuarios, loading, error, recargar } = useCarga(getUsuarios);
 
   function entrar(usuario) {
     elegirUsuario(usuario);
@@ -71,7 +53,7 @@ export default function ElegirUsuario() {
             loading={loading}
             error={error}
             detalle={`${API_URL}\nRevisá que esté levantado.`}
-            onRetry={cargar}
+            onRetry={recargar}
           />
         )}
       </ScrollView>

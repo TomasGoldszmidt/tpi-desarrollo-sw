@@ -58,10 +58,10 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
 - **Cliente HTTP** en `src/api/client.js`: `fetch` contra `API_URL` (de `src/config.js`), con el header `X-User-Id` del usuario activo cuando lo hay. Si la respuesta no es 2xx, lanza un `Error` con el mensaje de `{ "error": "..." }`, que la pantalla muestra tal cual (ya viene en español). Un archivo por recurso (`api/eventos.js`, `api/compras.js`) con funciones que nombran la operación: `buscarEventos`, `getCompra`, `pagarCompra`.
 - **Usuario activo** en `src/context/UsuarioContext.js`: se elige de la lista de `GET /usuarios`, no hay login (igual que el backend).
 - **Componentes:** de función con hooks, en `src/components/` cuando se usan en más de una pantalla (`EventoCard`, `EstadoBadge`). Estilos con `StyleSheet` y valores compartidos (colores, espaciados) en `src/theme.js`.
-- **Estados de la pantalla:** toda pantalla que carga datos muestra cargando, error (con reintentar) y vacío, como en el boceto. Después de una acción (pagar, cancelar) se vuelven a pedir los datos al backend en lugar de modificar el estado a mano.
+- **Estados de la pantalla:** toda pantalla que carga datos muestra cargando, error (con reintentar) y vacío, como en el boceto. Para pedir los datos usar el hook `src/hooks/useCarga.js` (`{ data, loading, error, recargar }`) con `EstadoCarga`, en lugar de un `useEffect` propio: ESLint (`react-hooks/set-state-in-effect`) rechaza los `setState` sincrónicos dentro de un efecto. Después de una acción (pagar, cancelar) se vuelven a pedir los datos al backend en lugar de modificar el estado a mano.
 - **Fechas y precios** se formatean en un solo lugar (`src/format.js`), en es-AR.
 - JavaScript, sin TypeScript. ES Modules.
-- **Dependencias:** solo con `npx expo install` y **avisando antes**. Antes de usar una API de Expo o de React Native, consultar la documentación de la versión instalada (`https://docs.expo.dev/versions/v<major>.0.0/`), no la de memoria.
+- **Dependencias:** solo con `npx expo install` y **avisando antes**. Hoy falla por un conflicto de `react-dom` (dependencia opcional de la versión web de Expo Router), así que se instala con `npx expo install <paquete> -- --legacy-peer-deps`. Antes de usar una API de Expo o de React Native, consultar la documentación de la versión instalada (`https://docs.expo.dev/versions/v<major>.0.0/`), no la de memoria.
 - La pantalla tiene que **respetar el boceto aprobado**. Si al implementar algo no se puede hacer igual, frenar y avisar.
 
 ## Paso 4 · Probar y cerrar

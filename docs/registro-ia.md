@@ -492,3 +492,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El puerto 8081 estaba ocupado por otro proceso (java) y Expo se levantó en el 8083.
   - No corrió `npx expo lint`, porque la primera vez instala ESLint como dependencia nueva y queda pendiente de mi ok.
 - **Aprendizaje:** aprobar un boceto me hizo pensar en cosas que en un análisis de texto no hubiera visto, como la identidad de la app y si hacen falta roles. Y cuando la IA afirma que algo "ya viene incluido", conviene que lo verifique antes de dar por buena la decisión.
+
+### 2026-11-02 · ESLint en la app mobile
+- **Tarea:** cierre de "Navegación, cliente HTTP y selección de usuario activo" (faltaba el lint)
+- **Herramienta / skill:** Claude Code + `/probar-caso-de-uso` + `registrar-ia`
+- **Pedido (prompt):** "Sí, instalalo" (ESLint para `npx expo lint`).
+- **Resultado:**
+  - Instaló `eslint` y `eslint-config-expo` como dependencias de desarrollo, y también `typescript`, que la configuración de Expo necesita aunque el proyecto sea JavaScript. Se generó `eslint.config.js`.
+  - El lint encontró un error real en la pantalla de selección: `setState` sincrónico dentro de un `useEffect` (`react-hooks/set-state-in-effect`), que provoca renders en cascada. El primer arreglo de la IA tampoco pasó, porque la regla sigue las funciones que llama el efecto.
+  - Quedó un hook `src/hooks/useCarga.js` que pide los datos dentro del efecto con `.then`, descarta respuestas viejas si la pantalla se desmonta y expone `{ data, loading, error, recargar }`. Lo van a reusar todas las pantallas que cargan datos. Lint sin errores.
+  - Volvió a probar en el emulador el error sin red y Reintentar: funciona igual.
+  - Anotó en la skill `nueva-pantalla` que hay que usar `useCarga` y que, por el conflicto de `react-dom`, las instalaciones van con `--legacy-peer-deps`.
+- **Bien:** el lint encontró un problema que la prueba en el emulador no mostraba, porque la pantalla funcionaba bien.
+- **Corregido / problemas:** el conflicto de `react-dom` volvió a aparecer al instalar ESLint, y hizo falta `typescript`, que no estaba previsto. El primer arreglo del error de lint no alcanzó.
+- **Aprendizaje:** que una pantalla "ande" en el emulador no quiere decir que esté bien escrita. Vale la pena tener el lint desde la primera pantalla, porque el patrón que se corrige ahora (`useCarga`) se repite en todas las que siguen.
