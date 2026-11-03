@@ -356,6 +356,7 @@ function TipoEntradaForm({ numero, tipo, errores, onChange, onQuitar }) {
               placeholderTextColor={colors.textMuted}
             />
           </View>
+          {errores.precio ? <Text style={styles.ayuda}>{errores.precio}</Text> : null}
         </View>
         <View style={styles.columna}>
           <Text style={styles.etiqueta}>Cupo</Text>
@@ -367,10 +368,9 @@ function TipoEntradaForm({ numero, tipo, errores, onChange, onQuitar }) {
             placeholder="100"
             placeholderTextColor={colors.textMuted}
           />
+          {errores.cupo ? <Text style={styles.ayuda}>{errores.cupo}</Text> : null}
         </View>
       </View>
-      {errores.precio ? <Text style={styles.ayuda}>{errores.precio}</Text> : null}
-      {errores.cupo ? <Text style={styles.ayuda}>{errores.cupo}</Text> : null}
     </View>
   );
 }

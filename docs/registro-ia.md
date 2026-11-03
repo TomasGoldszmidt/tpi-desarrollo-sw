@@ -660,5 +660,6 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** la pregunta sobre los asteriscos llevó a encontrar un problema real de la pantalla que había quedado aprobada.
 - **Corregido / problemas:**
   - Para bajar hasta el primer campo, la IA guardó las posiciones en un `useRef`, y el lint lo rechazó (`react-hooks/refs`, por escribir el ref desde un handler armado durante el render). Se pasaron a un estado que se actualiza en `onLayout`.
+  - Marqué que "Completá el cupo" quedaba mal ubicado: la IA había puesto los avisos de precio y cupo debajo de la fila, y el del cupo aparecía debajo del precio. Se movió cada uno debajo de su campo, como ya estaban los de fecha y hora.
   - Después del cambio, no se volvió a probar en el emulador la creación correcta ni los errores del backend. Ese código no cambió, salvo el chequeo previo.
 - **Aprendizaje:** que una pantalla esté aprobada no significa que esté bien diseñada. Preguntarle a la IA "¿es un buen patrón?" sobre algo concreto sirve para revisarla con criterio y encontrar problemas que en el boceto no se veían.
