@@ -743,3 +743,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el arreglo salió del diagnóstico que la IA ya había hecho al principio de la prueba, cuando encontró el backend viejo ocupando el puerto.
 - **Corregido / problemas:** ninguno.
 - **Aprendizaje:** un mensaje de éxito que se imprime sin revisar si hubo error es peor que no tener mensaje. Me hizo probar contra un backend con datos viejos sin darme cuenta.
+
+### 2026-11-03 · README
+- **Tarea:** "README con instrucciones para levantar el proyecto" (sección 4)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** "Dale" a seguir con el README.
+- **Resultado:**
+  - `README.md` en la raíz: qué es, estructura, requisitos, cómo levantar backend y app (emulador o celular), usuarios del seed con qué probar en cada uno, tests, arquitectura y la sección de desarrollo con IA, con las skills y los documentos del proceso.
+  - La URL del backend no se configura: la app usa la IP con la que Expo la sirve. Solo hace falta `REACT_NATIVE_PACKAGER_HOSTNAME` con la IP de la PC.
+  - Se verificó lo que afirma: los status 401 y 405 contra el backend, que Swagger responde y la instalación de la app con `npm install --dry-run`.
+- **Bien:** verificar contra el código y los paquetes instalados corrigió dos afirmaciones antes de commitear.
+- **Corregido / problemas:**
+  - La IA había puesto "Node 20 o superior" de memoria. Al revisar los `engines` de Expo y React Native, el mínimo real es Node 22.13 (o 24.3).
+  - El registro decía que un `npm install` normal ya funcionaba. El dry-run mostró que, sin `--legacy-peer-deps`, npm agrega `react-dom`, `react-native-reanimated` y `react-native-gesture-handler`, que la app no usa. Se dejó la instalación con `--legacy-peer-deps`, que es con la que se probó, y se explicó el motivo.
+- **Aprendizaje:** un README tiene que salir de verificar los comandos, no de lo que la IA "sabe". Los requisitos de versión cambian con cada SDK, y la IA los completa de memoria si no se le pide que los chequee.
