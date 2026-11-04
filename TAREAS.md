@@ -41,7 +41,7 @@
 - [x] Pantalla de ventas por evento (organizador)
 
 ## 4. Cierre técnico
-- [ ] Prueba integral de todos los casos de uso en el celular
+- [x] Prueba integral de todos los casos de uso en el celular
 - [ ] Corrección de bugs y pulido visual
 - [ ] README con instrucciones para levantar el proyecto
 - [ ] Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)

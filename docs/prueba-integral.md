@@ -6,6 +6,8 @@ Recorrido de los 12 casos de uso del enunciado en el emulador. Está ordenado pa
 
 En cada caso, anotar ✅ o ❌. Si algo falla o se ve mal, alcanza con una línea que diga qué pasó.
 
+**Resultado (2026-11-03):** recorrida completa en el emulador. Pasaron todos los casos después de resolver los bugs 2 y 3 de la tabla del final.
+
 ---
 
 ## Parte A · Lucía organiza (casos 4 y 2)
