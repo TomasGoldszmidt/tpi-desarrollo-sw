@@ -757,3 +757,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La IA había puesto "Node 20 o superior" de memoria. Al revisar los `engines` de Expo y React Native, el mínimo real es Node 22.13 (o 24.3).
   - El registro decía que un `npm install` normal ya funcionaba. El dry-run mostró que, sin `--legacy-peer-deps`, npm agrega `react-dom`, `react-native-reanimated` y `react-native-gesture-handler`, que la app no usa. Se dejó la instalación con `--legacy-peer-deps`, que es con la que se probó, y se explicó el motivo.
 - **Aprendizaje:** un README tiene que salir de verificar los comandos, no de lo que la IA "sabe". Los requisitos de versión cambian con cada SDK, y la IA los completa de memoria si no se le pide que los chequee.
+
+### 2026-11-03 · Flujo y guion del video
+- **Tarea:** "Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)" (sección 4)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** "Dale" a seguir con el guion, y "Ciclo de la compra" entre los cuatro flujos que propuso la IA.
+- **Resultado:**
+  - La IA propuso cuatro flujos (ciclo de la compra, cancelación y reembolso, chat, y crear evento → ventas) y recomendó el ciclo de la compra, por ser el que tiene más reglas de dominio y pasa por comprador y organizador.
+  - `docs/guion-video.md`, de ~9 minutos: preparación (archivos a abrir, reiniciar el backend), recorrido en la app (Sofía compra y paga, Martín marca como utilizada, Juan reseña), backend (capas, `comprar` y `hayCupoPara`, la tabla `TRANSICIONES`, persistencia embebida, errores en Swagger), frontend, skills con un ejemplo concreto de cada una sacado del registro, y la conclusión.
+  - Se verificaron contra el backend los mensajes de error del guion y cómo se carga el usuario activo en Swagger.
+- **Bien:** los ejemplos de las skills salieron del registro, así que son situaciones que pasaron de verdad (el "409" en el boceto, la carrera por el cupo), no descripciones genéricas.
+- **Corregido / problemas:**
+  - La IA avisó que una compra nueva no se puede marcar como utilizada hasta el día del evento. Por eso el guion usa, para usar y reseñar, la compra de Juan del Stand-up que ya está en el seed, en lugar de la que se compra en el video.
+  - El guion decía que en Swagger se ponía el header `X-User-Id`. Al revisar el `openapi.yaml`, el usuario activo se carga con el botón Authorize, y se corrigió.
+- **Aprendizaje:** antes de grabar conviene ensayar el recorrido y reiniciar el backend. Como la persistencia es en memoria, lo que se hace en el ensayo cambia lo que se ve en la grabación.

@@ -44,6 +44,6 @@
 - [x] Prueba integral de todos los casos de uso en el celular
 - [x] Corrección de bugs y pulido visual
 - [x] README con instrucciones para levantar el proyecto
-- [ ] Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)
+- [x] Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)
 - [ ] Redactar conclusión sobre el uso de IA
 - [ ] Grabar y entregar el video (5-10 min)
