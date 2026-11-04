@@ -772,3 +772,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El guion decía que en Swagger se ponía el header `X-User-Id`. Al revisar el `openapi.yaml`, el usuario activo se carga con el botón Authorize, y se corrigió.
   - La IA armó el guion con el backend y el frontend en bloques separados, después del recorrido en la app. Le propuse mostrar el código a la par del flujo, con VS Code y el emulador en la misma pantalla, y se reordenó por pasos (comprar, pagar, usar y reseñar), cada uno con su pantalla y su backend.
 - **Aprendizaje:** antes de grabar conviene ensayar el recorrido y reiniciar el backend. Como la persistencia es en memoria, lo que se hace en el ensayo cambia lo que se ve en la grabación.
+
+### 2026-11-03 · Conclusión sobre el uso de IA
+- **Tarea:** "Redactar conclusión sobre el uso de IA" (sección 4)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** "Dale" a seguir con la conclusión, y "Está bien así" al borrador.
+- **Resultado:**
+  - `docs/conclusion-ia.md` con las partes que pide el enunciado: cómo trabajé, ventajas, desventajas, dificultades, aprendizajes y una valoración de productividad y calidad. Al final, un resumen de seis puntos para decir en el video en ~1:30.
+  - Se armó desde el registro (50 entradas, 63 commits, 20 subtareas sin correcciones), con ejemplos que pasaron de verdad: la tabla de transiciones, la carrera por el cupo, Node 20 de memoria, los casos de búsqueda con texto que no se ve y el recorte que dejaba afuera Mis eventos.
+  - La sección que había escrito yo ("No todo conviene hacerlo con la IA") quedó sin cambios.
+- **Bien:** como cada subtarea tenía su entrada con lo que salió bien y lo que hubo que corregir, la conclusión no hubo que reconstruirla de memoria.
+- **Corregido / problemas:** ninguno. La IA marcó qué partes eran más personales (la valoración y la frase de cierre) para que las revisara antes de aprobar.
+- **Aprendizaje:** llevar el registro durante todo el TP fue lo que hizo posible una conclusión concreta. Anotar los errores en el momento vale más que acordarse al final.
