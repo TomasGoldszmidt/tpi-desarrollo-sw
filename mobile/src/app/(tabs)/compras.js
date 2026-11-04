@@ -3,6 +3,8 @@ import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'rea
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getMisCompras } from '../../api/compras.js';
+import { getUsuarios } from '../../api/usuarios.js';
+import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { CompraCard } from '../../components/CompraCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
@@ -11,8 +13,15 @@ import { colors, fontSize, spacing } from '../../theme.js';
 
 // Caso de uso 1: las compras del usuario activo, con el estado bien diferenciado
 // y los días que faltan para el evento si están confirmadas.
+// La compra trae solo el id del organizador: los nombres, para el aviso de mensajes, salen de los usuarios.
+async function pedirCompras() {
+  const [compras, usuarios] = await Promise.all([getMisCompras(), getUsuarios()]);
+  return { compras, usuarios: new Map(usuarios.map((u) => [u.id, u])) };
+}
+
 export default function MisCompras() {
-  const { data: compras, loading, error, recargar } = useCarga(getMisCompras);
+  const { usuario } = useUsuario();
+  const { data, loading, error, recargar } = useCarga(pedirCompras);
 
   // Se vuelve a pedir cada vez que se vuelve a la pestaña, así se ven los cambios
   // después de comprar, pagar o cancelar. La primera vez ya lo pide useCarga.
@@ -29,13 +38,20 @@ export default function MisCompras() {
 
   return (
     <Seccion titulo="Mis compras">
-      {error || !compras ? (
+      {error || !data ? (
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus compras…" />
       ) : (
         <FlatList
-          data={compras}
+          data={data.compras}
           keyExtractor={(compra) => String(compra.id)}
-          renderItem={({ item }) => <CompraCard compra={item} onPress={() => router.push(`/compras/${item.id}`)} />}
+          renderItem={({ item }) => (
+            <CompraCard
+              compra={item}
+              usuario={usuario}
+              organizador={data.usuarios.get(item.evento.organizadorId)}
+              onPress={() => router.push(`/compras/${item.id}`)}
+            />
+          )}
           refreshControl={
             <RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />
           }

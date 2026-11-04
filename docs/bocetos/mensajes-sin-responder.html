@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Mensajes sin responder</title>
+<style>
+:root{--text-secondary:#5F5E5A;--border-strong:#B4B2A9}
+body{font-family:system-ui,sans-serif;max-width:820px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.cap{font-size:12px;color:var(--text-secondary);margin-bottom:6px}
+.phone{position:relative;border:0.5px solid var(--border-strong);border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:540px;display:flex;flex-direction:column}
+.bar{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 12px;border-bottom:0.5px solid #D3D1C7;font-size:14px;font-weight:500;background:#fff}
+.bar .l{display:flex;align-items:center;gap:8px}
+.back{font-size:16px;color:#3B6D11}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.chip{width:28px;height:28px;background:#EAF3DE;color:#27500A;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.scr{flex:1;font-size:12px;overflow:hidden;padding:10px 12px;position:relative}
+.h{font-size:16px;font-weight:500;margin-bottom:8px}
+.sec{font-size:13px;font-weight:500;margin:12px 0 6px}
+.mt{font-size:11px;color:#5F5E5A}
+.cc{position:relative;border:0.5px solid #D3D1C7;border-radius:10px;padding:8px;margin-bottom:7px}
+.cc.off{opacity:.6}
+.cc .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cc .nm{font-size:13px;font-weight:500}
+.cc .ft{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.cc .tt{font-size:12px;font-weight:500}
+.dias{font-size:11px;font-weight:600;color:#27500A}
+.b{border-radius:999px;padding:1px 8px;font-size:10px;font-weight:500}
+.b.pen{background:#FAEEDA;color:#633806}.b.con{background:#EAF3DE;color:#27500A}.b.uti{background:#F1EFE8;color:#444441}
+.b.can{background:#FCEBEB;color:#791F1F}.b.ree{background:#EEEDFE;color:#3C3489}
+/* Lo nuevo: aviso de chat que espera respuesta */
+.cc.esp{border-color:#3B6D11;border-width:1.5px}
+.aviso{display:flex;align-items:center;gap:5px;margin-top:5px;padding-top:5px;border-top:0.5px solid #D3D1C7;font-size:11px;font-weight:600;color:#27500A;min-width:0}
+.aviso .dot{width:7px;height:7px;border-radius:50%;background:#A32D2D;flex-shrink:0}
+.aviso .q{font-weight:400;color:#5F5E5A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.add{background:#3B6D11;color:#fff;border-radius:8px;padding:7px;text-align:center;font-size:12px;font-weight:500}
+.ev{position:relative;display:flex;gap:8px;align-items:center;border:0.5px solid #D3D1C7;border-radius:10px;padding:7px;margin-bottom:6px}
+.ev.esp{border-color:#3B6D11;border-width:1.5px}
+.ev .img{width:46px;height:46px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#97C459,#3B6D11)}
+.ev .img.b{background:linear-gradient(135deg,#B4B2A9,#5F5E5A)}
+.ev .img.c{background:linear-gradient(135deg,#FAC775,#D85A30)}
+.ev .img.d{background:linear-gradient(135deg,#AFA9EC,#3C3489)}
+.ev .inf{flex:1;min-width:0}
+.ev .cat{font-size:10px;color:#27500A;font-weight:500}
+.ev .nm{font-size:13px;font-weight:500}
+.ev .chev{color:#888780;font-size:16px}
+.ev.pas{opacity:.75}
+.pild{display:flex;align-items:center;gap:4px;margin-top:3px;font-size:10px;font-weight:600;color:#27500A}
+.pild .dot{width:7px;height:7px;border-radius:50%;background:#A32D2D}
+.tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
+.tabs span{display:flex;flex-direction:column;align-items:center;gap:2px}.tabs .on{color:#3B6D11}
+.ico{display:inline-block;width:14px;height:14px;border:1.5px solid currentColor;border-radius:4px}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500;margin-right:4px;flex-shrink:0}
+.abs{position:absolute;right:-6px;top:-6px}
+.hero{position:relative;height:90px;flex-shrink:0;background:#B4B2A9;display:flex;align-items:center;justify-content:center;color:#2C2C2A;font-size:11px}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Mensajes sin responder</h1>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:1rem 0;">
+
+<!-- A -->
+<div>
+<div class="cap">A · Mis compras de Sofía (seed)</div>
+<div class="phone">
+<div class="bar"><span class="l"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">SP</span></div>
+<div class="scr">
+<div class="h">Mis compras</div>
+<div class="cc"><div class="top"><span class="b pen">Pendiente de pago</span></div><div class="nm">La casa de Bernarda Alba</div><div class="mt">dom 8 nov · 20:00 · Platea × 1</div><div class="ft"><span class="mt">Pagala para confirmarla</span><span class="tt">$ 30.000</span></div></div>
+<div class="cc esp"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 20 días</span></div><div class="nm">Noche de Rock Nacional</div><div class="mt">lun 23 nov · 21:00 · Campo × 2</div><div class="ft"><span class="mt"></span><span class="tt">$ 90.000</span></div><div class="aviso"><span class="dot"></span>Lucía te respondió<span class="q">· Sí, chica, la revisan en la puerta.</span></div><span class="n abs">1</span></div>
+<div class="cc"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Acústico en el Gran Rex</div><div class="mt">lun 19 oct · 21:00 · Platea × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 35.000</span></div></div>
+<div class="cc"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Noche de Stand-up</div><div class="mt">dom 4 oct · 22:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 18.000</span></div></div>
+</div>
+<div class="tabs"><span><b class="ico"></b>Catálogo</span><span class="on"><b class="ico"></b>Mis compras</span><span><b class="ico"></b>Mis eventos</span></div>
+</div>
+</div>
+
+<!-- B -->
+<div>
+<div class="cap">B · Ventas de Lucía, después de que Sofía pregunta</div>
+<div class="phone">
+<div class="bar"><span class="l"><span class="back">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="hero">imagen del evento</div>
+<div class="scr">
+<div style="font-size:10px;font-weight:500;color:#27500A">Ventas</div><div class="h" style="margin-bottom:2px">Noche de Rock Nacional</div>
+<div class="mt">lun 23 nov · 21:00 · Estadio Obras</div>
+<div class="sec">Entradas disponibles</div>
+<div class="mt" style="padding:4px 0;border-bottom:0.5px solid #D3D1C7">Campo 498 de 500 · Platea 200 de 200</div>
+<div class="sec">Compras (2)</div>
+<div class="cc esp"><div class="top"><span class="b con">Confirmada</span><span class="mt">jue 29 oct</span></div><div class="nm">Sofía Pérez</div><div class="ft"><span class="mt">Campo × 2 · 3 mensajes</span><span class="tt">$ 90.000</span></div><div class="aviso"><span class="dot"></span>Sofía espera tu respuesta<span class="q">· ¿A qué hora abren las puertas?</span></div><span class="n abs">2</span></div>
+<div class="cc off"><div class="top"><span class="b ree">Reembolsada</span><span class="mt">lun 26 oct</span></div><div class="nm">Juan Rodríguez</div><div class="ft"><span class="mt">Platea × 1</span><span class="tt">$ 80.000</span></div></div>
+</div>
+</div>
+</div>
+
+<!-- C -->
+<div>
+<div class="cap">C · Mis compras de Sofía, mientras espera</div>
+<div class="phone">
+<div class="bar"><span class="l"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">SP</span></div>
+<div class="scr">
+<div class="h">Mis compras</div>
+<div class="cc"><div class="top"><span class="b pen">Pendiente de pago</span></div><div class="nm">La casa de Bernarda Alba</div><div class="mt">dom 8 nov · 20:00 · Platea × 1</div><div class="ft"><span class="mt">Pagala para confirmarla</span><span class="tt">$ 30.000</span></div></div>
+<div class="cc"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 20 días</span></div><div class="nm">Noche de Rock Nacional</div><div class="mt">lun 23 nov · 21:00 · Campo × 2</div><div class="ft"><span class="mt"></span><span class="tt">$ 90.000</span></div></div>
+<div class="cc"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Acústico en el Gran Rex</div><div class="mt">lun 19 oct · 21:00 · Platea × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 35.000</span></div></div>
+<div class="cc"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Noche de Stand-up</div><div class="mt">dom 4 oct · 22:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 18.000</span></div></div>
+</div>
+<div class="tabs"><span><b class="ico"></b>Catálogo</span><span class="on"><b class="ico"></b>Mis compras</span><span><b class="ico"></b>Mis eventos</span></div>
+</div>
+</div>
+
+<!-- D -->
+<div>
+<div class="cap">D · Mis eventos de Lucía, después de que Sofía pregunta</div>
+<div class="phone">
+<div class="bar"><span class="l"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">LF</span></div>
+<div class="scr">
+<div class="h">Mis eventos</div>
+<div class="add">+ Crear evento</div>
+<div class="sec">Próximos</div>
+<div class="ev"><div class="img b"></div><div class="inf"><div class="cat">Teatro</div><div class="nm">La casa de Bernarda Alba</div><div class="mt">dom 8 nov · 20:00 · Teatro San Martín</div></div><span class="chev">›</span></div>
+<div class="ev esp"><div class="img"></div><div class="inf"><div class="cat">Música</div><div class="nm">Noche de Rock Nacional</div><div class="mt">lun 23 nov · 21:00 · Estadio Obras</div><div class="pild"><span class="dot"></span>1 compra espera tu respuesta</div></div><span class="chev">›</span><span class="n abs">3</span></div>
+<div class="ev"><div class="img c"></div><div class="inf"><div class="cat">Festivales</div><div class="nm">Festival de Verano</div><div class="mt">sáb 2 ene · 16:00 · Hipódromo de San Isidro</div></div><span class="chev">›</span></div>
+<div class="sec">Ya realizados</div>
+<div class="ev pas"><div class="img d"></div><div class="inf"><div class="cat">Música</div><div class="nm">Acústico en el Gran Rex</div><div class="mt">lun 19 oct · 21:00 · Teatro Gran Rex</div></div><span class="chev">›</span></div>
+</div>
+<div class="tabs"><span><b class="ico"></b>Catálogo</span><span><b class="ico"></b>Mis compras</span><span class="on"><b class="ico"></b>Mis eventos</span></div>
+</div>
+</div>
+
+</div>
+<div style="font-size:13px;color:var(--text-secondary);line-height:1.6;padding-bottom:1rem;">
+<div><b>Regla:</b> una compra espera la respuesta de alguien cuando el último mensaje del chat lo escribió la otra persona (comprador ↔ organizador). El aviso se apaga cuando esa persona contesta. En las tarjetas de Mis compras, Ventas y Mis eventos; las pestañas quedan como hoy.</div>
+<div><span class="n">1</span> Tarjeta de Mis compras: borde verde y, abajo, "&lt;Organizador&gt; te respondió" con el comienzo del último mensaje en una sola línea. Sale de <code>mensajes</code> de <code>GET /compras</code>, que ya viene en la lista. El nombre del organizador, de <code>GET /usuarios</code> por <code>evento.organizadorId</code>, pedido junto con las compras. Tocarla abre el detalle de compra, como hoy.</div>
+<div><span class="n">2</span> Tarjeta de Ventas: igual, con "&lt;Comprador&gt; espera tu respuesta". Sale de <code>GET /eventos/:id/compras</code>, que ya trae los mensajes y el comprador.</div>
+<div><span class="n">3</span> Fila de Mis eventos: borde verde y "N compra(s) espera(n) tu respuesta" debajo del lugar; sin pendientes, queda como hoy. Necesita un dato nuevo, <code>sinResponder</code> (cantidad de compras del evento cuyo último mensaje es del comprador), en cada evento de <code>GET /usuarios/:id/eventos</code>: se calcula en el backend para no pedir las compras de cada evento desde la app. Va por <code>/nuevo-endpoint</code>, <code>/swagger</code> y un test de dominio. Al volver a la pestaña ya se vuelve a pedir la lista, así que el aviso se apaga después de contestar.</div>
+<div style="margin-top:6px">B, C y D siguen la prueba integral: en B5 Sofía pregunta por las puertas, así que el aviso pasa a Lucía (B) y a Sofía se le apaga (C). Cuando Lucía contesta, Sofía vuelve a verlo como en A.</div>
+</div>
+</body></html>

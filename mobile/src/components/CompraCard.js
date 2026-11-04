@@ -1,16 +1,24 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { EstadoBadge, ESTADOS_INACTIVOS } from './EstadoBadge.js';
+import { AvisoMensaje, estiloEsperando, mensajeSinResponder } from './AvisoMensaje.js';
 import { formatDiasRestantes, formatFecha, formatPrecio } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
 // Una compra del comprador (CompraDetalle de la API): estado, evento, entradas y total.
-export function CompraCard({ compra, onPress }) {
+// Si el organizador escribió último, abajo avisa que respondió. Sin su nombre, dice "El organizador".
+export function CompraCard({ compra, usuario, organizador, onPress }) {
   const confirmada = compra.estado === 'CONFIRMADA';
   const inactiva = ESTADOS_INACTIVOS.includes(compra.estado);
+  const sinResponder = mensajeSinResponder(compra, usuario);
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, inactiva && styles.inactiva, pressed && styles.presionada]}
+      style={({ pressed }) => [
+        styles.card,
+        sinResponder && estiloEsperando,
+        inactiva && styles.inactiva,
+        pressed && styles.presionada,
+      ]}
       onPress={onPress}
     >
       <View style={styles.arriba}>
@@ -29,6 +37,12 @@ export function CompraCard({ compra, onPress }) {
         <Text style={styles.meta}>{compra.estado === 'PENDIENTE' ? 'Pagala para confirmarla' : ''}</Text>
         <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
       </View>
+      {sinResponder ? (
+        <AvisoMensaje
+          texto={`${organizador ? organizador.nombre : 'El organizador'} te respondió`}
+          mensaje={sinResponder.mensaje}
+        />
+      ) : null}
     </Pressable>
   );
 }

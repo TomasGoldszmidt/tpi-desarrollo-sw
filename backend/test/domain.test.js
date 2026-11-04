@@ -9,6 +9,7 @@ import * as reseniaRepository from '../src/persistence/repositories/reseniaRepos
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
   actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+  esperaRespuestaDe, cantidadSinResponder,
 } from '../src/domain/compra.js';
 import { requireString } from '../src/http/validation.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
@@ -388,6 +389,24 @@ describe('chat de la compra', () => {
   it('nadie más puede escribir', () => {
     assert.throws(() => enviarMensaje(seed.compras.sofiaAcustico, acustico, martin, 'hola'),
       (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden escribir en este chat');
+  });
+
+  it('esperaRespuestaDe: el chat espera a quien no escribió el último mensaje', () => {
+    const { sofiaRock, juanBackstage } = seed.compras; // Rock: el último es de Lucía; Backstage: sin mensajes
+    assert.equal(esperaRespuestaDe(sofiaRock, sofia), true);
+    assert.equal(esperaRespuestaDe(sofiaRock, lucia), false);
+    assert.equal(esperaRespuestaDe(juanBackstage, lucia), false);
+
+    const pregunta = { ...sofiaRock, mensajes: [...sofiaRock.mensajes, { usuarioId: sofia.id, mensaje: '¿A qué hora abren?', enviado: new Date() }] };
+    assert.equal(esperaRespuestaDe(pregunta, sofia), false);
+    assert.equal(esperaRespuestaDe(pregunta, lucia), true);
+  });
+
+  it('cantidadSinResponder cuenta las compras que esperan al organizador', () => {
+    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    const pregunta = { ...juanRockReembolsada, mensajes: [{ usuarioId: seed.usuarios.juan.id, mensaje: '¿Y el reembolso?', enviado: new Date() }] };
+    assert.equal(cantidadSinResponder([sofiaRock, juanRockReembolsada], lucia), 0);
+    assert.equal(cantidadSinResponder([sofiaRock, pregunta], lucia), 1);
   });
 
   it('requireString respeta maxLength', () => {

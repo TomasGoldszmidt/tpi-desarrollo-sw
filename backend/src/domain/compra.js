@@ -166,6 +166,20 @@ export function mensajesConAutor(mensajes) {
   });
 }
 
+// El chat espera la respuesta de un participante cuando el último mensaje lo escribió el otro.
+// Sin mensajes no espera nada. No hay "leído": se apaga recién cuando contesta.
+/** @param {Compra} compra @param {Usuario} usuario @returns {boolean} */
+export function esperaRespuestaDe(compra, usuario) {
+  const ultimo = compra.mensajes.at(-1);
+  return ultimo !== undefined && ultimo.usuarioId !== usuario.id;
+}
+
+// Para Mis eventos: cuántas compras de un evento esperan la respuesta del organizador.
+/** @param {Compra[]} compras @param {Usuario} usuario @returns {number} */
+export function cantidadSinResponder(compras, usuario) {
+  return compras.filter((compra) => esperaRespuestaDe(compra, usuario)).length;
+}
+
 // Casos de uso 5 y 6: comprador y organizador escriben "en cualquier momento",
 // así que no importa el estado de la compra ni si el evento ya pasó.
 /**

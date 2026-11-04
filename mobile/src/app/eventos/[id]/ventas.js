@@ -7,6 +7,8 @@ import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge, ESTADOS_INACTIVOS } from '../../../components/EstadoBadge.js';
 import { Galeria } from '../../../components/Galeria.js';
+import { AvisoMensaje, estiloEsperando, mensajeSinResponder } from '../../../components/AvisoMensaje.js';
+import { useUsuario } from '../../../context/UsuarioContext.js';
 import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
@@ -14,6 +16,7 @@ import { colors, fontSize, spacing } from '../../../theme.js';
 // disponibles de cada tipo. Solo la ve el organizador.
 export default function VentasEvento() {
   const { id } = useLocalSearchParams();
+  const { usuario } = useUsuario();
   const pedir = useCallback(async () => {
     const [evento, compras] = await Promise.all([getEvento(id), getVentasEvento(id)]);
     return { evento, compras };
@@ -73,7 +76,7 @@ export default function VentasEvento() {
           </View>
         ) : (
           compras.map((compra) => (
-            <VentaCard key={compra.id} compra={compra} onPress={() => router.push(`/compras/${compra.id}`)} />
+            <VentaCard key={compra.id} compra={compra} usuario={usuario} onPress={() => router.push(`/compras/${compra.id}`)} />
           ))
         )}
       </View>
@@ -107,8 +110,10 @@ function DisponiblesFila({ tipo }) {
 }
 
 // Una compra del evento: estado, comprador, entradas y total. Abre el detalle con el chat.
-function VentaCard({ compra, onPress }) {
+// Si el comprador escribió último, abajo avisa que espera la respuesta del organizador.
+function VentaCard({ compra, usuario, onPress }) {
   const inactiva = ESTADOS_INACTIVOS.includes(compra.estado);
+  const sinResponder = mensajeSinResponder(compra, usuario);
   // El primer cambio del historial es la creación de la compra.
   const creada = compra.historial[0].fechaHora;
   const mensajes = compra.mensajes.length;
@@ -117,7 +122,12 @@ function VentaCard({ compra, onPress }) {
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, inactiva && styles.inactiva, pressed && styles.presionada]}
+      style={({ pressed }) => [
+        styles.card,
+        sinResponder && estiloEsperando,
+        inactiva && styles.inactiva,
+        pressed && styles.presionada,
+      ]}
       onPress={onPress}
     >
       <View style={styles.fila}>
@@ -131,6 +141,9 @@ function VentaCard({ compra, onPress }) {
         <Text style={styles.meta}>{detalle}</Text>
         <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
       </View>
+      {sinResponder ? (
+        <AvisoMensaje texto={`${compra.comprador.nombre} espera tu respuesta`} mensaje={sinResponder.mensaje} />
+      ) : null}
     </Pressable>
   );
 }

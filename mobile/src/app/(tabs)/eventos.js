@@ -7,6 +7,7 @@ import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { Seccion } from '../../components/Seccion.js';
+import { estiloEsperando } from '../../components/AvisoMensaje.js';
 import { formatFecha } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
@@ -77,9 +78,16 @@ function separarPorFecha(eventos) {
 function EventoFila({ evento, realizado, onPress }) {
   // Del lugar se muestra solo el nombre, sin la dirección.
   const lugar = evento.lugar.split(',')[0];
+  // Compras del evento cuyo chat espera la respuesta del organizador (lo calcula el backend).
+  const { sinResponder } = evento;
   return (
     <Pressable
-      style={({ pressed }) => [styles.card, realizado && styles.realizado, pressed && styles.presionada]}
+      style={({ pressed }) => [
+        styles.card,
+        sinResponder > 0 && estiloEsperando,
+        realizado && styles.realizado,
+        pressed && styles.presionada,
+      ]}
       onPress={onPress}
     >
       {evento.imagen ? (
@@ -93,6 +101,14 @@ function EventoFila({ evento, realizado, onPress }) {
         <Text style={styles.meta}>
           {formatFecha(evento.fecha)} · {lugar}
         </Text>
+        {sinResponder > 0 ? (
+          <View style={styles.pendientes}>
+            <View style={styles.punto} />
+            <Text style={styles.pendientesTexto}>
+              {sinResponder === 1 ? '1 compra espera tu respuesta' : `${sinResponder} compras esperan tu respuesta`}
+            </Text>
+          </View>
+        ) : null}
       </View>
       <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
     </Pressable>
@@ -160,6 +176,23 @@ const styles = StyleSheet.create({
   meta: {
     color: colors.textSecondary,
     fontSize: fontSize.small,
+  },
+  pendientes: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 3,
+  },
+  punto: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+    backgroundColor: colors.danger,
+  },
+  pendientesTexto: {
+    color: colors.primaryText,
+    fontSize: 11,
+    fontWeight: 'bold',
   },
   vacio: {
     marginTop: spacing.lg,

@@ -713,3 +713,21 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Antes de leer la regla, la IA dijo que el backend solo lo permitía el mismo día del evento y que había que agregar un evento de hoy al seed. Lo corrigió al revisar el código.
   - En la prueba, la hora del historial (21:11) no coincidía con el reloj del emulador (12:11). Era el reloj del emulador el que estaba mal: la PC y el backend tenían la hora correcta.
 - **Aprendizaje:** al cerrar una pantalla conviene releer las notas de los bocetos anteriores que la mencionan. Lo que quedó prometido ahí se puede perder si nadie lo vuelve a mirar.
+
+### 2026-11-03 · Prueba integral: lista de casos y avisos de mensajes sin responder
+- **Tarea:** "Prueba integral de todos los casos de uso en el celular" y "Corrección de bugs y pulido visual" (sección 4), en curso
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/swagger` + `/registrar-ia`
+- **Pedido (prompt):** "realiza la tarea final" y "Dale, arrancá". Durante la prueba: "buscan cosas que no estan visibles" y "Los mensajes pendientes deben estar mas visibles". Después, "esto se pidio en la consigna?", "en mis eventos lo sacamos? justamente ese es el mas importante" y "Aprobado".
+- **Resultado:**
+  - `docs/prueba-integral.md`: los 12 casos de uso en seis partes (Lucía, Sofía, Lucía, Martín, Juan y generales), ordenados para seguir de corrido sobre el seed, con resultados esperados exactos y una tabla de bugs.
+  - Al levantar el backend, la IA vio que un backend viejo seguía ocupando el puerto 3000. El nuevo decía "Servidor escuchando" y se cerraba, porque en Express 5 `app.listen` le pasa el error al callback en vez de tirarlo. Cerró los procesos viejos y lo levantó en el panel de Terminal. El aviso quedó anotado como bug pendiente.
+  - Búsqueda: se cambiaron los casos por textos que se ven en la tarjeta ("BERNARDA", "san martin"). La búsqueda sigue mirando también la descripción y la calle.
+  - Mensajes sin responder: el chat espera a quien no escribió el último mensaje. Las tarjetas de Mis compras ("Lucía te respondió · …") y de Ventas ("Sofía espera tu respuesta · …") lo calculan con los mensajes que ya traen las listas. Mis eventos ("1 compra espera tu respuesta") usa un campo nuevo, `sinResponder`, en `GET /usuarios/:id/eventos`, con `esperaRespuestaDe` y `cantidadSinResponder` en el dominio, dos tests y el swagger.
+  - Prueba por API (el contador pasa de 0 a 1 y vuelve a 0 al contestar) y en el celular, hecha por el usuario.
+- **Bien:** dos de los tres lugares salieron sin tocar el backend, porque las listas ya traían los mensajes. La regla quedó en un solo componente que usan las dos tarjetas.
+- **Corregido / problemas:**
+  - Los casos de búsqueda de la IA usaban la descripción y la calle, que no se ven en la tarjeta. Lo marqué yo al probar.
+  - La IA primero propuso la versión completa: pestañas con números, Mis eventos y un mensaje nuevo en el seed. Cuando pregunté si la consigna lo pedía, aclaró que no (los casos 5 y 6 solo piden poder escribir) y propuso una versión chica, que dejaba afuera justo Mis eventos. Lo corregí yo, porque es donde el organizador tiene más mensajes.
+  - Para probar por API, la IA mandó mensajes con curl desde la consola de Windows. Quedaron guardados con las tildes rotas y hubo que reiniciar el backend para volver al seed limpio.
+  - Dos reemplazos hechos con scripts de consola fallaron, uno por las comillas y otro por los saltos de línea CRLF. No escribieron nada y se rehicieron con el editor.
+- **Aprendizaje:** al recortar alcance, hay que preguntarse qué parte resuelve el problema real y no solo cuál es más barata. La IA recortó por costo y dejó afuera justo la pantalla donde se acumulan los mensajes.

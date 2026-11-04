@@ -105,7 +105,8 @@ paths:
       description: >-
         Los eventos que organiza el usuario, incluidos los que ya se realizaron,
         ordenados por fecha. La app lo usa con el usuario activo para entrar a las
-        ventas de cada evento. Si no organiza nada, devuelve [].
+        ventas de cada evento. Cada evento trae cuántas compras esperan la respuesta
+        del organizador en el chat (`sinResponder`). Si no organiza nada, devuelve [].
       operationId: listEventosOrganizador
       parameters:
         - name: id
@@ -122,7 +123,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/EventoResumen'
+                  $ref: '#/components/schemas/EventoOrganizado'
         '400':
           $ref: '#/components/responses/IdInvalido'
         '404':
@@ -968,6 +969,18 @@ components:
           type: number
           description: Calculado. Precio de su entrada más barata
           example: 20000
+    EventoOrganizado:
+      description: Un evento en Mis eventos del organizador
+      allOf:
+        - $ref: '#/components/schemas/EventoResumen'
+        - type: object
+          properties:
+            sinResponder:
+              type: integer
+              description: >-
+                Calculado. Cantidad de compras del evento cuyo chat espera la respuesta
+                del organizador (el último mensaje es del comprador). 0 si no hay ninguna
+              example: 1
     CambioEstadoCompra:
       type: object
       properties:

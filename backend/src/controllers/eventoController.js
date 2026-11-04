@@ -3,7 +3,7 @@ import * as compraRepository from '../persistence/repositories/compraRepository.
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
-import { detalleCompra, masRecientesPrimero } from '../domain/compra.js';
+import { cantidadSinResponder, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
@@ -87,11 +87,15 @@ export async function getById(req, res) {
 }
 
 // GET /usuarios/:id/eventos: los eventos que organiza, incluidos los pasados. Son públicos.
+// Cada uno trae cuántas compras esperan la respuesta del organizador en el chat.
 export async function listByOrganizador(req, res) {
   const id = requireId(req.params.id);
   const organizador = usuarioRepository.findById(id);
   if (!organizador) throw new NotFoundError(`No existe el usuario ${id}`);
-  res.status(200).json(eventosOrganizados(organizador));
+  res.status(200).json(eventosOrganizados(organizador).map((evento) => ({
+    ...evento,
+    sinResponder: cantidadSinResponder(compraRepository.findByEvento(evento.id), organizador),
+  })));
 }
 
 // Caso de uso 2. Las disponibles por tipo salen de GET /eventos/:id.
