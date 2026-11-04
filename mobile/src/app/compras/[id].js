@@ -3,7 +3,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { cancelarCompra, getCompra, pagarCompra } from '../../api/compras.js';
+import { cancelarCompra, getCompra, marcarUtilizada, pagarCompra } from '../../api/compras.js';
 import { crearResenia } from '../../api/resenias.js';
 import { getUsuario } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
@@ -26,7 +26,8 @@ const HISTORIAL = {
 };
 
 // Detalle de una compra (casos de uso 5 a 9): estado, entradas, acciones del comprador
-// (pagar, cancelar, reseñar), la vista previa del chat y el historial.
+// (pagar, cancelar, reseñar) y del organizador (marcar como utilizada), la vista previa
+// del chat y el historial.
 export default function DetalleCompra() {
   const { id } = useLocalSearchParams();
   const { usuario } = useUsuario();
@@ -66,6 +67,7 @@ export default function DetalleCompra() {
 
   const { compra, organizador } = data;
   const esComprador = usuario?.id === compra.comprador.id;
+  const esOrganizador = usuario?.id === compra.evento.organizadorId;
   // Con quién se chatea: el comprador habla con el organizador y viceversa.
   const otro = esComprador ? organizador : compra.comprador;
 
@@ -94,6 +96,18 @@ export default function DetalleCompra() {
     );
   }
 
+  function confirmarUtilizacion() {
+    const { comprador, tipoEntrada, cantidad } = compra;
+    Alert.alert(
+      '¿Marcar como utilizada?',
+      `${comprador.nombre} ${comprador.apellido} ya usó sus entradas (${tipoEntrada.nombre} × ${cantidad}). Después no se puede cancelar y ${comprador.nombre} va a poder dejar su reseña.`,
+      [
+        { text: 'Volver', style: 'cancel' },
+        { text: 'Marcar', onPress: () => ejecutar('Marcando la entrada…', () => marcarUtilizada(compra.id)) },
+      ],
+    );
+  }
+
   // Acciones del comprador según el estado. Una compra pagada solo se cancela antes del evento
   // (diasRestantes es null si ya pasó); el backend igual valida cada regla.
   const acciones = [];
@@ -103,6 +117,17 @@ export default function DetalleCompra() {
   }
   if (esComprador && compra.estado === 'CONFIRMADA' && compra.diasRestantes !== null) {
     acciones.push({ texto: 'Cancelar y pedir reembolso', peligro: true, onPress: () => confirmarCancelacion(true) });
+  }
+
+  // El organizador marca la entrada como utilizada desde el día del evento: diasRestantes
+  // es 0 el mismo día y null si ya pasó. Antes, el pie explica desde cuándo se va a poder.
+  let aviso = null;
+  if (esOrganizador && compra.estado === 'CONFIRMADA') {
+    if (compra.diasRestantes === 0 || compra.diasRestantes === null) {
+      acciones.push({ texto: 'Marcar como utilizada', onPress: confirmarUtilizacion });
+    } else {
+      aviso = 'Vas a poder marcarla como utilizada desde el día del evento.';
+    }
   }
 
   const ultimo = compra.mensajes.at(-1);
@@ -195,9 +220,10 @@ export default function DetalleCompra() {
         ))}
       </ScrollView>
 
-      {acciones.length > 0 || errorAccion ? (
+      {acciones.length > 0 || errorAccion || aviso ? (
         <View style={[styles.pie, { paddingBottom: spacing.md + insets.bottom }]}>
           {errorAccion ? <Text style={styles.error}>{errorAccion}</Text> : null}
+          {aviso ? <Text style={styles.aviso}>{aviso}</Text> : null}
           {acciones.map((accion) => (
             <Pressable
               key={accion.texto}
@@ -325,6 +351,12 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: colors.border,
     backgroundColor: colors.background,
+  },
+  aviso: {
+    color: colors.textSecondary,
+    fontSize: fontSize.small,
+    textAlign: 'center',
+    paddingHorizontal: spacing.lg,
   },
   error: {
     backgroundColor: '#FCEBEB',

@@ -697,3 +697,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La imagen se me ocurrió a mí después de aprobar el boceto: la IA no la había propuesto, aunque el detalle de evento ya la tenía.
   - No se capturó en esta ronda el caso sin imágenes (el bloque gris). Es el mismo componente que ya se usaba en el detalle de evento.
 - **Aprendizaje:** al aprobar un boceto conviene compararlo con las pantallas que ya existen del mismo recurso. Lo que una tiene y la otra no (como la imagen del evento) salta enseguida.
+
+### 2026-11-03 · Marcar como utilizada desde el detalle de compra
+- **Tarea:** ajuste sobre las pantallas del organizador (sección 3)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` + `/probar-caso-de-uso` + `/registrar-ia`
+- **Pedido (prompt):** "como seria eso? lo pide la consigna?". Después, "dale" a la propuesta y "Aprobado" al boceto.
+- **Resultado:**
+  - La IA explicó que ningún caso de uso lo pide de forma directa, pero que sin esta acción una compra solo llega a UTILIZADA si ya venía así del seed, y no se puede mostrar el ciclo completo (comprar → pagar → usar → reseñar), que habilitan los casos 8 y 9.
+  - Boceto: se sumaron a `detalle-compra.html` los estados E a H (botón, confirmación, carga y resultado, y el aviso antes del día del evento).
+  - `api/compras.js` suma `marcarUtilizada`. En `compras/[id].js`, el organizador ve "Marcar como utilizada" si la compra está confirmada y ya llegó el día del evento. Pide confirmación, llama a `POST /compras/:id/utilizacion` y vuelve a pedir la compra. Antes del día, el pie explica desde cuándo se va a poder.
+  - Prueba en el emulador: Lucía, en la compra de Sofía para el Rock, ve el aviso. Martín, en la compra de Juan para el Stand-up, marca la entrada y la compra queda Utilizada, con el cambio en el historial y sin el botón. Por API: 409 antes del día, 403 si no es el organizador y 409 si ya estaba utilizada.
+- **Bien:** no hizo falta tocar el seed. Al revisar la regla del backend, la IA vio que se permite desde el día del evento en adelante, y que la compra de Juan para el Stand-up ya servía para el caso feliz.
+- **Corregido / problemas:**
+  - El boceto original del detalle de compra ya decía que el organizador iba a poder "Marcar como utilizada" desde sus ventas (subtarea 3.9), pero al hacer esa pantalla la IA no lo revisó y quedó afuera. Apareció porque la IA lo listó como endpoint sin usar.
+  - Antes de leer la regla, la IA dijo que el backend solo lo permitía el mismo día del evento y que había que agregar un evento de hoy al seed. Lo corrigió al revisar el código.
+  - En la prueba, la hora del historial (21:11) no coincidía con el reloj del emulador (12:11). Era el reloj del emulador el que estaba mal: la PC y el backend tenían la hora correcta.
+- **Aprendizaje:** al cerrar una pantalla conviene releer las notas de los bocetos anteriores que la mencionan. Lo que quedó prometido ahí se puede perder si nadie lo vuelve a mirar.

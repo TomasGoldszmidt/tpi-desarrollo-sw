@@ -35,3 +35,9 @@ export function getMensajes(id) {
 export function enviarMensaje(id, mensaje) {
   return request(`/compras/${id}/mensajes`, { method: 'POST', body: { mensaje } });
 }
+
+// El organizador marca la entrada como usada (CONFIRMADA → UTILIZADA), desde el día
+// del evento. Habilita al comprador a reseñar.
+export function marcarUtilizada(id) {
+  return request(`/compras/${id}/utilizacion`, { method: 'POST' });
+}
