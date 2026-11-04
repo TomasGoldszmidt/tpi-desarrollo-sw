@@ -770,4 +770,5 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Corregido / problemas:**
   - La IA avisó que una compra nueva no se puede marcar como utilizada hasta el día del evento. Por eso el guion usa, para usar y reseñar, la compra de Juan del Stand-up que ya está en el seed, en lugar de la que se compra en el video.
   - El guion decía que en Swagger se ponía el header `X-User-Id`. Al revisar el `openapi.yaml`, el usuario activo se carga con el botón Authorize, y se corrigió.
+  - La IA armó el guion con el backend y el frontend en bloques separados, después del recorrido en la app. Le propuse mostrar el código a la par del flujo, con VS Code y el emulador en la misma pantalla, y se reordenó por pasos (comprar, pagar, usar y reseñar), cada uno con su pantalla y su backend.
 - **Aprendizaje:** antes de grabar conviene ensayar el recorrido y reiniciar el backend. Como la persistencia es en memoria, lo que se hace en el ensayo cambia lo que se ve en la grabación.
