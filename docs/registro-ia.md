@@ -731,3 +731,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Para probar por API, la IA mandó mensajes con curl desde la consola de Windows. Quedaron guardados con las tildes rotas y hubo que reiniciar el backend para volver al seed limpio.
   - Dos reemplazos hechos con scripts de consola fallaron, uno por las comillas y otro por los saltos de línea CRLF. No escribieron nada y se rehicieron con el editor.
 - **Aprendizaje:** al recortar alcance, hay que preguntarse qué parte resuelve el problema real y no solo cuál es más barata. La IA recortó por costo y dejó afuera justo la pantalla donde se acumulan los mensajes.
+
+### 2026-11-03 · Aviso de puerto ocupado al levantar el backend
+- **Tarea:** "Corrección de bugs y pulido visual" (sección 4)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** "Dale" al arreglo propuesto para el bug 1 de la prueba integral.
+- **Resultado:**
+  - `index.js`: el callback de `app.listen` recibe el error. Si el puerto está ocupado, muestra "No se pudo levantar el servidor. El puerto 3000 ya está en uso: cerrá el otro backend y volvé a intentar" y termina con código 1. Con nodemon, ahora figura como caída en vez de "clean exit".
+  - Prueba: con el backend de la pestaña corriendo, un segundo backend muestra el aviso y sale con código 1. En un puerto libre (3001) arranca normal y queda vivo.
+  - Con esto quedan resueltos los tres bugs de la prueba integral. No apareció nada de pulido visual para corregir.
+- **Bien:** el arreglo salió del diagnóstico que la IA ya había hecho al principio de la prueba, cuando encontró el backend viejo ocupando el puerto.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** un mensaje de éxito que se imprime sin revisar si hubo error es peor que no tener mensaje. Me hizo probar contra un backend con datos viejos sin darme cuenta.

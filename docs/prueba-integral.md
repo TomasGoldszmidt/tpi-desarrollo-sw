@@ -192,6 +192,6 @@ Se resuelven en la subtarea "Corrección de bugs y pulido visual".
 
 | # | Caso | Qué pasó | Estado |
 |---|---|---|---|
-| 1 | Preparación | Con otro backend ocupando el puerto 3000, `npm run dev` dice "Servidor escuchando" y se cierra sin avisar: la app seguía usando el backend viejo. | Pendiente |
+| 1 | Preparación | Con otro backend ocupando el puerto 3000, `npm run dev` dice "Servidor escuchando" y se cierra sin avisar: la app seguía usando el backend viejo. | Resuelto: ahora avisa que el puerto está en uso y termina con error |
 | 2 | B2 | Los casos de búsqueda usaban textos que no se ven en la tarjeta (descripción y calle). | Resuelto: se cambiaron los casos |
 | 3 | B5 / C1 | Un mensaje sin responder no se nota en ninguna lista: hay que entrar a cada compra para verlo. Se marca en Mis compras, Ventas y Mis eventos (boceto `mensajes-sin-responder.html`); las pestañas y el "leído" quedaron afuera. | Resuelto, falta probarlo en el celular |

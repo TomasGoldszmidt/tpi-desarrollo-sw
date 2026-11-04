@@ -42,7 +42,7 @@
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular
-- [ ] Corrección de bugs y pulido visual
+- [x] Corrección de bugs y pulido visual
 - [ ] README con instrucciones para levantar el proyecto
 - [ ] Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)
 - [ ] Redactar conclusión sobre el uso de IA
