@@ -837,3 +837,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** la captura con el stack de React Native señalaba la línea exacta, y la corrección fue de una línea.
 - **Corregido / problemas:** el error pasó lint y la compilación, y yo commiteé sin abrir la pantalla en el emulador. Lo encontró el usuario en la primera prueba.
 - **Aprendizaje:** que compile no alcanza. Un JSX pasado como prop se evalúa siempre, aunque no se muestre, y estos errores solo aparecen al abrir la pantalla.
+
+### 2026-11-11 · Mis compras ordenadas por importancia
+- **Tarea:** "Mis compras: filtrar y diferenciar por estado" (sección 3)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** "Cuando estoy en todas debería estar ordenado por estado y luego por tiempo, del más importante al menos", y "Dale, así" a la propuesta.
+- **Resultado:**
+  - Como "por tiempo" podía ir en cualquiera de los dos sentidos, la IA propuso primero el orden con una tabla de cómo quedarían Juan y Sofía, y esperó el ok.
+  - `ordenarPorImportancia` en `(tabs)/compras.js` ordena por estado (pendiente, confirmada, utilizada, cancelada, reembolsada) y después por fecha del evento. En las pendientes y confirmadas va primero el evento más próximo, y las de eventos que ya pasaron van al final. En el resto va primero el más reciente.
+  - Se ordena una vez al cargar, así los filtros mantienen el mismo orden interno. El backend no cambió.
+- **Bien:** se verificó el orden ejecutando la misma función del archivo contra las compras reales del backend, y coincidió con la tabla aprobada.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** cuando un pedido tiene una parte ambigua ("por tiempo"), mostrar el resultado con datos reales antes de implementar evita una vuelta de corrección.

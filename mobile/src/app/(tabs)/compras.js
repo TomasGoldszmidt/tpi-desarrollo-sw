@@ -9,7 +9,7 @@ import { useCarga } from '../../hooks/useCarga.js';
 import { CompraCard } from '../../components/CompraCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { FiltroEstados } from '../../components/FiltroEstados.js';
-import { estiloEstado } from '../../components/EstadoBadge.js';
+import { ORDEN_ESTADOS, estiloEstado } from '../../components/EstadoBadge.js';
 import { Seccion } from '../../components/Seccion.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
@@ -18,7 +18,34 @@ import { colors, fontSize, spacing } from '../../theme.js';
 // La compra trae solo el id del organizador: los nombres, para el aviso de mensajes, salen de los usuarios.
 async function pedirCompras() {
   const [compras, usuarios] = await Promise.all([getMisCompras(), getUsuarios()]);
-  return { compras, usuarios: new Map(usuarios.map((u) => [u.id, u])) };
+  return { compras: ordenarPorImportancia(compras), usuarios: new Map(usuarios.map((u) => [u.id, u])) };
+}
+
+// Las que todavía importan: hay que pagarlas o el evento está por venir.
+const ESTADOS_ACTIVOS = ['PENDIENTE', 'CONFIRMADA'];
+
+// Primero por estado, del más importante al menos (pendiente, confirmada, utilizada,
+// cancelada, reembolsada), y dentro de cada estado por la fecha del evento:
+// - pendientes y confirmadas: el evento más próximo primero; las de eventos que ya
+//   pasaron van al final de su estado, la más reciente primero;
+// - utilizadas, canceladas y reembolsadas: como historial, la más reciente primero.
+function ordenarPorImportancia(compras) {
+  const ahora = Date.now();
+  return [...compras].sort((a, b) => {
+    const porEstado = ORDEN_ESTADOS.indexOf(a.estado) - ORDEN_ESTADOS.indexOf(b.estado);
+    if (porEstado !== 0) return porEstado;
+
+    const fechaA = Date.parse(a.evento.fecha);
+    const fechaB = Date.parse(b.evento.fecha);
+    const porFecha = (() => {
+      if (!ESTADOS_ACTIVOS.includes(a.estado)) return fechaB - fechaA;
+      const pasoA = fechaA < ahora;
+      const pasoB = fechaB < ahora;
+      if (pasoA !== pasoB) return pasoA ? 1 : -1;
+      return pasoA ? fechaB - fechaA : fechaA - fechaB;
+    })();
+    return porFecha || b.id - a.id;
+  });
 }
 
 export default function MisCompras() {
