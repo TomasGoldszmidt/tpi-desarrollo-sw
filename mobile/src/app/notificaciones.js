@@ -1,19 +1,19 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { Pressable, RefreshControl, SectionList, StyleSheet, Text, View } from 'react-native';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getNotificaciones, marcarNotificacionesLeidas } from '../api/notificaciones.js';
+import { getNotificaciones, marcarNotificacionLeida, marcarNotificacionesLeidas } from '../api/notificaciones.js';
 import { useUsuario } from '../context/UsuarioContext.js';
 import { useNotificaciones } from '../context/NotificacionesContext.js';
 import { useCarga } from '../hooks/useCarga.js';
-import { PantallaCarga } from '../components/Carga.js';
+import { CargaEncima, PantallaCarga } from '../components/Carga.js';
 import { EstadoCarga } from '../components/EstadoCarga.js';
 import { formatCuando } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Lo que hicieron otros en las compras y los eventos del usuario. Al entrar se marcan
-// todas como leídas (la campana vuelve a 0), pero las que eran nuevas siguen resaltadas
-// mientras la pantalla está abierta, para que se vea cuáles eran.
+// Lo que hicieron otros en las compras y los eventos del usuario. Cada notificación nueva
+// se marca como leída al abrirla; el botón de arriba las marca todas. Al volver de lo que
+// se abrió, la lista se vuelve a pedir y la que se leyó pasa a Anteriores.
 export default function Notificaciones() {
   const { usuario } = useUsuario();
   const { actualizar } = useNotificaciones();
@@ -25,15 +25,42 @@ export default function Notificaciones() {
   }, [usuario.id]);
   const { data: notificaciones, loading, error, recargar } = useCarga(pedir);
 
-  // La primera vez que llegan, si había nuevas, se marcan como leídas y se actualiza la campana.
-  const marcadas = useRef(false);
-  useEffect(() => {
-    if (!notificaciones || marcadas.current) return;
-    marcadas.current = true;
-    if (notificaciones.some((notificacion) => !notificacion.leida)) {
-      marcarNotificacionesLeidas(usuario.id).then(actualizar, () => {});
+  const [marcandoTodas, setMarcandoTodas] = useState(false);
+  const [errorMarcar, setErrorMarcar] = useState(null);
+
+  // Al volver de una notificación abierta se vuelve a pedir (la primera vez ya pide useCarga).
+  const primeraVez = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (primeraVez.current) {
+        primeraVez.current = false;
+        return;
+      }
+      recargar();
+    }, [recargar]),
+  );
+
+  // Se abre enseguida y se marca por detrás: si falla (sin conexión), la próxima vez sigue como nueva.
+  function abrirNotificacion(notificacion) {
+    if (!notificacion.leida) {
+      marcarNotificacionLeida(usuario.id, notificacion.id).then(actualizar, () => {});
     }
-  }, [notificaciones, usuario.id, actualizar]);
+    abrir(notificacion, usuario);
+  }
+
+  async function marcarTodas() {
+    setMarcandoTodas(true);
+    setErrorMarcar(null);
+    try {
+      await marcarNotificacionesLeidas(usuario.id);
+      recargar();
+      actualizar();
+    } catch (e) {
+      setErrorMarcar(e.message);
+    } finally {
+      setMarcandoTodas(false);
+    }
+  }
 
   if (loading && !notificaciones) {
     return <PantallaCarga mensaje="Cargando tus notificaciones…" />;
@@ -46,34 +73,53 @@ export default function Notificaciones() {
     );
   }
 
+  const hayNuevas = notificaciones.some((notificacion) => !notificacion.leida);
   const secciones = [
     { titulo: 'Nuevas', data: notificaciones.filter((notificacion) => !notificacion.leida) },
     { titulo: 'Anteriores', data: notificaciones.filter((notificacion) => notificacion.leida) },
   ].filter((seccion) => seccion.data.length > 0);
 
   return (
-    <SectionList
-      style={styles.pantalla}
-      contentContainerStyle={styles.contenido}
-      sections={secciones}
-      keyExtractor={(notificacion) => notificacion.id}
-      ListHeaderComponent={<Text style={styles.titulo}>Notificaciones</Text>}
-      renderSectionHeader={({ section }) => <Text style={styles.seccion}>{section.titulo}</Text>}
-      renderItem={({ item }) => (
-        <NotificacionFila notificacion={item} onPress={() => abrir(item, usuario)} />
-      )}
-      stickySectionHeadersEnabled={false}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
-      ListEmptyComponent={
-        <View style={styles.vacio}>
-          <Ionicons name="notifications-outline" size={36} color={colors.textMuted} />
-          <Text style={styles.vacioTitulo}>No tenés notificaciones</Text>
-          <Text style={styles.vacioTexto}>
-            Acá vas a ver los mensajes y los cambios de tus compras y de tus eventos.
-          </Text>
-        </View>
-      }
-    />
+    <View style={styles.pantalla}>
+      <SectionList
+        style={styles.pantalla}
+        contentContainerStyle={styles.contenido}
+        sections={secciones}
+        keyExtractor={(notificacion) => notificacion.id}
+        ListHeaderComponent={
+          <View>
+            <Text style={styles.titulo}>Notificaciones</Text>
+            {hayNuevas ? (
+              <Pressable
+                style={({ pressed }) => [styles.marcarTodas, pressed && styles.presionada]}
+                onPress={marcarTodas}
+                disabled={marcandoTodas}
+              >
+                <Ionicons name="checkmark-done" size={18} color={colors.primaryText} />
+                <Text style={styles.marcarTodasTexto}>Marcar todas como leídas</Text>
+              </Pressable>
+            ) : null}
+            {errorMarcar ? <Text style={styles.error}>{errorMarcar}</Text> : null}
+          </View>
+        }
+        renderSectionHeader={({ section }) => <Text style={styles.seccion}>{section.titulo}</Text>}
+        renderItem={({ item }) => (
+          <NotificacionFila notificacion={item} onPress={() => abrirNotificacion(item)} />
+        )}
+        stickySectionHeadersEnabled={false}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+        ListEmptyComponent={
+          <View style={styles.vacio}>
+            <Ionicons name="notifications-outline" size={36} color={colors.textMuted} />
+            <Text style={styles.vacioTitulo}>No tenés notificaciones</Text>
+            <Text style={styles.vacioTexto}>
+              Acá vas a ver los mensajes y los cambios de tus compras y de tus eventos.
+            </Text>
+          </View>
+        }
+      />
+      {marcandoTodas ? <CargaEncima mensaje="Marcando como leídas…" /> : null}
+    </View>
   );
 }
 
@@ -167,6 +213,31 @@ const styles = StyleSheet.create({
     color: colors.text,
     fontSize: fontSize.title,
     fontWeight: 'bold',
+  },
+  marcarTodas: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    marginTop: spacing.md,
+  },
+  marcarTodasTexto: {
+    color: colors.primaryText,
+    fontSize: fontSize.body,
+    fontWeight: 'bold',
+  },
+  error: {
+    backgroundColor: '#FCEBEB',
+    color: '#791F1F',
+    borderRadius: 8,
+    padding: spacing.md,
+    marginTop: spacing.sm,
+    fontSize: fontSize.body,
+    overflow: 'hidden',
   },
   seccion: {
     color: colors.textMuted,

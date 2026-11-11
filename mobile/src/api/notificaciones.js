@@ -9,3 +9,8 @@ export function getNotificaciones(usuarioId) {
 export function marcarNotificacionesLeidas(usuarioId) {
   return request(`/usuarios/${usuarioId}/notificaciones/lectura`, { method: 'PUT' });
 }
+
+// Solo esa notificación queda leída (al abrirla).
+export function marcarNotificacionLeida(usuarioId, notificacionId) {
+  return request(`/usuarios/${usuarioId}/notificaciones/${encodeURIComponent(notificacionId)}/lectura`, { method: 'PUT' });
+}

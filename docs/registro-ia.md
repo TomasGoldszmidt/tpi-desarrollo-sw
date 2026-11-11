@@ -932,3 +932,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - `GET /usuarios/:id/eventos` devuelve resúmenes sin `organizadorId`, y el cálculo de no leídos lo necesita. Se volvió a buscar el evento completo.
   - El campo de Mis eventos cambió de nombre, así que se renombró también en la app para que no deje de andar. Los textos ("espera tu respuesta") se cambian en la subtarea de los chats.
 - **Aprendizaje:** un indicador que parece de "leído" puede estar midiendo otra cosa (acá, "falta responder"). Antes de cambiarlo, conviene preguntar qué tiene que significar para el usuario.
+
+### 2026-11-11 · Notificaciones: se leen una por una (app)
+- **Tarea:** Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
+- **Herramienta / skill:** Claude Code, `/nueva-pantalla`, `/registrar-ia`
+- **Pedido (prompt):** "cuando entro a una de las notificaciones nuevas debería marcarse como leído".
+- **Resultado:**
+  - Boceto `docs/bocetos/notificaciones-lectura.html` con tres estados y datos de Lucía: al entrar, al volver de una notificación y después de marcar todas.
+  - Entrar a la pantalla ya no marca todas como leídas.
+  - Tocar una nueva la abre enseguida y la marca por detrás (`PUT .../notificaciones/:notificacionId/lectura`). Después se actualiza la campana.
+  - Al volver, la lista se vuelve a pedir con `useFocusEffect`.
+  - El botón "Marcar todas como leídas" muestra una carga encima mientras marca y el error si falla.
+- **Bien:** el endpoint de la subtarea anterior alcanzó tal cual. La pantalla solo cambió en cuándo marca y en el botón.
+- **Corregido / problemas:**
+  - En el boceto, "Marcar todas como leídas" parecía solo texto. El usuario pidió un botón más visible y pasó a ser un botón con borde, de ancho completo.
+  - Al recargar la app, Expo Go mostró "Something went wrong": Metro no estaba corriendo, y la IA había recargado la app sin fijarse. Se levantó en una pestaña del terminal, y quedó anotado que hay que verificar Metro antes de recargar.
+- **Aprendizaje:** una acción que cambia el estado de toda la pantalla tiene que verse como botón, no como un link al costado del título.

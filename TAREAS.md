@@ -48,7 +48,7 @@
 - [ ] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
 - [ ] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header
 - [ ] Mensajes de cada evento: bandeja de conversaciones responsive
-- [ ] Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
+- [x] Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
 - [ ] Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos
 
 ## 4. Cierre técnico
