@@ -48,7 +48,7 @@ describe('inicio de sesión', () => {
 describe('registro', () => {
   it('crea la cuenta y después se puede iniciar sesión', () => {
     const cuenta = registrar({ nombre: 'Camila', apellido: 'Ríos', email: 'camila@gmail.com', contrasenia: 'camila1234' });
-    assert.deepEqual(cuenta, { id: cuenta.id, nombre: 'Camila', apellido: 'Ríos', email: 'camila@gmail.com', favoritos: [], notificacionesLeidasHasta: null });
+    assert.deepEqual(cuenta, { id: cuenta.id, nombre: 'Camila', apellido: 'Ríos', email: 'camila@gmail.com', favoritos: [], notificacionesLeidasHasta: null, notificacionesLeidas: [] });
     assert.equal(iniciarSesion('camila@gmail.com', 'camila1234').id, cuenta.id);
   });
 

@@ -198,6 +198,13 @@ export function loadSeed() {
     usuarioId: juan.id, mensaje: '¿El Backstage incluye estacionamiento?', enviado: daysFromNow(-1, 19),
   });
 
+  // Hasta dónde leyó cada uno: quien escribe ya leyó su chat. Sofía no abrió la respuesta de
+  // Lucía y Lucía no abrió las preguntas de Juan, así que esos chats tienen mensajes nuevos.
+  compraRepository.marcarMensajesLeidos(compras.sofiaRock.id, 'comprador', daysFromNow(-4, 10));
+  compras.sofiaRock = compraRepository.marcarMensajesLeidos(compras.sofiaRock.id, 'organizador', daysFromNow(-4, 11));
+  compras.juanRockReembolsada = compraRepository.marcarMensajesLeidos(compras.juanRockReembolsada.id, 'comprador', daysFromNow(-3, 10));
+  compras.juanBackstage = compraRepository.marcarMensajesLeidos(compras.juanBackstage.id, 'comprador', daysFromNow(-1, 19));
+
   // Todos leyeron sus notificaciones hace unos días: lo posterior aparece como nuevo
   // (Lucía tiene 4, Martín 2, Sofía 1 y Juan ninguna).
   for (const usuario of Object.values(usuarios)) {

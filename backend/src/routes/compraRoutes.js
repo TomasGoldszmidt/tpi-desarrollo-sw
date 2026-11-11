@@ -19,5 +19,6 @@ router.route('/:id/mensajes')
   .get(requireUsuario, compraController.listMensajes)
   .post(requireUsuario, compraController.createMensaje)
   .all(methodNotAllowed);
+router.route('/:id/mensajes/lectura').put(requireUsuario, compraController.markMensajesRead).all(methodNotAllowed);
 
 export default router;

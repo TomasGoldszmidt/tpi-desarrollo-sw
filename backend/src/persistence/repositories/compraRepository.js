@@ -17,6 +17,7 @@ export function create({ compradorId, eventoId, tipoEntradaId, cantidad, total, 
     estado: EstadoCompra.PENDIENTE,
     historial: [{ estado: EstadoCompra.PENDIENTE, usuarioId: Number(compradorId), fechaHora: new Date(fechaHora) }],
     mensajes: [],
+    mensajesLeidosHasta: { comprador: null, organizador: null },
   });
 }
 
@@ -55,5 +56,16 @@ export function addMensaje(id, { usuarioId, mensaje, enviado = new Date() }) {
 
   return compras.update(id, {
     mensajes: [...compra.mensajes, { usuarioId: Number(usuarioId), mensaje, enviado: new Date(enviado) }],
+  });
+}
+
+// rol: 'comprador' u 'organizador'; quién es quién lo decide el dominio.
+/** @param {'comprador' | 'organizador'} rol @returns {Compra | null} */
+export function marcarMensajesLeidos(id, rol, fecha = new Date()) {
+  const compra = compras.findById(id);
+  if (!compra) return null;
+
+  return compras.update(id, {
+    mensajesLeidosHasta: { ...compra.mensajesLeidosHasta, [rol]: new Date(fecha) },
   });
 }

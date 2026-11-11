@@ -15,9 +15,9 @@
 
 /**
  * El usuario visto por él mismo: lo que devuelven el inicio de sesión, el registro y la edición del perfil.
- * `notificacionesLeidasHasta`: la última vez que abrió las notificaciones (null si nunca);
- * las de antes se muestran como leídas.
- * @typedef {Usuario & { email: string, notificacionesLeidasHasta: Date | null }} Cuenta
+ * `notificacionesLeidasHasta`: la última vez que marcó todas como leídas (null si nunca);
+ * las de antes se muestran como leídas. `notificacionesLeidas`: ids de las que abrió una por una.
+ * @typedef {Usuario & { email: string, notificacionesLeidasHasta: Date | null, notificacionesLeidas: string[] }} Cuenta
  */
 
 /**
@@ -78,6 +78,15 @@
  * @property {EstadoCompra} estado Estado actual; se escribe junto con el historial.
  * @property {CambioEstadoCompra[]} historial Embebido, en orden cronológico.
  * @property {Mensaje[]} mensajes Embebidos: el chat de la compra.
+ * @property {MensajesLeidosHasta} mensajesLeidosHasta Hasta cuándo leyó el chat cada participante.
+ */
+
+/**
+ * Embebido en `Compra.mensajesLeidosHasta`. Por rol y no por id de usuario: en una compra
+ * hay un solo comprador y un solo organizador. null si nunca abrió el chat.
+ * @typedef {Object} MensajesLeidosHasta
+ * @property {Date | null} comprador
+ * @property {Date | null} organizador
  */
 
 /**

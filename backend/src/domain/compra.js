@@ -142,9 +142,13 @@ export function puedeVer(compra, evento, usuario) {
 
 // Forma de la compra para la app: resúmenes del evento, el tipo de entrada y el comprador
 // en lugar de sus ids, y los días que faltan (calculados). El historial y el chat van tal cual.
-/** @param {Compra} compra @param {Evento} evento @param {Usuario} comprador @param {Date} [ahora] */
-export function detalleCompra(compra, evento, comprador, ahora = new Date()) {
-  const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, ...resto } = compra;
+// Con `lector` (quien pide), suma cuántos mensajes del chat todavía no leyó.
+/**
+ * @param {Compra} compra @param {Evento} evento @param {Usuario} comprador
+ * @param {Usuario | null} [lector] @param {Date} [ahora]
+ */
+export function detalleCompra(compra, evento, comprador, lector = null, ahora = new Date()) {
+  const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, mensajesLeidosHasta: _leidos, ...resto } = compra;
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
   return {
     id: compra.id,
@@ -153,6 +157,7 @@ export function detalleCompra(compra, evento, comprador, ahora = new Date()) {
     comprador: { id: comprador.id, nombre: comprador.nombre, apellido: comprador.apellido },
     ...resto,
     diasRestantes: diasRestantes(compra, evento, ahora),
+    ...(lector ? { mensajesNoLeidos: mensajesNoLeidos(compra, evento, lector) } : {}),
   };
 }
 
@@ -166,18 +171,39 @@ export function mensajesConAutor(mensajes) {
   });
 }
 
-// El chat espera la respuesta de un participante cuando el último mensaje lo escribió el otro.
-// Sin mensajes no espera nada. No hay "leído": se apaga recién cuando contesta.
-/** @param {Compra} compra @param {Usuario} usuario @returns {boolean} */
-export function esperaRespuestaDe(compra, usuario) {
-  const ultimo = compra.mensajes.at(-1);
-  return ultimo !== undefined && ultimo.usuarioId !== usuario.id;
+// Qué papel tiene el usuario en el chat de la compra; null si no participa.
+// No hay ambigüedad: el organizador no puede comprar en su propio evento.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {'comprador' | 'organizador' | null} */
+export function rolEnCompra(compra, evento, usuario) {
+  if (esComprador(usuario, compra)) return 'comprador';
+  if (esOrganizador(usuario, compra, evento)) return 'organizador';
+  return null;
 }
 
-// Para Mis eventos: cuántas compras de un evento esperan la respuesta del organizador.
-/** @param {Compra[]} compras @param {Usuario} usuario @returns {number} */
-export function cantidadSinResponder(compras, usuario) {
-  return compras.filter((compra) => esperaRespuestaDe(compra, usuario)).length;
+// Mensajes que escribió el otro después de la última vez que el usuario abrió el chat.
+// Los propios nunca cuentan. Si nunca lo abrió, cuentan todos los del otro.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {number} */
+export function mensajesNoLeidos(compra, evento, usuario) {
+  const rol = rolEnCompra(compra, evento, usuario);
+  if (!rol) return 0;
+  const leidoHasta = compra.mensajesLeidosHasta[rol];
+  return compra.mensajes
+    .filter((mensaje) => mensaje.usuarioId !== usuario.id && (leidoHasta === null || mensaje.enviado > leidoHasta))
+    .length;
+}
+
+// Para Mis eventos: cuántas compras de un evento tienen mensajes que el organizador no leyó.
+/** @param {Compra[]} compras @param {Evento} evento @param {Usuario} usuario @returns {number} */
+export function cantidadConMensajesNoLeidos(compras, evento, usuario) {
+  return compras.filter((compra) => mensajesNoLeidos(compra, evento, usuario) > 0).length;
+}
+
+// Al abrir el chat: todo lo que hay hasta ahora queda leído para quien lo abrió.
+/** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @param {Date} [ahora] @returns {Compra} */
+export function leerMensajes(compra, evento, usuario, ahora = new Date()) {
+  const rol = rolEnCompra(compra, evento, usuario);
+  if (!rol) throw new ForbiddenError('Solo el comprador y el organizador pueden leer este chat');
+  return compraRepository.marcarMensajesLeidos(compra.id, rol, ahora);
 }
 
 // Casos de uso 5 y 6: comprador y organizador escriben "en cualquier momento",
@@ -191,5 +217,7 @@ export function enviarMensaje(compra, evento, usuario, texto, ahora = new Date()
     throw new ForbiddenError('Solo el comprador y el organizador pueden escribir en este chat');
   }
   const actualizada = compraRepository.addMensaje(compra.id, { usuarioId: usuario.id, mensaje: texto, enviado: ahora });
+  // Quien escribe ya vio el chat hasta acá.
+  compraRepository.marcarMensajesLeidos(compra.id, rolEnCompra(compra, evento, usuario), ahora);
   return mensajesConAutor([actualizada.mensajes.at(-1)])[0];
 }

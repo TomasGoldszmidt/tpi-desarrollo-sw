@@ -3,7 +3,7 @@ import * as compraRepository from '../persistence/repositories/compraRepository.
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
-import { cantidadSinResponder, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
+import { cantidadConMensajesNoLeidos, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import {
@@ -87,14 +87,16 @@ export async function getById(req, res) {
 }
 
 // GET /usuarios/:id/eventos: los eventos que organiza, incluidos los pasados. Son públicos.
-// Cada uno trae cuántas compras esperan la respuesta del organizador en el chat.
+// Cada uno trae cuántas compras tienen mensajes que el organizador no leyó.
 export async function listByOrganizador(req, res) {
   const id = requireId(req.params.id);
   const organizador = usuarioRepository.findById(id);
   if (!organizador) throw new NotFoundError(`No existe el usuario ${id}`);
   res.status(200).json(eventosOrganizados(organizador).map((evento) => ({
     ...evento,
-    sinResponder: cantidadSinResponder(compraRepository.findByEvento(evento.id), organizador),
+    conMensajesNoLeidos: cantidadConMensajesNoLeidos(
+      compraRepository.findByEvento(evento.id), eventoRepository.findById(evento.id), organizador,
+    ),
   })));
 }
 
@@ -107,7 +109,7 @@ export async function listCompras(req, res) {
 
   const compras = masRecientesPrimero(compraRepository.findByEvento(evento.id));
   res.status(200).json(compras.map((compra) => ({
-    ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId)),
+    ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId), req.usuario),
     resenia: reseniaDeCompra(compra),
   })));
 }

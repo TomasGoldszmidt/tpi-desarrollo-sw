@@ -906,3 +906,29 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Para no repetir el error de Fast Refresh de favoritos, esta vez el provider de notificaciones se agregó en el layout antes que la campana que lo usa.
   - El boceto tenía mal el día de la semana de una fecha ("sáb 8 nov" en vez de "dom 8 nov"). La app usa `formatDia`, que lo calcula bien.
 - **Aprendizaje:** antes de agregar una entidad, conviene ver si lo que se quiere mostrar ya se puede calcular con lo guardado. Una notificación es otra forma de mirar el historial.
+
+### 2026-11-11 · Marcar como leída cada notificación y cada chat (backend)
+- **Tarea:** Marcar como leída una notificación y el chat de una compra (sección 2 de TAREAS.md)
+- **Herramienta / skill:** Claude Code, `/swagger`, `/registrar-ia`
+- **Pedido (prompt):** "cuando entro a una de las notificaciones nuevas debería marcarse como leído" y "cuando entro a un chat en mis eventos se tiene que marcar como leído".
+- **Resultado:**
+  - Antes de tocar código, la IA explicó por qué no se podía con lo que había: las notificaciones guardaban una sola fecha por usuario, y en los chats no existía el "leído" (el indicador era "el último mensaje es del otro"). Propuso tres subtareas, y esta es la primera.
+  - Persistencia:
+    - `Compra.mensajesLeidosHasta` guarda `{ comprador, organizador }`, una fecha por rol.
+    - `Cuenta.notificacionesLeidas` guarda los ids de las notificaciones abiertas una por una.
+    - Repositorios nuevos: `marcarMensajesLeidos` y `addNotificacionLeida`.
+  - Dominio:
+    - `rolEnCompra`, `mensajesNoLeidos`, `cantidadConMensajesNoLeidos` y `leerMensajes`.
+    - Quien escribe un mensaje ya leyó el chat hasta ahí.
+    - Una notificación de mensaje queda leída si se abrió el chat después.
+  - Endpoints:
+    - `PUT /compras/:id/mensajes/lectura` y `PUT /usuarios/:id/notificaciones/:notificacionId/lectura`, los dos con 204.
+    - Las compras devuelven `mensajesNoLeidos` para el usuario activo.
+    - En Mis eventos, `sinResponder` pasa a `conMensajesNoLeidos`.
+  - Seed: Sofía no abrió la respuesta de Lucía, y Lucía no abrió las dos preguntas de Juan.
+  - 7 tests nuevos (87 en total), swagger, `docs/persistencia.md` y prueba con curl (204, 401, 403, 404 y 405 con `Allow`).
+- **Bien:** como los ids de las notificaciones se arman con lo que las origina y nunca cambian, se pudo guardar cuáles se leyeron sin crear una colección de notificaciones.
+- **Corregido / problemas:**
+  - `GET /usuarios/:id/eventos` devuelve resúmenes sin `organizadorId`, y el cálculo de no leídos lo necesita. Se volvió a buscar el evento completo.
+  - El campo de Mis eventos cambió de nombre, así que se renombró también en la app para que no deje de andar. Los textos ("espera tu respuesta") se cambian en la subtarea de los chats.
+- **Aprendizaje:** un indicador que parece de "leído" puede estar midiendo otra cosa (acá, "falta responder"). Antes de cambiarlo, conviene preguntar qué tiene que significar para el usuario.

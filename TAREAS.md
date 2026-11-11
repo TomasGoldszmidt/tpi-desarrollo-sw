@@ -31,6 +31,7 @@
 - [x] Inicio de sesión, registro y edición del perfil (`POST /sesiones`, `POST /usuarios`, `PATCH /usuarios/:id`)
 - [x] Favoritos: listar, marcar y quitar (`GET /usuarios/:id/favoritos`, `PUT` y `DELETE /usuarios/:id/favoritos/:eventoId`)
 - [x] Notificaciones calculadas y marcar como leídas (`GET /usuarios/:id/notificaciones`, `PUT /usuarios/:id/notificaciones/lectura`)
+- [x] Marcar como leída una notificación y el chat de una compra (`PUT /usuarios/:id/notificaciones/:notificacionId/lectura`, `PUT /compras/:id/mensajes/lectura`)
 
 ## 3. Front-End
 - [x] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
@@ -47,6 +48,8 @@
 - [ ] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
 - [ ] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header
 - [ ] Mensajes de cada evento: bandeja de conversaciones responsive
+- [ ] Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
+- [ ] Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular

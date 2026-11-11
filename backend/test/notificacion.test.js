@@ -1,10 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadSeed } from '../src/persistence/seed.js';
-import { marcarLeidas, notificacionesDe } from '../src/domain/notificacion.js';
-import { enviarMensaje } from '../src/domain/compra.js';
+import { marcarLeida, marcarLeidas, notificacionesDe } from '../src/domain/notificacion.js';
+import { enviarMensaje, leerMensajes } from '../src/domain/compra.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
-import { ForbiddenError } from '../src/http/errors.js';
+import { ForbiddenError, NotFoundError } from '../src/http/errors.js';
 
 const seed = loadSeed();
 const { lucia, martin, sofia, juan } = seed.usuarios;
@@ -45,6 +45,26 @@ describe('notificaciones', () => {
     assert.ok(lista.some((n) => n.tipo === 'CAMBIO_ESTADO' && n.estado === 'UTILIZADA' && n.de.nombre === 'Martín'));
     assert.equal(nuevas(notificacionesDe(juan, juan.id)).length, 0);
     assert.equal(nuevas(notificacionesDe(martin, martin.id)).length, 2);
+  });
+
+  it('al abrir una, solo esa queda leída', () => {
+    const [primera, segunda] = nuevas(notificacionesDe(martin, martin.id));
+    marcarLeida(martin, martin.id, primera.id);
+    assert.deepEqual(nuevas(notificacionesDe(martin, martin.id)).map((n) => n.id), [segunda.id]);
+    marcarLeida(martin, martin.id, primera.id); // otra vez: no cambia nada
+    assert.equal(nuevas(notificacionesDe(martin, martin.id)).length, 1);
+  });
+
+  it('una notificación que no es del usuario da 404', () => {
+    assert.throws(() => marcarLeida(martin, martin.id, 'compra-999-mensaje-0'), NotFoundError);
+    assert.throws(() => marcarLeida(juan, lucia.id, 'compra-1-estado-0'), ForbiddenError);
+  });
+
+  it('al abrir el chat quedan leídas las notificaciones de sus mensajes', () => {
+    const lista = notificacionesDe(sofia, sofia.id);
+    const compraId = lista.find((n) => n.tipo === 'MENSAJE' && !n.leida).compra.id;
+    leerMensajes(compraRepository.findById(compraId), seed.eventos.rock, sofia);
+    assert.equal(nuevas(notificacionesDe(sofia, sofia.id)).length, 0);
   });
 
   it('al marcarlas como leídas quedan en 0, y lo que llega después vuelve a ser nuevo', () => {

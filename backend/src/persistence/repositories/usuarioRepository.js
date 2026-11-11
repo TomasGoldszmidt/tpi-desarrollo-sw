@@ -11,7 +11,7 @@ const usuarios = new Collection();
 /** @returns {Usuario | null} */
 function toUsuario(documento) {
   if (!documento) return null;
-  const { email: _email, contraseniaHash: _hash, notificacionesLeidasHasta: _leidas, ...usuario } = documento;
+  const { email: _email, contraseniaHash: _hash, notificacionesLeidasHasta: _hasta, notificacionesLeidas: _leidas, ...usuario } = documento;
   return usuario;
 }
 
@@ -29,7 +29,7 @@ function normalizarEmail(email) {
 
 /** @returns {Cuenta} */
 export function create({ nombre, apellido, email, contraseniaHash }) {
-  return toCuenta(usuarios.insert({ nombre, apellido, email: normalizarEmail(email), contraseniaHash, favoritos: [], notificacionesLeidasHasta: null }));
+  return toCuenta(usuarios.insert({ nombre, apellido, email: normalizarEmail(email), contraseniaHash, favoritos: [], notificacionesLeidasHasta: null, notificacionesLeidas: [] }));
 }
 
 /** @returns {Usuario | null} */
@@ -92,7 +92,17 @@ export function removeFavorito(usuarioId, eventoId) {
 }
 
 // Desde ahora, las notificaciones anteriores a esta fecha se muestran como leídas.
+// Las que se habían leído una por una ya quedan cubiertas: se vacía la lista.
 /** @returns {Cuenta | null} */
 export function marcarNotificacionesLeidas(id, fecha = new Date()) {
-  return toCuenta(usuarios.update(id, { notificacionesLeidasHasta: fecha }));
+  return toCuenta(usuarios.update(id, { notificacionesLeidasHasta: fecha, notificacionesLeidas: [] }));
+}
+
+// Una notificación abierta: queda leída aunque sea posterior a notificacionesLeidasHasta. Sin duplicados.
+/** @returns {Cuenta | null} */
+export function addNotificacionLeida(id, notificacionId) {
+  const usuario = usuarios.findById(id);
+  if (!usuario) return null;
+  if (usuario.notificacionesLeidas.includes(notificacionId)) return toCuenta(usuario);
+  return toCuenta(usuarios.update(id, { notificacionesLeidas: [...usuario.notificacionesLeidas, notificacionId] }));
 }

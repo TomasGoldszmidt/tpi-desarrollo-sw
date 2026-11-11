@@ -1,5 +1,5 @@
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { marcarLeidas, notificacionesDe } from '../domain/notificacion.js';
+import { marcarLeida, marcarLeidas, notificacionesDe } from '../domain/notificacion.js';
 import { NotFoundError } from '../http/errors.js';
 import { requireId } from '../http/validation.js';
 
@@ -17,5 +17,11 @@ export async function list(req, res) {
 export async function markRead(req, res) {
   const id = requireUsuarioExistente(req.params);
   marcarLeidas(req.usuario, id);
+  res.status(204).end();
+}
+
+export async function markOneRead(req, res) {
+  const id = requireUsuarioExistente(req.params);
+  marcarLeida(req.usuario, id, req.params.notificacionId);
   res.status(204).end();
 }

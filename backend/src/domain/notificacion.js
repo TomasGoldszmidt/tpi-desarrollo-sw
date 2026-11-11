@@ -2,7 +2,7 @@ import * as usuarioRepository from '../persistence/repositories/usuarioRepositor
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
-import { ForbiddenError } from '../http/errors.js';
+import { ForbiddenError, NotFoundError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Usuario} Usuario */
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
@@ -10,7 +10,8 @@ import { ForbiddenError } from '../http/errors.js';
 // Las notificaciones no se guardan: se calculan con lo que ya está guardado.
 // Una notificación es algo que hizo OTRA persona en una compra en la que el usuario
 // participa (como comprador o como organizador del evento), o una reseña de uno de
-// sus eventos. Del usuario solo se guarda hasta cuándo las leyó.
+// sus eventos. Del usuario solo se guarda qué leyó: una fecha (al marcar todas) y los ids
+// de las que abrió una por una. Las de mensajes también quedan leídas al abrir el chat.
 //
 // Tipos:
 // - COMPRA: alguien compró entradas de un evento tuyo (el primer cambio del historial).
@@ -26,8 +27,11 @@ function verificarPropio(usuarioActivo, id) {
 }
 
 // Lo que pasó en una compra hecho por alguien que no es el usuario.
+// Los mensajes llevan `chatLeidoHasta`: hasta cuándo el usuario leyó ese chat.
 /** @param {Compra} compra @param {Usuario} usuario */
 function deCompra(compra, evento, usuario) {
+  const rol = compra.compradorId === usuario.id ? 'comprador' : 'organizador';
+  const chatLeidoHasta = compra.mensajesLeidosHasta[rol];
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === compra.tipoEntradaId);
   const base = {
     compra: { id: compra.id, estado: compra.estado, cantidad: compra.cantidad, tipoEntrada: tipoEntrada.nombre },
@@ -48,20 +52,29 @@ function deCompra(compra, evento, usuario) {
     mensaje: mensaje.mensaje,
     fecha: mensaje.enviado,
     deId: mensaje.usuarioId,
+    chatLeidoHasta,
     ...base,
   }));
   return [...cambios, ...mensajes].filter((notificacion) => notificacion.deId !== usuario.id);
 }
 
+// Leída si es anterior a la última vez que marcó todas, si la abrió, o si es un mensaje
+// de un chat que ya abrió.
+function estaLeida(notificacion, chatLeidoHasta, cuenta) {
+  const { fecha } = notificacion;
+  const hasta = cuenta.notificacionesLeidasHasta;
+  return (hasta !== null && fecha <= hasta)
+    || cuenta.notificacionesLeidas.includes(notificacion.id)
+    || (chatLeidoHasta !== undefined && chatLeidoHasta !== null && fecha <= chatLeidoHasta);
+}
+
 /**
- * Las notificaciones del usuario, de la más reciente a la más vieja, con `leida`
- * según `notificacionesLeidasHasta`.
+ * Las notificaciones del usuario, de la más reciente a la más vieja, con `leida`.
  * @param {Usuario} usuarioActivo
  */
 export function notificacionesDe(usuarioActivo, id) {
   verificarPropio(usuarioActivo, id);
   const cuenta = usuarioRepository.findCuentaById(id);
-  const leidasHasta = cuenta.notificacionesLeidasHasta;
 
   const misEventos = eventoRepository.findByOrganizador(id);
   const comoComprador = compraRepository.findByComprador(id)
@@ -86,20 +99,28 @@ export function notificacionesDe(usuarioActivo, id) {
 
   const usuarios = new Map(usuarioRepository.findAll().map((u) => [u.id, u]));
   return [...deCompras, ...deResenias]
-    .map(({ deId, ...notificacion }) => {
+    .map(({ deId, chatLeidoHasta, ...notificacion }) => {
       const de = usuarios.get(deId);
       return {
         ...notificacion,
         de: { id: de.id, nombre: de.nombre, apellido: de.apellido },
-        leida: leidasHasta !== null && notificacion.fecha <= leidasHasta,
+        leida: estaLeida(notificacion, chatLeidoHasta, cuenta),
       };
     })
     .sort((a, b) => b.fecha - a.fecha);
 }
 
-// Al abrir la pantalla de notificaciones: las que hay hasta ahora quedan como leídas.
+// "Marcar todas como leídas": las que hay hasta ahora quedan como leídas.
 /** @param {Usuario} usuarioActivo */
 export function marcarLeidas(usuarioActivo, id, ahora = new Date()) {
   verificarPropio(usuarioActivo, id);
   usuarioRepository.marcarNotificacionesLeidas(id, ahora);
+}
+
+// Al abrir una notificación: solo esa queda leída. Tiene que ser una de las del usuario.
+/** @param {Usuario} usuarioActivo @param {string} notificacionId */
+export function marcarLeida(usuarioActivo, id, notificacionId) {
+  const existe = notificacionesDe(usuarioActivo, id).some((notificacion) => notificacion.id === notificacionId);
+  if (!existe) throw new NotFoundError(`No existe la notificación ${notificacionId}`);
+  usuarioRepository.addNotificacionLeida(id, notificacionId);
 }

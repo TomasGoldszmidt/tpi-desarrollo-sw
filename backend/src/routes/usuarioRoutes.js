@@ -23,8 +23,11 @@ router.route('/:id/favoritos/:eventoId')
   .put(requireUsuario, favoritoController.add)
   .delete(requireUsuario, favoritoController.remove)
   .all(methodNotAllowed);
-// Notificaciones: se calculan; solo se guarda hasta cuándo se leyeron.
+// Notificaciones: se calculan; solo se guarda cuáles se leyeron (todas hasta una fecha o una por una).
 router.route('/:id/notificaciones').get(requireUsuario, notificacionController.list).all(methodNotAllowed);
 router.route('/:id/notificaciones/lectura').put(requireUsuario, notificacionController.markRead).all(methodNotAllowed);
+router.route('/:id/notificaciones/:notificacionId/lectura')
+  .put(requireUsuario, notificacionController.markOneRead)
+  .all(methodNotAllowed);
 
 export default router;

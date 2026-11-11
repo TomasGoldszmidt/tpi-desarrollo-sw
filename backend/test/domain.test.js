@@ -9,7 +9,7 @@ import * as reseniaRepository from '../src/persistence/repositories/reseniaRepos
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
   actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
-  esperaRespuestaDe, cantidadSinResponder,
+  mensajesNoLeidos, cantidadConMensajesNoLeidos, leerMensajes, rolEnCompra,
 } from '../src/domain/compra.js';
 import { requireString } from '../src/http/validation.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
@@ -391,23 +391,54 @@ describe('chat de la compra', () => {
       (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden escribir en este chat');
   });
 
-  it('esperaRespuestaDe: el chat espera a quien no escribió el último mensaje', () => {
-    const { sofiaRock, juanStandup } = seed.compras; // Rock: el último es de Lucía; Stand-up de Juan: sin mensajes
-    assert.equal(esperaRespuestaDe(sofiaRock, sofia), true);
-    assert.equal(esperaRespuestaDe(sofiaRock, lucia), false);
-    assert.equal(esperaRespuestaDe(juanStandup, seed.usuarios.martin), false);
-
-    const pregunta = { ...sofiaRock, mensajes: [...sofiaRock.mensajes, { usuarioId: sofia.id, mensaje: '¿A qué hora abren?', enviado: new Date() }] };
-    assert.equal(esperaRespuestaDe(pregunta, sofia), false);
-    assert.equal(esperaRespuestaDe(pregunta, lucia), true);
+  it('rolEnCompra distingue al comprador del organizador', () => {
+    const { sofiaRock } = seed.compras;
+    const { rock } = seed.eventos;
+    assert.equal(rolEnCompra(sofiaRock, rock, sofia), 'comprador');
+    assert.equal(rolEnCompra(sofiaRock, rock, lucia), 'organizador');
+    assert.equal(rolEnCompra(sofiaRock, rock, martin), null);
   });
 
-  it('cantidadSinResponder cuenta las compras que esperan al organizador', () => {
-    // En el seed, Juan preguntó por el reembolso de Noche de Rock y Lucía no respondió.
+  it('mensajesNoLeidos: los del otro posteriores a la última vez que abrió el chat', () => {
+    // En el seed Sofía no abrió la respuesta de Lucía, y Lucía no abrió la pregunta de Juan.
     const { sofiaRock, juanRockReembolsada } = seed.compras;
-    const respondida = { ...juanRockReembolsada, mensajes: [...juanRockReembolsada.mensajes, { usuarioId: lucia.id, mensaje: 'En 5 días hábiles.', enviado: new Date() }] };
-    assert.equal(cantidadSinResponder([sofiaRock, juanRockReembolsada], lucia), 1);
-    assert.equal(cantidadSinResponder([sofiaRock, respondida], lucia), 0);
+    const { rock } = seed.eventos;
+    assert.equal(mensajesNoLeidos(sofiaRock, rock, sofia), 1);
+    assert.equal(mensajesNoLeidos(sofiaRock, rock, lucia), 0);
+    assert.equal(mensajesNoLeidos(juanRockReembolsada, rock, lucia), 1);
+    assert.equal(mensajesNoLeidos(juanRockReembolsada, rock, seed.usuarios.juan), 0);
+    assert.equal(mensajesNoLeidos(sofiaRock, rock, martin), 0);
+  });
+
+  it('cantidadConMensajesNoLeidos cuenta las compras con mensajes nuevos para el organizador', () => {
+    const { rock } = seed.eventos;
+    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, lucia), 1);
+  });
+
+  it('leerMensajes deja el chat leído solo para quien lo abre', () => {
+    const { rock } = seed.eventos;
+    const compra = leerMensajes(compraRepository.findById(seed.compras.juanRockReembolsada.id), rock, lucia);
+    assert.equal(mensajesNoLeidos(compra, rock, lucia), 0);
+    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, lucia), 0);
+    assert.throws(() => leerMensajes(compra, rock, martin),
+      (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden leer este chat');
+  });
+
+  it('quien escribe ya leyó su chat; el otro tiene un mensaje nuevo', () => {
+    const { obra } = seed.eventos;
+    const compra = seed.compras.sofiaObra; // sin mensajes
+    enviarMensaje(compra, obra, sofia, '¿Hay estacionamiento?');
+    const actualizada = compraRepository.findById(compra.id);
+    assert.equal(mensajesNoLeidos(actualizada, obra, sofia), 0);
+    assert.equal(mensajesNoLeidos(actualizada, obra, lucia), 1);
+  });
+
+  it('detalleCompra suma mensajesNoLeidos para quien pide y no muestra hasta cuándo leyó cada uno', () => {
+    const { sofiaRock } = seed.compras;
+    const detalle = detalleCompra(sofiaRock, seed.eventos.rock, sofia, sofia);
+    assert.equal(detalle.mensajesNoLeidos, 1);
+    assert.equal(detalle.mensajesLeidosHasta, undefined);
+    assert.equal(detalleCompra(sofiaRock, seed.eventos.rock, sofia).mensajesNoLeidos, undefined);
   });
 
   it('requireString respeta maxLength', () => {

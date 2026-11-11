@@ -57,13 +57,14 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - `findById` y `findAll`, sin datos de la cuenta
 - `findCuentaById`, `findCredenciales(email)`, `existsEmail(email, { exceptoId })` y `update`, para el inicio de sesión, el registro y la edición del perfil
 - `addFavorito` y `removeFavorito`, que no generan duplicados
-- `marcarNotificacionesLeidas(id, fecha)`
+- `marcarNotificacionesLeidas(id, fecha)`, que además vacía `notificacionesLeidas`
+- `addNotificacionLeida(id, notificacionId)`, sin duplicados
 
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
 - ~~Sin login: en la app se elige el usuario activo de una lista.~~ Reemplazado por inicio de sesión con email y contraseña (`POST /sesiones`). Después de entrar, el usuario activo sigue viajando en `X-User-Id`.
 - Los favoritos se guardan aunque ningún caso de uso los pida. Se usan desde `GET /usuarios/:id/favoritos` y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, solo para el propio usuario. En el seed, Sofía tiene tres (dos próximos y uno ya realizado).
-- **Notificaciones calculadas, no guardadas:** son lo que hizo otra persona en una compra en la que participa el usuario (cambios del historial y mensajes) y las reseñas de sus eventos. Del usuario solo se guarda `notificacionesLeidasHasta` (null si nunca las abrió), que lo actualiza `marcarNotificacionesLeidas`. Se descartó una colección `notificaciones`: habría que escribirla en cada acción y podría quedar desincronizada de las compras. En el seed todos las leyeron hace 4 días.
+- **Notificaciones calculadas, no guardadas:** son lo que hizo otra persona en una compra en la que participa el usuario (cambios del historial y mensajes) y las reseñas de sus eventos. Del usuario solo se guarda qué leyó: `notificacionesLeidasHasta` (null si nunca), que se actualiza al marcar todas, y `notificacionesLeidas`, los ids de las que abrió una por una (los ids se arman con lo que las origina y no cambian, porque historial y mensajes solo crecen). Las de mensajes también cuentan como leídas si el chat se abrió después (`Compra.mensajesLeidosHasta`). Se descartó una colección `notificaciones`: habría que escribirla en cada acción y podría quedar desincronizada de las compras. En el seed todos las leyeron hace 4 días.
 - Ids numéricos incrementales.
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
 
@@ -181,7 +182,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
   mensajes: [
     { usuarioId: 3, mensaje: "¿Se puede entrar con mochila?", enviado: new Date("2026-10-29T13:00:00Z") },
     { usuarioId: 1, mensaje: "Sí, chica, la revisan en la puerta.", enviado: new Date("2026-10-29T14:00:00Z") }
-  ]
+  ],
+  mensajesLeidosHasta: { comprador: new Date("2026-10-29T13:00:00Z"), organizador: new Date("2026-10-29T14:00:00Z") }
 }
 ```
 
@@ -193,6 +195,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | estado → EstadoCompra | String de la constante `EstadoCompra` | Es un enum, no se persiste |
 | historial → CambioEstadoCompra[] | Embebe | No existe sin la compra, se lee con ella y es corto. El campo `compra` del diagrama sobra |
 | mensajes → Mensaje[] | Embebe | El chat es de cada compra y solo se lee en su detalle |
+| mensajesLeidosHasta | Embebe, una fecha por rol | Hasta cuándo leyó el chat cada participante. Por rol y no por id: en una compra hay un solo comprador y un solo organizador. Los mensajes no leídos se calculan con esto |
 | total | Se guarda | Es lo que se pagó y lo que se reembolsa; no debe cambiar si cambia el precio |
 
 **Repositorio** (`backend/src/persistence/repositories/compraRepository.js`):
@@ -202,17 +205,20 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - `findByEvento`, para las ventas del organizador y las entradas disponibles
 - `addCambioEstado`, que actualiza `estado` y agrega el registro al historial en una sola escritura
 - `addMensaje`
+- `marcarMensajesLeidos(id, rol, fecha)`, con rol `comprador` u `organizador` (quién es quién lo decide el dominio)
 
 **Decisiones aprobadas:**
 - `EstadoCompra` es una constante congelada en `backend/src/domain/estadoCompra.js`, la primera pieza de la carpeta del dominio.
 - Se guarda `estado` además del historial: está en el diagrama y simplifica los filtros. `addCambioEstado` escribe los dos juntos.
 - Mensajes e historial no tienen colección propia: ningún caso de uso los consulta fuera de su compra.
 - Los mensajes no llevan `id`: nadie los referencia.
+- Se descartó un `leido` en cada mensaje: alcanza con una fecha por participante, y abrir el chat es una sola escritura. Quien escribe un mensaje ya leyó el chat hasta ahí.
 - Quedan para el dominio (sección 2): si una PENDIENTE reserva cupo, las transiciones válidas y cuándo una cancelación queda CANCELADA o REEMBOLSADA.
 
 **Seed:** 9 compras, con historiales de fechas coherentes relativas al arranque y el `total` calculado con el precio del tipo de entrada.
-- Sofía: rock CONFIRMADA con chat; obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Lucía y a Martín).
+- Sofía: rock CONFIRMADA con chat (no abrió la respuesta de Lucía); obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Lucía y a Martín).
 - Juan: Backstage × 2 CONFIRMADA (agota el cupo de 2); rock REEMBOLSADA y partido CANCELADA (no cuentan para el cupo); acústico UTILIZADA; stand-up CONFIRMADA de un evento pasado (no se puede cancelar).
+- Chats: Juan preguntó en rock y en Backstage y Lucía no abrió ninguno de los dos, así que tiene 2 compras con mensajes sin leer.
 - La compra REEMBOLSADA pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio decide otro flujo, hay que ajustar el seed.
 
 ### Resenia · colección `resenias`

@@ -3,18 +3,21 @@ import * as eventoRepository from '../persistence/repositories/eventoRepository.
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import {
   comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+  leerMensajes,
 } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
 import { reseniaDeCompra } from '../domain/resenia.js';
 import { ForbiddenError, NotFoundError } from '../http/errors.js';
 import { requireId, requireInteger, requireString } from '../http/validation.js';
 
-function toDetalle(compra) {
+// lector: quien pide, para contar los mensajes que todavía no leyó.
+function toDetalle(compra, lector) {
   return {
     ...detalleCompra(
       compra,
       eventoRepository.findById(compra.eventoId),
       usuarioRepository.findById(compra.compradorId),
+      lector,
     ),
     resenia: reseniaDeCompra(compra),
   };
@@ -34,21 +37,21 @@ function changeEstado(destino) {
     const compra = findCompra(req);
     const evento = eventoRepository.findById(compra.eventoId);
     const actualizada = actualizarEstado(compra, evento, destino(compra), req.usuario);
-    res.status(200).json(toDetalle(actualizada));
+    res.status(200).json(toDetalle(actualizada, req.usuario));
   };
 }
 
 // Caso de uso 1: las compras del usuario activo como comprador, de la más reciente a la más vieja.
 export async function list(req, res) {
   const compras = masRecientesPrimero(compraRepository.findByComprador(req.usuario.id));
-  res.status(200).json(compras.map(toDetalle));
+  res.status(200).json(compras.map((compra) => toDetalle(compra, req.usuario)));
 }
 
 export async function getById(req, res) {
   const compra = findCompra(req);
   const evento = eventoRepository.findById(compra.eventoId);
   if (!puedeVer(compra, evento, req.usuario)) throw new ForbiddenError('No podés ver esta compra');
-  res.status(200).json(toDetalle(compra));
+  res.status(200).json(toDetalle(compra, req.usuario));
 }
 
 export async function create(req, res) {
@@ -60,7 +63,7 @@ export async function create(req, res) {
   };
 
   const compra = comprar(datos, req.usuario);
-  res.status(201).location(`/compras/${compra.id}`).json(toDetalle(compra));
+  res.status(201).location(`/compras/${compra.id}`).json(toDetalle(compra, req.usuario));
 }
 
 export const pay = changeEstado(() => EstadoCompra.CONFIRMADA);
@@ -83,4 +86,11 @@ export async function createMensaje(req, res) {
   const texto = requireString(req.body?.mensaje, 'mensaje', { maxLength: 500 });
   const evento = eventoRepository.findById(compra.eventoId);
   res.status(201).json(enviarMensaje(compra, evento, req.usuario, texto));
+}
+
+// Al abrir el chat (o mientras está abierto) queda leído hasta ahora para quien lo pide.
+export async function markMensajesRead(req, res) {
+  const compra = findCompra(req);
+  leerMensajes(compra, eventoRepository.findById(compra.eventoId), req.usuario);
+  res.status(204).end();
 }

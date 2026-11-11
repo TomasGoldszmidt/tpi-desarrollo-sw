@@ -264,8 +264,8 @@ paths:
       description: >-
         Los eventos que organiza el usuario, incluidos los que ya se realizaron,
         ordenados por fecha. La app lo usa con el usuario activo para entrar a las
-        ventas de cada evento. Cada evento trae cuántas compras esperan la respuesta
-        del organizador en el chat (`sinResponder`). Si no organiza nada, devuelve [].
+        ventas de cada evento. Cada evento trae cuántas compras tienen mensajes que el
+        organizador todavía no leyó (`conMensajesNoLeidos`). Si no organiza nada, devuelve [].
       operationId: listEventosOrganizador
       parameters:
         - name: id
@@ -463,7 +463,9 @@ paths:
         otra persona en una compra en la que participa (como comprador o como
         organizador del evento) y con las reseñas de sus eventos. Van de la más
         reciente a la más vieja; `leida` es true si es anterior a la última vez
-        que las marcó como leídas.
+        que las marcó todas como leídas, si la abrió (PUT
+        /usuarios/{id}/notificaciones/{notificacionId}/lectura) o, si es un mensaje,
+        si ya abrió ese chat después (PUT /compras/{id}/mensajes/lectura).
       operationId: listNotificaciones
       security:
         - usuarioActivo: []
@@ -502,7 +504,7 @@ paths:
   /usuarios/{id}/notificaciones/lectura:
     put:
       tags: [Usuarios]
-      summary: Marcar mis notificaciones como leídas
+      summary: Marcar todas mis notificaciones como leídas
       description: >-
         Solo el propio usuario activo. Todas las notificaciones hasta este momento
         quedan como leídas; las que lleguen después vuelven a ser nuevas.
@@ -533,6 +535,49 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/notificaciones/{notificacionId}/lectura:
+    put:
+      tags: [Usuarios]
+      summary: Marcar una notificación como leída
+      description: >-
+        Solo el propio usuario activo. Se usa al abrir una notificación: solo esa
+        queda leída. Marcarla de nuevo no cambia nada.
+      operationId: markOneReadNotificacion
+      security:
+        - usuarioActivo: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 4
+        - name: notificacionId
+          in: path
+          required: true
+          description: El `id` que trae la notificación en GET /usuarios/{id}/notificaciones
+          schema:
+            type: string
+          example: compra-1-mensaje-1
+      responses:
+        '204':
+          description: Quedó marcada como leída
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/NotificacionesAjenas'
+        '404':
+          description: No existe el usuario, o la notificación no es una de las suyas
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe la notificación compra-99-mensaje-0
         '500':
           $ref: '#/components/responses/ErrorInterno'
   /sesiones:
@@ -1076,7 +1121,8 @@ paths:
       summary: Enviar un mensaje en el chat de una compra
       description: >-
         El comprador y el organizador pueden escribir en cualquier momento, sin
-        importar el estado de la compra ni si el evento ya se realizó.
+        importar el estado de la compra ni si el evento ya se realizó. Para quien
+        escribe, el chat queda leído hasta ese mensaje.
       operationId: createMensajeCompra
       security:
         - usuarioActivo: []
@@ -1120,6 +1166,39 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 error: Solo el comprador y el organizador pueden escribir en este chat
+        '404':
+          $ref: '#/components/responses/CompraNoEncontrada'
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /compras/{id}/mensajes/lectura:
+    put:
+      tags: [Compras]
+      summary: Marcar el chat de una compra como leído
+      description: >-
+        Solo para el comprador y el organizador del evento. Todos los mensajes hasta
+        este momento quedan leídos para quien lo pide (el otro no cambia), y también
+        las notificaciones de esos mensajes. La app lo llama al abrir el chat y
+        cuando llegan mensajes nuevos con el chat abierto.
+      operationId: markMensajesReadCompra
+      security:
+        - usuarioActivo: []
+      parameters:
+        - $ref: '#/components/parameters/CompraId'
+      responses:
+        '204':
+          description: El chat quedó leído
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          description: El usuario activo no es el comprador ni el organizador
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Solo el comprador y el organizador pueden leer este chat
         '404':
           $ref: '#/components/responses/CompraNoEncontrada'
         '500':
@@ -1233,6 +1312,17 @@ components:
             email:
               type: string
               example: sofia@aiticketit.com
+            notificacionesLeidasHasta:
+              type: string
+              format: date-time
+              nullable: true
+              description: La última vez que marcó todas las notificaciones como leídas (null si nunca)
+            notificacionesLeidas:
+              type: array
+              description: Ids de las notificaciones que abrió una por una después de esa fecha
+              items:
+                type: string
+              example: [compra-1-mensaje-1]
     Notificacion:
       type: object
       description: >-
@@ -1471,11 +1561,11 @@ components:
         - $ref: '#/components/schemas/EventoResumen'
         - type: object
           properties:
-            sinResponder:
+            conMensajesNoLeidos:
               type: integer
               description: >-
-                Calculado. Cantidad de compras del evento cuyo chat espera la respuesta
-                del organizador (el último mensaje es del comprador). 0 si no hay ninguna
+                Calculado. Cantidad de compras del evento con mensajes del comprador que
+                el organizador todavía no leyó. 0 si no hay ninguna
               example: 1
     CambioEstadoCompra:
       type: object
@@ -1634,6 +1724,12 @@ components:
             Calculado. Días de calendario hasta el evento (0 = hoy). Solo si la
             compra está CONFIRMADA y el evento no se realizó; si no, null.
           example: 20
+        mensajesNoLeidos:
+          type: integer
+          description: >-
+            Calculado para el usuario activo. Mensajes del otro participante que
+            escribió después de la última vez que abrió el chat.
+          example: 1
         resenia:
           type: object
           nullable: true

@@ -79,12 +79,12 @@ function EventoFila({ evento, realizado, onPress }) {
   // Del lugar se muestra solo el nombre, sin la dirección.
   const lugar = evento.lugar.split(',')[0];
   // Compras del evento cuyo chat espera la respuesta del organizador (lo calcula el backend).
-  const { sinResponder } = evento;
+  const { conMensajesNoLeidos } = evento;
   return (
     <Pressable
       style={({ pressed }) => [
         styles.card,
-        sinResponder > 0 && estiloEsperando,
+        conMensajesNoLeidos > 0 && estiloEsperando,
         realizado && styles.realizado,
         pressed && styles.presionada,
       ]}
@@ -101,11 +101,11 @@ function EventoFila({ evento, realizado, onPress }) {
         <Text style={styles.meta}>
           {formatFecha(evento.fecha)} · {lugar}
         </Text>
-        {sinResponder > 0 ? (
+        {conMensajesNoLeidos > 0 ? (
           <View style={styles.pendientes}>
             <View style={styles.punto} />
             <Text style={styles.pendientesTexto}>
-              {sinResponder === 1 ? '1 compra espera tu respuesta' : `${sinResponder} compras esperan tu respuesta`}
+              {conMensajesNoLeidos === 1 ? '1 compra espera tu respuesta' : `${conMensajesNoLeidos} compras esperan tu respuesta`}
             </Text>
           </View>
         ) : null}
@@ -115,12 +115,12 @@ function EventoFila({ evento, realizado, onPress }) {
         style={styles.mensajes}
         onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}
         hitSlop={6}
-        accessibilityLabel={sinResponder > 0 ? `Mensajes, ${sinResponder} esperan tu respuesta` : 'Mensajes'}
+        accessibilityLabel={conMensajesNoLeidos > 0 ? `Mensajes, ${conMensajesNoLeidos} esperan tu respuesta` : 'Mensajes'}
       >
         <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
-        {sinResponder > 0 ? (
+        {conMensajesNoLeidos > 0 ? (
           <View style={styles.numero}>
-            <Text style={styles.numeroTexto}>{sinResponder}</Text>
+            <Text style={styles.numeroTexto}>{conMensajesNoLeidos}</Text>
           </View>
         ) : null}
       </Pressable>
