@@ -115,6 +115,40 @@ export function loadSeed() {
     }),
   };
 
+  // Más eventos próximos, para que el catálogo y Mis eventos tengan más de una página.
+  // No tienen compras ni reseñas: solo llenan listados.
+  const masEventos = [
+    ['Tributo a Soda Stereo', 'Una banda tributo repasa los grandes éxitos', 'Teatro Vorterix, Av. Federico Lacroze 3455, CABA', 'musica', 'martin', 3, 21, 25000],
+    ['Jazz en el Bebop', 'Cuarteto de jazz con standards y temas propios', 'Bebop Club, Moreno 364, CABA', 'musica', 'lucia', 7, 22, 12000],
+    ['Final del Torneo de Vóley', 'La final del torneo metropolitano', 'Estadio Obras, Av. del Libertador 7395, CABA', 'deportes', 'martin', 8, 19, 8000],
+    ['Hamlet', 'La tragedia de Shakespeare en versión moderna', 'Teatro Cervantes, Libertad 815, CABA', 'teatro', 'lucia', 12, 20, 22000],
+    ['Orquesta Sinfónica Nacional', 'Beethoven y Brahms en el Centro Cultural', 'Centro Cultural Kirchner, Sarmiento 151, CABA', 'musica', 'lucia', 14, 20, 10000],
+    ['Maratón de Stand-up', 'Diez comediantes, una noche larga', 'Teatro Picadero, Pje. Santos Discépolo 1857, CABA', 'teatro', 'martin', 15, 21, 16000],
+    ['Clásico de Básquet', 'Boca y San Lorenzo por la Liga Nacional', 'Estadio Luis Conde, Arzobispo Espinosa 600, CABA', 'deportes', 'martin', 17, 20, 14000],
+    ['Cumbia en el Konex', 'Una noche para bailar con bandas en vivo', 'Ciudad Cultural Konex, Sarmiento 3131, CABA', 'musica', 'lucia', 22, 23, 18000],
+    ['El principito', 'Obra para toda la familia', 'Teatro Astral, Av. Corrientes 1639, CABA', 'teatro', 'lucia', 25, 17, 15000],
+    ['Festival de Food Trucks y Música', 'Dos días de comida y bandas emergentes', 'Parque de la Ciudad, Av. Escalada 4501, CABA', 'festivales', 'martin', 30, 14, 9000],
+    ['Tango en la Usina', 'Orquesta típica y bailarines invitados', 'Usina del Arte, Agustín R. Caffarena 1, CABA', 'musica', 'lucia', 35, 20, 13000],
+    ['Copa de Rugby Juvenil', 'Los mejores equipos juveniles del país', 'CASI, Roque Sáenz Peña 499, San Isidro', 'deportes', 'martin', 40, 15, 6000],
+    ['Improvisación teatral', 'Una obra distinta cada noche, armada con el público', 'Teatro La Comedia, Rodríguez Peña 1062, CABA', 'teatro', 'martin', 45, 21, 11000],
+    ['Festival Electrónico', 'Una noche con DJs nacionales e internacionales', 'Costanera Sur, Av. Tristán Achával Rodríguez, CABA', 'festivales', 'lucia', 75, 22, 55000],
+  ];
+  for (const [nombre, descripcion, lugar, categoria, organizador, dias, hora, precio] of masEventos) {
+    eventoRepository.create({
+      nombre,
+      descripcion,
+      lugar,
+      categoriaId: categorias[categoria].id,
+      organizadorId: usuarios[organizador].id,
+      fecha: daysFromNow(dias, hora),
+      multimedia: [`https://picsum.photos/seed/evento${dias}/800/400`],
+      tiposEntrada: [
+        { nombre: 'General', descripcion: 'Sin ubicación asignada', precio, cupo: 300 },
+        { nombre: 'Preferencial', descripcion: 'Mejor ubicación', precio: precio * 2, cupo: 100 },
+      ],
+    });
+  }
+
   // Favoritos de Sofía: dos eventos próximos y uno ya realizado. Los demás no tienen.
   for (const evento of [eventos.partido, eventos.festival, eventos.acustico]) {
     usuarioRepository.addFavorito(usuarios.sofia.id, evento.id);

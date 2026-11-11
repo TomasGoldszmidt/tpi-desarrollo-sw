@@ -6,6 +6,7 @@ import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados,
 import { cantidadConMensajesNoLeidos, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
+import { paginar, parsePagina } from '../http/pagination.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString, requireUrl,
 } from '../http/validation.js';
@@ -56,7 +57,9 @@ export async function list(req, res) {
     throw new ValidationError('El campo precioMin no puede ser mayor que precioMax');
   }
 
-  res.status(200).json(buscarEventos(filtros));
+  const pagina = parsePagina(req.query);
+
+  res.status(200).json(paginar(buscarEventos(filtros), pagina));
 }
 
 export async function create(req, res) {

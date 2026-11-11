@@ -78,8 +78,9 @@ export function precioDesde(evento) {
 }
 
 // Casos de uso 3 y 11. Dirección fija: fecha y precio de menor a mayor, puntaje de mayor
-// a menor con los organizadores sin reseñas al final. Si empatan, desempata la fecha.
-const porFecha = (a, b) => a.fecha - b.fecha;
+// a menor con los organizadores sin reseñas al final. Si empatan, desempata la fecha y después
+// el id, así el orden es siempre el mismo y las páginas no repiten ni saltean eventos.
+const porFecha = (a, b) => a.fecha - b.fecha || a.id - b.id;
 const COMPARADORES = {
   fecha: porFecha,
   precio: (a, b) => a.precioDesde - b.precioDesde || porFecha(a, b),

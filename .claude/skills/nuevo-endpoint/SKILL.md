@@ -76,7 +76,8 @@ Respuestas:
 | Crear | 201 | El documento creado, con el header `Location` si tiene URL propia (`res.location('/compras/10')`) |
 | Consultar o acción (pagar, cancelar) | 200 | El documento actualizado |
 | Quitar algo | 204 | Vacío |
-| Listado | 200 | El array directo, sin envoltorio ni paginación |
+| Listado que puede crecer (catálogo, compras, reseñas, notificaciones…) | 200 | Una página: `{ resultados, pagina, limite, total, hayMas }`, con `parsePagina` y `paginar` de `http/pagination.js` (`?pagina=1&limite=10`, límite máximo 50). Los campos propios del listado (ej: `noLeidas`) van como `extra` de `paginar` |
+| Listado acotado (categorías, favoritos) | 200 | El array directo, sin envoltorio |
 
 Reglas:
 

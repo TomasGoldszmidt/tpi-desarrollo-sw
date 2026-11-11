@@ -29,7 +29,7 @@ export default function Catalogo() {
 
   const { data: categorias } = useCarga(getCategorias);
   const pedirEventos = useCallback(
-    () => buscarEventos({ texto: textoBuscado, ...filtros }),
+    () => buscarEventos({ texto: textoBuscado, ...filtros, limite: 50 }).then((pagina) => pagina.resultados),
     [textoBuscado, filtros],
   );
   const { data: eventos, loading, error, recargar } = useCarga(pedirEventos);
