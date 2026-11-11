@@ -1,17 +1,17 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, spacing } from '../theme.js';
 
-// El chat de una compra espera la respuesta del usuario cuando el último mensaje lo
-// escribió la otra persona (comprador ↔ organizador). Es la misma regla que usa el
-// backend para `sinResponder` en Mis eventos. No hay "leído": se apaga al contestar.
-export function esperaRespuestaDe(compra, usuario) {
-  const ultimo = compra.mensajes.at(-1);
-  return ultimo !== undefined && ultimo.usuarioId !== usuario.id;
+// El chat de una compra tiene mensajes nuevos cuando la otra persona (comprador ↔
+// organizador) escribió después de la última vez que el usuario lo abrió. Lo calcula el
+// backend (`mensajesNoLeidos`) y se apaga al abrir el chat.
+export function tieneNoLeidos(compra) {
+  return compra.mensajesNoLeidos > 0;
 }
 
-// El último mensaje de la compra, si espera la respuesta del usuario; si no, null.
-export function mensajeSinResponder(compra, usuario) {
-  return esperaRespuestaDe(compra, usuario) ? compra.mensajes.at(-1) : null;
+// El último mensaje de la otra persona, si hay alguno sin leer; si no, null.
+export function mensajeNoLeido(compra, usuario) {
+  if (!tieneNoLeidos(compra)) return null;
+  return [...compra.mensajes].reverse().find((mensaje) => mensaje.usuarioId !== usuario.id) ?? null;
 }
 
 // Pie de las tarjetas de Mis compras y Ventas: quién escribió y el comienzo del mensaje.

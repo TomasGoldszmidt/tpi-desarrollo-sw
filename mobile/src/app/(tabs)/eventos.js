@@ -78,7 +78,7 @@ function separarPorFecha(eventos) {
 function EventoFila({ evento, realizado, onPress }) {
   // Del lugar se muestra solo el nombre, sin la dirección.
   const lugar = evento.lugar.split(',')[0];
-  // Compras del evento cuyo chat espera la respuesta del organizador (lo calcula el backend).
+  // Compras del evento con mensajes que el organizador no leyó (lo calcula el backend).
   const { conMensajesNoLeidos } = evento;
   return (
     <Pressable
@@ -105,17 +105,17 @@ function EventoFila({ evento, realizado, onPress }) {
           <View style={styles.pendientes}>
             <View style={styles.punto} />
             <Text style={styles.pendientesTexto}>
-              {conMensajesNoLeidos === 1 ? '1 compra espera tu respuesta' : `${conMensajesNoLeidos} compras esperan tu respuesta`}
+              {conMensajesNoLeidos === 1 ? '1 chat con mensajes nuevos' : `${conMensajesNoLeidos} chats con mensajes nuevos`}
             </Text>
           </View>
         ) : null}
       </View>
-      {/* Abre los mensajes del evento sin pasar por Ventas; el número es cuántos esperan respuesta. */}
+      {/* Abre los mensajes del evento sin pasar por Ventas; el número es cuántos chats tienen mensajes nuevos. */}
       <Pressable
         style={styles.mensajes}
         onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}
         hitSlop={6}
-        accessibilityLabel={conMensajesNoLeidos > 0 ? `Mensajes, ${conMensajesNoLeidos} esperan tu respuesta` : 'Mensajes'}
+        accessibilityLabel={conMensajesNoLeidos > 0 ? `Mensajes, ${conMensajesNoLeidos} con mensajes nuevos` : 'Mensajes'}
       >
         <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
         {conMensajesNoLeidos > 0 ? (

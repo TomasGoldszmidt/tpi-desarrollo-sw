@@ -36,6 +36,11 @@ export function enviarMensaje(id, mensaje) {
   return request(`/compras/${id}/mensajes`, { method: 'POST', body: { mensaje } });
 }
 
+// El chat queda leído hasta ahora para el usuario activo (y las notificaciones de sus mensajes).
+export function marcarMensajesLeidos(id) {
+  return request(`/compras/${id}/mensajes/lectura`, { method: 'PUT' });
+}
+
 // El organizador marca la entrada como usada (CONFIRMADA → UTILIZADA), desde el día
 // del evento. Habilita al comprador a reseñar.
 export function marcarUtilizada(id) {

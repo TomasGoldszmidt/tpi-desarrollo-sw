@@ -9,7 +9,7 @@ import { Conversacion } from '../../../components/Conversacion.js';
 import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge } from '../../../components/EstadoBadge.js';
-import { esperaRespuestaDe } from '../../../components/AvisoMensaje.js';
+import { tieneNoLeidos } from '../../../components/AvisoMensaje.js';
 import { formatDia } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
@@ -17,7 +17,7 @@ import { colors, fontSize, spacing } from '../../../theme.js';
 const ANCHO_DIVIDIDO = 700;
 
 // Los mensajes de un evento, para su organizador: una conversación por compra con
-// mensajes. Primero las que esperan su respuesta y después la más reciente.
+// mensajes. Primero las que tienen mensajes sin leer y después la más reciente.
 // En pantallas angostas, tocar una abre el chat; en anchas, el chat se ve a la derecha.
 export default function MensajesEvento() {
   const { id } = useLocalSearchParams();
@@ -57,8 +57,8 @@ export default function MensajesEvento() {
   }
 
   const { evento } = data;
-  const conversaciones = ordenar(data.compras.filter((compra) => compra.mensajes.length > 0), usuario);
-  const esperan = conversaciones.filter((compra) => esperaRespuestaDe(compra, usuario)).length;
+  const conversaciones = ordenar(data.compras.filter((compra) => compra.mensajes.length > 0));
+  const sinLeer = conversaciones.filter(tieneNoLeidos).length;
   // En pantallas anchas, si no se eligió ninguna (o ya no está), se abre la primera.
   const elegida = conversaciones.find((compra) => compra.id === elegidaId) ?? conversaciones[0];
 
@@ -86,7 +86,7 @@ export default function MensajesEvento() {
           {conversaciones.length > 0 ? (
             <Text style={styles.resumen}>
               {conversaciones.length === 1 ? '1 conversación' : `${conversaciones.length} conversaciones`}
-              {esperan > 0 ? ` · ${esperan} ${esperan === 1 ? 'espera' : 'esperan'} tu respuesta` : ''}
+              {sinLeer > 0 ? ` · ${sinLeer} sin leer` : ''}
             </Text>
           ) : null}
         </View>
@@ -120,6 +120,12 @@ export default function MensajesEvento() {
             key={elegida.id}
             compraId={elegida.id}
             onEnviado={recargar}
+            // Al leerla se fija como elegida: si no, al reordenarse la lista se abriría
+            // (y se marcaría como leída) otra conversación sin que la toquen.
+            onLeido={() => {
+              setElegidaId(elegida.id);
+              recargar();
+            }}
             encabezado={<CabeceraChat compra={elegida} />}
           />
         ) : (
@@ -132,19 +138,19 @@ export default function MensajesEvento() {
   );
 }
 
-// Primero las que esperan la respuesta del organizador; dentro de cada grupo, la del
+// Primero las que tienen mensajes sin leer; dentro de cada grupo, la del
 // último mensaje más reciente primero.
-function ordenar(compras, usuario) {
+function ordenar(compras) {
   const ultimo = (compra) => new Date(compra.mensajes.at(-1).enviado).getTime();
   return [...compras].sort(
-    (a, b) => Number(esperaRespuestaDe(b, usuario)) - Number(esperaRespuestaDe(a, usuario)) || ultimo(b) - ultimo(a),
+    (a, b) => Number(tieneNoLeidos(b)) - Number(tieneNoLeidos(a)) || ultimo(b) - ultimo(a),
   );
 }
 
 function ConversacionFila({ compra, usuario, elegida, onPress }) {
   const ultimo = compra.mensajes.at(-1);
   const propio = ultimo.usuarioId === usuario.id;
-  const espera = esperaRespuestaDe(compra, usuario);
+  const noLeida = tieneNoLeidos(compra);
   return (
     <Pressable
       style={({ pressed }) => [styles.fila, elegida && styles.filaElegida, pressed && styles.presionada]}
@@ -159,11 +165,11 @@ function ConversacionFila({ compra, usuario, elegida, onPress }) {
           <Text style={styles.fecha}>{formatDia(ultimo.enviado)}</Text>
         </View>
         <View style={styles.filaArriba}>
-          <Text style={[styles.ultimo, espera && styles.ultimoEspera]} numberOfLines={1}>
+          <Text style={[styles.ultimo, noLeida && styles.ultimoEspera]} numberOfLines={1}>
             {propio ? 'Vos: ' : ''}
             {ultimo.mensaje}
           </Text>
-          {espera ? <View style={styles.punto} /> : null}
+          {noLeida ? <View style={styles.punto} /> : null}
         </View>
         <View style={styles.compra}>
           <EstadoBadge estado={compra.estado} />

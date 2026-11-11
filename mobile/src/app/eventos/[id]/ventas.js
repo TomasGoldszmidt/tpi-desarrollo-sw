@@ -7,7 +7,7 @@ import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge, ESTADOS_INACTIVOS } from '../../../components/EstadoBadge.js';
 import { Galeria } from '../../../components/Galeria.js';
-import { AvisoMensaje, estiloEsperando, mensajeSinResponder } from '../../../components/AvisoMensaje.js';
+import { AvisoMensaje, estiloEsperando, mensajeNoLeido } from '../../../components/AvisoMensaje.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
 import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
@@ -116,10 +116,10 @@ function DisponiblesFila({ tipo }) {
 }
 
 // Una compra del evento: estado, comprador, entradas y total. Abre el detalle con el chat.
-// Si el comprador escribió último, abajo avisa que espera la respuesta del organizador.
+// Si el comprador escribió algo que el organizador no leyó, abajo lo avisa.
 function VentaCard({ compra, usuario, onPress }) {
   const inactiva = ESTADOS_INACTIVOS.includes(compra.estado);
-  const sinResponder = mensajeSinResponder(compra, usuario);
+  const noLeido = mensajeNoLeido(compra, usuario);
   // El primer cambio del historial es la creación de la compra.
   const creada = compra.historial[0].fechaHora;
   const mensajes = compra.mensajes.length;
@@ -130,7 +130,7 @@ function VentaCard({ compra, usuario, onPress }) {
     <Pressable
       style={({ pressed }) => [
         styles.card,
-        sinResponder && estiloEsperando,
+        noLeido && estiloEsperando,
         inactiva && styles.inactiva,
         pressed && styles.presionada,
       ]}
@@ -147,8 +147,8 @@ function VentaCard({ compra, usuario, onPress }) {
         <Text style={styles.meta}>{detalle}</Text>
         <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
       </View>
-      {sinResponder ? (
-        <AvisoMensaje texto={`${compra.comprador.nombre} espera tu respuesta`} mensaje={sinResponder.mensaje} />
+      {noLeido ? (
+        <AvisoMensaje texto={`${compra.comprador.nombre} te escribió`} mensaje={noLeido.mensaje} />
       ) : null}
     </Pressable>
   );

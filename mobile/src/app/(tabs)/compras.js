@@ -48,6 +48,18 @@ function ordenarPorImportancia(compras) {
   });
 }
 
+// El chat con el organizador, directo desde la lista (sin pasar por el detalle).
+function abrirChat(compra, organizador) {
+  router.push({
+    pathname: '/compras/[id]/chat',
+    params: {
+      id: compra.id,
+      evento: compra.evento.nombre,
+      con: organizador ? `${organizador.nombre} ${organizador.apellido}` : 'el organizador',
+    },
+  });
+}
+
 export default function MisCompras() {
   const { usuario } = useUsuario();
   const { data, loading, error, recargar } = useCarga(pedirCompras);
@@ -86,6 +98,7 @@ export default function MisCompras() {
                 usuario={usuario}
                 organizador={data.usuarios.get(item.evento.organizadorId)}
                 onPress={() => router.push(`/compras/${item.id}`)}
+                onChat={() => abrirChat(item, data.usuarios.get(item.evento.organizadorId))}
               />
             )}
             refreshControl={

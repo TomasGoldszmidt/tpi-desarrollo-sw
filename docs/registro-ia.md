@@ -948,3 +948,21 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - En el boceto, "Marcar todas como leídas" parecía solo texto. El usuario pidió un botón más visible y pasó a ser un botón con borde, de ancho completo.
   - Al recargar la app, Expo Go mostró "Something went wrong": Metro no estaba corriendo, y la IA había recargado la app sin fijarse. Se levantó en una pestaña del terminal, y quedó anotado que hay que verificar Metro antes de recargar.
 - **Aprendizaje:** una acción que cambia el estado de toda la pantalla tiene que verse como botón, no como un link al costado del título.
+
+### 2026-11-11 · Chats leídos al abrirlos y chat directo desde Mis compras
+- **Tarea:** Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos, y Mis compras tiene acceso directo al chat
+- **Herramienta / skill:** Claude Code, `/nueva-pantalla`, `/registrar-ia`
+- **Pedido (prompt):** "cuando entro a un chat en mis eventos se tiene que marcar como leído". Después, al probar: "si entro desde el chat de mis compras no se marca como leído" y "el diseño de mis compras debe ser parecido al de mis eventos para el tema del chat".
+- **Resultado:**
+  - `Conversacion` marca el chat como leído al abrirse y cada vez que llega un mensaje del otro con el chat abierto (`PUT /compras/:id/mensajes/lectura`). Después actualiza la campana.
+  - Los indicadores pasaron de "espera tu respuesta" (el último mensaje es del otro) a mensajes sin leer (`mensajesNoLeidos` del backend). Cambió en Mis compras, Ventas, Mis eventos y la bandeja de mensajes, que ahora ordena primero las no leídas.
+  - En la bandeja en pantalla ancha, la conversación leída queda fija como elegida.
+  - Boceto `docs/bocetos/mis-compras-chat.html`: cada compra de Mis compras tiene un botón de chat a la derecha, con el número de mensajes sin leer, como en Mis eventos, y abre el chat directo.
+- **Bien:** como el marcado está en el componente del chat, alcanzó con un solo cambio para que funcione desde todas las pantallas que lo abren: Mis compras, Mis eventos, Ventas, la bandeja y las notificaciones.
+- **Corregido / problemas:**
+  - El usuario probó el chat desde Mis compras antes de que esta subtarea estuviera hecha, y vio que no se marcaba. Ahí se hizo, para los dos roles a la vez.
+  - Los textos nuevos de los indicadores no pasaron por un boceto. Se avisaron en el cierre.
+  - En la bandeja en pantalla ancha, al marcar leída la primera conversación la lista se reordenaba y se abría otra, que también se marcaba como leída. La IA lo vio antes de probar: la conversación leída queda fija como elegida.
+  - Después de reiniciar, Expo Go a veces quedaba en el escritorio del emulador. Hubo que abrirlo de nuevo con el `-n` de la actividad.
+  - Mis compras obligaba a entrar al detalle de la compra para llegar al chat. El usuario pidió el mismo diseño que Mis eventos.
+- **Aprendizaje:** las pantallas que hacen lo mismo para los dos roles (comprador y organizador) tienen que resolverlo igual. Si no, al probar se nota enseguida cuál quedó atrás.

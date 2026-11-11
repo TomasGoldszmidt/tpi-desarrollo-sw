@@ -49,7 +49,7 @@
 - [ ] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header
 - [ ] Mensajes de cada evento: bandeja de conversaciones responsive
 - [x] Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
-- [ ] Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos
+- [x] Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos, y Mis compras tiene acceso directo al chat
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular

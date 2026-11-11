@@ -1,10 +1,11 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { enviarMensaje, getMensajes } from '../api/compras.js';
+import { enviarMensaje, getMensajes, marcarMensajesLeidos } from '../api/compras.js';
 import { useUsuario } from '../context/UsuarioContext.js';
+import { useNotificaciones } from '../context/NotificacionesContext.js';
 import { useAlturaTeclado } from '../hooks/useAlturaTeclado.js';
 import { useCarga } from '../hooks/useCarga.js';
 import { CargaEncima, PantallaCarga } from './Carga.js';
@@ -20,9 +21,11 @@ const INTERVALO_MS = 5000;
 // Lo usan la pantalla de chat y, en pantallas anchas, el panel derecho de los mensajes
 // del evento. encabezado: lo que va arriba de los mensajes (cada uno arma el suyo).
 // onEnviado: para que la pantalla que lo contiene actualice lo suyo después de enviar.
+// onLeido: después de marcar el chat como leído (la bandeja de mensajes apaga el punto).
 // Al cambiar de compra, montarlo con key = compraId para que arranque de cero.
-export function Conversacion({ compraId, encabezado, onEnviado }) {
+export function Conversacion({ compraId, encabezado, onEnviado, onLeido }) {
   const { usuario } = useUsuario();
+  const notificaciones = useNotificaciones();
   const insets = useSafeAreaInsets();
   const alturaTeclado = useAlturaTeclado();
   const pedir = useCallback(() => getMensajes(compraId), [compraId]);
@@ -39,6 +42,23 @@ export function Conversacion({ compraId, encabezado, onEnviado }) {
       return () => clearInterval(intervalo);
     }, [recargar]),
   );
+
+  // Abrir el chat lo deja leído. Mientras está abierto, cada vez que llega un mensaje del
+  // otro se vuelve a marcar. Después se actualizan la campana y la pantalla que lo contiene.
+  // Si falla (sin conexión) no se avisa: la próxima vez que llegue algo se reintenta.
+  const marcados = useRef(0);
+  useEffect(() => {
+    if (!mensajes || !usuario) return;
+    const delOtro = mensajes.filter((mensaje) => mensaje.autor.id !== usuario.id).length;
+    if (delOtro <= marcados.current) return;
+    marcados.current = delOtro;
+    marcarMensajesLeidos(compraId).then(() => {
+      notificaciones?.actualizar();
+      onLeido?.();
+    }, () => {
+      marcados.current = 0;
+    });
+  }, [mensajes, usuario, compraId, notificaciones, onLeido]);
 
   async function enviar() {
     const mensaje = texto.trim();
