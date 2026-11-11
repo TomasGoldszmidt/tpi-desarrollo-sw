@@ -15,7 +15,7 @@ code{font-size:12px}
 .logo::before{left:-4px}.logo::after{right:-4px}
 .logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
 .word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
-.chips{position:relative;display:flex;gap:6px;overflow:hidden;white-space:nowrap;margin:0 -12px 10px;padding:0 12px}
+.chips{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
 .f{display:inline-flex;align-items:center;gap:5px;border:0.5px solid #D3D1C7;border-radius:999px;padding:4px 10px;font-size:11px;color:#5F5E5A}
 .f .d{width:7px;height:7px;border-radius:50%}
 .f .c{font-weight:500}
@@ -49,12 +49,12 @@ code{font-size:12px}
 <div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">JR</span></div>
 <div class="scr">
 <p class="h">Mis compras</p>
-<div class="chips"><span class="f on all">Todas <span class="c">5</span></span><span class="f"><span class="d dcon"></span>Confirmadas <span class="c">2</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">1</span></span><span class="f"><span class="d dcan"></span>Canceladas <span class="c">1</span></span><span class="n" style="right:6px">1</span></div>
+<div class="chips"><span class="f on all">Todas <span class="c">5</span></span><span class="f"><span class="d dcon"></span>Confirmadas <span class="c">2</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">1</span></span><span class="f"><span class="d dcan"></span>Canceladas <span class="c">1</span></span><span class="f"><span class="d dree"></span>Reembolsadas <span class="c">1</span></span><span class="n" style="right:-4px">1</span></div>
+<div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 60 días</span></div><div class="nm">Festival de Verano</div><div class="mt">dom 10 ene · 16:00 · Backstage × 2</div><div class="ft"><span></span><span class="tt">$ 700.000</span></div></div>
+<div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias pas">El evento ya pasó</span></div><div class="nm">Noche de Stand-up</div><div class="mt">lun 12 oct · 22:00 · General × 1</div><div class="ft"><span></span><span class="tt">$ 18.000</span></div></div>
+<div class="cc luti"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Acústico en el Gran Rex</div><div class="mt">mar 27 oct · 21:00 · Platea × 2</div><div class="ft"><span></span><span class="tt">$ 70.000</span></div></div>
 <div class="cc lcan off"><div class="top"><span class="b can">Cancelada</span></div><div class="nm">Amistoso Estudiantes vs. Gimnasia</div><div class="mt">sáb 21 nov · 18:00 · Popular × 3</div><div class="ft"><span></span><span class="tt">$ 45.000</span></div><span class="n">2</span></div>
 <div class="cc lree off"><div class="top"><span class="b ree">Reembolsada</span></div><div class="nm">Noche de Rock Nacional</div><div class="mt">mar 1 dic · 21:00 · Platea × 1</div><div class="ft"><span></span><span class="tt">$ 80.000</span></div></div>
-<div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 60 días</span></div><div class="nm">Festival de Verano</div><div class="mt">dom 10 ene · 16:00 · Backstage × 2</div><div class="ft"><span></span><span class="tt">$ 700.000</span></div></div>
-<div class="cc luti"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Acústico en el Gran Rex</div><div class="mt">mar 27 oct · 21:00 · Platea × 2</div><div class="ft"><span></span><span class="tt">$ 70.000</span></div></div>
-<div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias pas">El evento ya pasó</span></div><div class="nm">Noche de Stand-up</div><div class="mt">lun 12 oct · 22:00 · General × 1</div><div class="ft"><span></span><span class="tt">$ 18.000</span></div></div>
 </div>
 <div class="tabs"><span>Catálogo</span><span class="on">Mis compras</span><span>Mis eventos</span></div>
 </div></div>
@@ -64,7 +64,7 @@ code{font-size:12px}
 <div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">JR</span></div>
 <div class="scr">
 <p class="h">Mis compras</p>
-<div class="chips"><span class="f">Todas <span class="c">5</span></span><span class="f on con"><span class="d dcon"></span>Confirmadas <span class="c">2</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">1</span></span><span class="f"><span class="d dcan"></span>Canceladas <span class="c">1</span></span></div>
+<div class="chips"><span class="f">Todas <span class="c">5</span></span><span class="f on con"><span class="d dcon"></span>Confirmadas <span class="c">2</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">1</span></span><span class="f"><span class="d dcan"></span>Canceladas <span class="c">1</span></span><span class="f"><span class="d dree"></span>Reembolsadas <span class="c">1</span></span></div>
 <div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 60 días</span></div><div class="nm">Festival de Verano</div><div class="mt">dom 10 ene · 16:00 · Backstage × 2</div><div class="ft"><span></span><span class="tt">$ 700.000</span></div></div>
 <div class="cc lcon"><div class="top"><span class="b con">Confirmada</span><span class="dias pas">El evento ya pasó</span></div><div class="nm">Noche de Stand-up</div><div class="mt">lun 12 oct · 22:00 · General × 1</div><div class="ft"><span></span><span class="tt">$ 18.000</span></div></div>
 </div>
@@ -99,8 +99,8 @@ code{font-size:12px}
 
 </div>
 <div class="notes">
-<div><span class="n">1</span> Filtros: una fila de chips que se desliza a los costados. "Todas" y un chip por cada estado que el usuario tiene, en el orden del ciclo (pendientes, confirmadas, utilizadas, canceladas, reembolsadas), cada uno con su cantidad y el punto de color del estado. El elegido se pinta con los colores de su <code>EstadoBadge</code>. Filtra en la app, sin volver a pedir nada: <code>GET /compras</code> ya trae todas.</div>
-<div><span class="n">2</span> Cada tarjeta suma un borde izquierdo del color de su estado, además del badge, para distinguirlas de un vistazo al recorrer la lista. Tocar la tarjeta sigue abriendo el detalle de la compra.</div>
+<div><span class="n">1</span> Filtros: chips que pasan al renglón de abajo si no entran, así se ven todos sin deslizar. "Todas" y un chip por cada estado que el usuario tiene, en el orden del ciclo (pendientes, confirmadas, utilizadas, canceladas, reembolsadas), cada uno con su cantidad y el punto de color del estado. El elegido se pinta con los colores de su <code>EstadoBadge</code>. Filtra en la app, sin volver a pedir nada: <code>GET /compras</code> ya trae todas.</div>
+<div><span class="n">2</span> Cada tarjeta suma un borde izquierdo del color de su estado, además del badge. La lista va por estado (pendientes, confirmadas, utilizadas, canceladas, reembolsadas) y dentro de cada uno por fecha del evento: en pendientes y confirmadas el más próximo primero y los ya pasados al final; en el resto, el más reciente primero. Tocar la tarjeta sigue abriendo el detalle de la compra.</div>
 <div><span class="n">3</span> Si el filtro elegido se queda sin compras (ej: pagaste la única pendiente y volviste), el chip queda con 0 hasta que cambies de filtro, y "Ver todas" vuelve a Todas. El filtro se mantiene al recargar o al volver a la pestaña.</div>
 </div>
 </body></html>

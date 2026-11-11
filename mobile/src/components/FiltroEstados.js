@@ -1,8 +1,8 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ORDEN_ESTADOS, estiloEstado } from './EstadoBadge.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Fila de chips para filtrar compras por estado: "Todas" y un chip por cada estado
+// Chips para filtrar compras por estado (en uno o más renglones): "Todas" y un chip por cada estado
 // que aparece en las compras, con su cantidad. El elegido toma los colores de su badge.
 // elegido es un EstadoCompra o null (Todas). Si el elegido se queda sin compras,
 // su chip se sigue mostrando con 0 para que se entienda por qué la lista está vacía.
@@ -14,30 +14,28 @@ export function FiltroEstados({ compras, elegido, onElegir }) {
   const estados = ORDEN_ESTADOS.filter((estado) => cantidades.has(estado) || estado === elegido);
 
   return (
-    <View style={styles.contenedor}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.fila}>
-        <Chip
-          texto="Todas"
-          cantidad={compras.length}
-          activo={elegido === null}
-          estiloActivo={{ backgroundColor: colors.primary, color: '#FFFFFF' }}
-          onPress={() => onElegir(null)}
-        />
-        {estados.map((estado) => {
-          const { plural, fondo, color, borde } = estiloEstado(estado);
-          return (
-            <Chip
-              key={estado}
-              texto={plural}
-              cantidad={cantidades.get(estado) ?? 0}
-              punto={borde}
-              activo={elegido === estado}
-              estiloActivo={{ backgroundColor: fondo, color }}
-              onPress={() => onElegir(estado)}
-            />
-          );
-        })}
-      </ScrollView>
+    <View style={styles.fila}>
+      <Chip
+        texto="Todas"
+        cantidad={compras.length}
+        activo={elegido === null}
+        estiloActivo={{ backgroundColor: colors.primary, color: '#FFFFFF' }}
+        onPress={() => onElegir(null)}
+      />
+      {estados.map((estado) => {
+        const { plural, fondo, color, borde } = estiloEstado(estado);
+        return (
+          <Chip
+            key={estado}
+            texto={plural}
+            cantidad={cantidades.get(estado) ?? 0}
+            punto={borde}
+            activo={elegido === estado}
+            estiloActivo={{ backgroundColor: fondo, color }}
+            onPress={() => onElegir(estado)}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -60,14 +58,12 @@ function Chip({ texto, cantidad, punto, activo, estiloActivo, onPress }) {
 }
 
 const styles = StyleSheet.create({
-  // La fila llega hasta los bordes de la pantalla, para que se note que se desliza.
-  contenedor: {
-    marginHorizontal: -spacing.lg,
-    marginBottom: spacing.md,
-  },
+  // Si no entran en un renglón, los chips pasan al de abajo: así se ven todos sin deslizar.
   fila: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
+    marginBottom: spacing.md,
   },
   chip: {
     flexDirection: 'row',

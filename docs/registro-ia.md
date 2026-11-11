@@ -849,3 +849,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** se verificó el orden ejecutando la misma función del archivo contra las compras reales del backend, y coincidió con la tabla aprobada.
 - **Corregido / problemas:** ninguno.
 - **Aprendizaje:** cuando un pedido tiene una parte ambigua ("por tiempo"), mostrar el resultado con datos reales antes de implementar evita una vuelta de corrección.
+
+### 2026-11-11 · Filtros de Mis compras en varios renglones
+- **Tarea:** "Mis compras: filtrar y diferenciar por estado" (sección 3)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** captura del emulador con "no entran todos los filtros en la pantalla".
+- **Resultado:** `FiltroEstados` dejó de ser una fila deslizable y ahora los chips pasan al renglón de abajo (`flexWrap`), así se ven todos. Se actualizó el boceto: chips en dos renglones y las tarjetas de Juan en el orden nuevo.
+- **Bien:** fue un cambio chico, solo de estilos.
+- **Corregido / problemas:** el boceto aprobado mostraba la fila deslizable cortada al borde, pero con 4 chips de ejemplo. Con los 5 estados de Juan en el emulador, el último quedaba afuera y no se notaba que se podía deslizar.
+- **Aprendizaje:** el boceto tiene que mostrar el peor caso (el usuario con todos los estados). Si no, un problema de espacio recién aparece en el celular.
