@@ -1,12 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { router } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { buscarEventos } from '../../api/eventos.js';
 import { getCategorias } from '../../api/categorias.js';
 import { useCarga } from '../../hooks/useCarga.js';
+import { usePaginado } from '../../hooks/usePaginado.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { EventoCard } from '../../components/EventoCard.js';
+import { PieLista } from '../../components/PieLista.js';
 import { FiltrosModal, ORDENES } from '../../components/FiltrosModal.js';
 import { Seccion } from '../../components/Seccion.js';
 import { colors, fontSize, spacing } from '../../theme.js';
@@ -14,6 +16,8 @@ import { colors, fontSize, spacing } from '../../theme.js';
 const ORDEN_POR_DEFECTO = ORDENES[0].valor;
 // Espera después de la última tecla antes de buscar, para no pedir por cada letra.
 const ESPERA_BUSQUEDA_MS = 500;
+// Eventos por página: se pide la siguiente al acercarse al final de la lista.
+const LIMITE = 10;
 
 // Casos de uso 3 y 11: buscar eventos por texto o categoría y ordenarlos.
 export default function Catalogo() {
@@ -29,10 +33,13 @@ export default function Catalogo() {
 
   const { data: categorias } = useCarga(getCategorias);
   const pedirEventos = useCallback(
-    () => buscarEventos({ texto: textoBuscado, ...filtros, limite: 50 }).then((pagina) => pagina.resultados),
+    (pagina) => buscarEventos({ texto: textoBuscado, ...filtros, pagina, limite: LIMITE }),
     [textoBuscado, filtros],
   );
-  const { data: eventos, loading, error, recargar } = useCarga(pedirEventos);
+  // Otra búsqueda u otros filtros arrancan de nuevo desde la página 1.
+  const {
+    items: eventos, total, hayMas, loading, recargando, error, cargandoMas, errorMas, cargarMas, recargar,
+  } = usePaginado(pedirEventos);
 
   // Los filtros activos se muestran como etiquetas debajo del buscador; tocarlas los quita.
   // Ordenar por fecha no cuenta: es el orden por defecto.
@@ -102,7 +109,7 @@ export default function Catalogo() {
         </View>
       ) : null}
 
-      {loading || error || !eventos ? (
+      {(loading && !recargando) || error || !eventos ? (
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Buscando eventos…" />
       ) : (
         <FlatList
@@ -112,6 +119,20 @@ export default function Catalogo() {
             <EventoCard evento={item} onPress={() => router.push(`/eventos/${item.id}`)} />
           )}
           keyboardShouldPersistTaps="handled"
+          onEndReached={cargarMas}
+          onEndReachedThreshold={0.5}
+          refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
+          ListFooterComponent={
+            <PieLista
+              cargandoMas={cargandoMas}
+              errorMas={errorMas}
+              hayMas={hayMas}
+              varias={total > LIMITE}
+              onReintentar={cargarMas}
+              cargando="Cargando más eventos…"
+              fin={`Ya viste los ${total} eventos`}
+            />
+          }
           ListEmptyComponent={
             <View style={styles.vacio}>
               <Text style={styles.vacioTitulo}>No hay eventos para esta búsqueda</Text>

@@ -966,3 +966,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Después de reiniciar, Expo Go a veces quedaba en el escritorio del emulador. Hubo que abrirlo de nuevo con el `-n` de la actividad.
   - Mis compras obligaba a entrar al detalle de la compra para llegar al chat. El usuario pidió el mismo diseño que Mis eventos.
 - **Aprendizaje:** las pantallas que hacen lo mismo para los dos roles (comprador y organizador) tienen que resolverlo igual. Si no, al probar se nota enseguida cuál quedó atrás.
+
+### 2026-11-11 · Catálogo de a páginas
+- **Tarea:** Paginación: catálogo de a páginas, con scroll infinito
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/registrar-ia`
+- **Pedido (prompt):** "Agregar paginación en todas las pantallas de la app (y los endpoints del backend) que la necesiten". La IA relevó los 8 listados y propuso cuáles paginar y cómo. El usuario sumó Mis eventos: "en mis eventos también, es más, en eventos agregá el mismo filtro que en mis compras".
+- **Resultado:**
+  - Relevamiento: se paginan catálogo, reseñas, notificaciones, Mis eventos, Mis compras, ventas y (opcional) la bandeja. Favoritos no, porque son pocos y el contexto de favoritos necesita todos los ids.
+  - Backend: helper `http/pagination.js` (`parsePagina` y `paginar`), con `?pagina=1&limite=10` (máximo 50) y la respuesta `{ resultados, pagina, limite, total, hayMas }`. `GET /eventos` lo usa. El orden desempata por id para que las páginas no repitan ni salteen eventos. 4 tests nuevos (91 en total).
+  - Seed: 14 eventos próximos más (18 en total), para que se vean dos páginas.
+  - Swagger: esquema `Pagina` y parámetros `Pagina`/`Limite` reutilizables. La skill `nuevo-endpoint` ahora dice que los listados que pueden crecer se paginan.
+  - App: hook `usePaginado` (junta páginas, no pide dos veces la misma, descarta repetidos y respuestas de una búsqueda vieja), componente `PieLista` (spinner, error con Reintentar, "Ya viste los N eventos") y el catálogo con `onEndReached` y pull-to-refresh. Boceto `docs/bocetos/catalogo-paginado.html`.
+- **Bien:** separar la paginación en un helper y un hook deja las próximas pantallas en pocas líneas. Mientras no estaba la pantalla, la app pedía `limite=50` y seguía andando, así que el backend se pudo commitear solo.
+- **Corregido / problemas:**
+  - Un script de edición quedó a medias (un heredoc mal cerrado) y duplicó un import en el controlador. La IA lo vio en el `git status` y lo arregló antes de probar.
+  - La skill `nuevo-endpoint` decía "el array directo, sin envoltorio ni paginación": hubo que cambiar la convención, no solo el código.
+  - Mis compras, la bandeja y la campana ordenan, filtran o cuentan en la app sobre la lista entera. Para paginarlas, eso tiene que pasar al backend: quedó en el análisis de cada subtarea.
+- **Aprendizaje:** antes de paginar un listado hay que mirar qué hace la app con la lista completa (ordenar, contar, filtrar). Si lo hace en el cliente, paginar obliga a mover esa lógica al backend.

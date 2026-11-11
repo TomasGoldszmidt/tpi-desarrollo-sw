@@ -58,3 +58,12 @@
 - [x] Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)
 - [x] Redactar conclusión sobre el uso de IA
 - [ ] Grabar y entregar el video (5-10 min)
+
+## 5. Paginación
+- [x] Catálogo de a páginas, con scroll infinito (`GET /eventos?pagina=&limite=`, helper `http/pagination.js`, hook `usePaginado`)
+- [ ] Reseñas de un organizador de a páginas (`GET /usuarios/:id/resenias`)
+- [ ] Notificaciones de a páginas, con `noLeidas` para la campana (`GET /usuarios/:id/notificaciones`)
+- [ ] Mis eventos de a páginas, con filtro Próximos / Ya realizados / Con mensajes nuevos (`GET /usuarios/:id/eventos`)
+- [ ] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
+- [ ] Ventas de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras`)
+- [ ] Bandeja de mensajes de un evento de a páginas (opcional)
