@@ -64,8 +64,10 @@ export default function MisCompras() {
             refreshControl={
               <RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />
             }
+            // Se arma en cada render aunque la lista no esté vacía: con el filtro en Todas (estado null)
+            // no hay estado del que leer el plural, así que ese caso va al vacío de "sin compras".
             ListEmptyComponent={
-              data.compras.length > 0 ? (
+              estado !== null ? (
                 // Hay compras, pero ninguna en el estado elegido (ej: se pagó la única pendiente).
                 <View style={styles.vacio}>
                   <Text style={styles.vacioTitulo}>No tenés compras {estiloEstado(estado).enPlural}</Text>

@@ -828,3 +828,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** la IA propuso filtrar en la app y no agregar `?estado=` al backend, porque la lista ya venía completa. Eso evitó tocar el endpoint, el swagger y los tests.
 - **Corregido / problemas:** el primer texto del vacío armaba el plural con una expresión regular ("pendiente de pago" → "pendientes de pago"). Era frágil y se reemplazó por un campo `enPlural` en cada estado.
 - **Aprendizaje:** antes de tocar el backend para un filtro, conviene preguntarse si los datos ya están en la app. Muchas veces el cambio es solo de pantalla.
+
+### 2026-11-11 · Corrección: Mis compras se rompía con el filtro en Todas
+- **Tarea:** "Mis compras: filtrar y diferenciar por estado" (sección 3)
+- **Herramienta / skill:** Claude Code + `/registrar-ia`
+- **Pedido (prompt):** el usuario mandó la captura del emulador con "Cannot read property 'enPlural' of undefined" al abrir Mis compras.
+- **Resultado:** el `ListEmptyComponent` de la `FlatList` se arma en cada render, aunque la lista tenga compras y no se muestre. Con el filtro en Todas (`estado` en `null`), intentaba leer el plural de un estado inexistente. Ahora la condición es `estado !== null`: con un filtro elegido se muestra el vacío del filtro, y sin filtro el de "Todavía no compraste entradas".
+- **Bien:** la captura con el stack de React Native señalaba la línea exacta, y la corrección fue de una línea.
+- **Corregido / problemas:** el error pasó lint y la compilación, y yo commiteé sin abrir la pantalla en el emulador. Lo encontró el usuario en la primera prueba.
+- **Aprendizaje:** que compile no alcanza. Un JSX pasado como prop se evalúa siempre, aunque no se muestre, y estos errores solo aparecen al abrir la pantalla.
