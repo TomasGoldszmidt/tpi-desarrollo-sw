@@ -127,6 +127,12 @@ export function eventosOrganizados(organizador) {
   return resumenes(eventoRepository.findByOrganizador(organizador.id)).sort(porFecha);
 }
 
+// Los eventos favoritos del usuario, incluidos los que ya se realizaron, ordenados por fecha.
+/** @param {Usuario} usuario */
+export function eventosFavoritos(usuario) {
+  return resumenes(eventoRepository.findByIds(usuario.favoritos)).sort(porFecha);
+}
+
 // Caso de uso 2: las ventas de un evento solo las ve su organizador.
 /** @param {Evento} evento @param {Usuario} usuario */
 export function verificarOrganizador(evento, usuario) {

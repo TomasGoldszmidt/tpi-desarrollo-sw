@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Favoritos</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:1rem 0}
+.cap{font-size:12px;color:#5F5E5A;margin-bottom:6px}
+.phone{position:relative;border:0.5px solid #B4B2A9;border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:560px;display:flex;flex-direction:column}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:0.5px solid #D3D1C7}
+.scr{flex:1;padding:10px 12px;font-size:12px;overflow:hidden}
+.h{font-size:16px;font-weight:500;margin:0 0 8px}
+.av{width:28px;height:28px;background:#EAF3DE;color:#27500A;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.ev{position:relative;display:flex;gap:10px;padding:9px 0;border-bottom:0.5px solid #D3D1C7}
+.ev.pas{opacity:.55}
+.img{width:58px;height:58px;border-radius:8px;background:#D3D1C7;flex-shrink:0}
+.inf{flex:1;min-width:0}
+.cat{display:inline-block;background:#F1EFE8;color:#444441;border-radius:4px;padding:0 5px;font-size:10px}
+.nm{font-size:13px;font-weight:500;margin-top:1px}
+.mt{font-size:11px;color:#5F5E5A}
+.pr{font-size:12px;font-weight:500;color:#27500A}
+.st{color:#BA7517}
+.co{position:relative;font-size:20px;line-height:1;color:#888780;align-self:flex-start}
+.co.on{color:#D4537E}
+.sec{font-size:11px;color:#888780;margin:10px 0 0;text-transform:none}
+.vacio{text-align:center;padding-top:70px;color:#5F5E5A}
+.btn{position:relative;display:inline-block;margin-top:10px;border:0.5px solid #3B6D11;color:#27500A;border-radius:8px;padding:6px 14px;font-size:12px}
+.tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:10px;color:#888780}
+.tabs .on{color:#3B6D11}
+.gal{height:150px;background:#D3D1C7}
+.tipo{display:flex;justify-content:space-between;padding:7px 0;border-bottom:0.5px solid #D3D1C7}
+.cta{margin:8px 12px 10px;background:#3B6D11;color:#fff;border-radius:8px;padding:9px;text-align:center;font-size:13px;font-weight:500}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500}
+.co .n,.btn .n,.tabs .n{position:absolute;right:-10px;top:-8px}
+.notes{font-size:13px;color:#5F5E5A;line-height:1.6;padding-bottom:1rem}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Favoritos</h1>
+<div class="grid">
+
+<div><div class="cap">A · Catálogo de Sofía, con corazones</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">SP</span></div>
+<div class="scr">
+<p class="h">Catálogo</p>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Teatro</span><div class="nm">La casa de Bernarda Alba</div><div class="mt">lun 16 nov · 20:00 · Teatro San Martín</div><div class="mt"><span class="st">★ 4,5</span> (2) · Lucía Fernández</div><div class="pr">Desde $ 20.000</div></div><span class="co">♡<span class="n">1</span></span></div>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Deportes</span><div class="nm">Amistoso Estudiantes vs. Gimnasia</div><div class="mt">sáb 21 nov · 18:00 · Estadio Ciudad de La Plata</div><div class="mt">Sin reseñas · Martín Gómez</div><div class="pr">Desde $ 15.000</div></div><span class="co on">♥</span></div>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Música</span><div class="nm">Noche de Rock Nacional</div><div class="mt">mar 1 dic · 21:00 · Estadio Obras</div><div class="mt"><span class="st">★ 4,5</span> (2) · Lucía Fernández</div><div class="pr">Desde $ 45.000</div></div><span class="co">♡</span></div>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Festivales</span><div class="nm">Festival de Verano</div><div class="mt">dom 10 ene · 16:00 · Hipódromo de San Isidro</div><div class="mt"><span class="st">★ 4,5</span> (2) · Lucía Fernández</div><div class="pr">Desde $ 90.000</div></div><span class="co on">♥</span></div>
+</div>
+<div class="tabs" style="position:relative"><span class="on">Catálogo</span><span>Favoritos</span><span>Mis compras</span><span>Mis eventos</span><span class="n" style="right:auto;left:38%">3</span></div>
+</div></div>
+
+<div><div class="cap">B · Detalle del evento</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span style="color:#3B6D11;font-size:16px">←</span><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="co on" style="font-size:22px">♥<span class="n">2</span></span></div>
+<div class="gal"></div>
+<div class="scr">
+<span class="cat">Festivales</span>
+<div class="nm" style="font-size:16px;margin:3px 0">Festival de Verano</div>
+<div class="mt">dom 10 ene · 16:00</div>
+<div class="mt">Hipódromo de San Isidro</div>
+<p style="font-size:13px;font-weight:500;margin:10px 0 2px">Entradas</p>
+<div class="tipo"><span>General</span><span class="pr">$ 90.000</span></div>
+<div class="tipo"><span>Backstage</span><span class="mt">Agotado</span></div>
+</div>
+<div class="cta">Comprar entradas</div>
+</div></div>
+
+<div><div class="cap">C · Pestaña Favoritos de Sofía</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">SP</span></div>
+<div class="scr">
+<p class="h">Favoritos</p>
+<div class="sec">Próximos</div>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Deportes</span><div class="nm">Amistoso Estudiantes vs. Gimnasia</div><div class="mt">sáb 21 nov · 18:00 · Estadio Ciudad de La Plata</div><div class="mt">Sin reseñas · Martín Gómez</div><div class="pr">Desde $ 15.000</div></div><span class="co on">♥</span></div>
+<div class="ev"><div class="img"></div><div class="inf"><span class="cat">Festivales</span><div class="nm">Festival de Verano</div><div class="mt">dom 10 ene · 16:00 · Hipódromo de San Isidro</div><div class="mt"><span class="st">★ 4,5</span> (2) · Lucía Fernández</div><div class="pr">Desde $ 90.000</div></div><span class="co on">♥<span class="n">4</span></span></div>
+<div class="sec">Ya realizados</div>
+<div class="ev pas"><div class="img"></div><div class="inf"><span class="cat">Música</span><div class="nm">Acústico en el Gran Rex</div><div class="mt">mar 27 oct · 21:00 · Teatro Gran Rex</div><div class="mt"><span class="st">★ 4,5</span> (2) · Lucía Fernández</div><div class="pr">Desde $ 35.000</div></div><span class="co on">♥</span></div>
+</div>
+<div class="tabs"><span>Catálogo</span><span class="on">Favoritos</span><span>Mis compras</span><span>Mis eventos</span></div>
+</div></div>
+
+<div><div class="cap">D · Favoritos de Juan, vacío</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">JR</span></div>
+<div class="scr">
+<p class="h">Favoritos</p>
+<div class="vacio">
+<div style="font-size:30px;color:#888780">♡</div>
+<div style="font-size:14px;font-weight:500;color:#2C2C2A;margin-top:6px">Todavía no guardaste eventos</div>
+<div style="margin-top:4px">Tocá el corazón de un evento para encontrarlo acá.</div>
+<span class="btn">Explorar eventos <span class="n">5</span></span>
+</div>
+</div>
+<div class="tabs"><span>Catálogo</span><span class="on">Favoritos</span><span>Mis compras</span><span>Mis eventos</span></div>
+</div></div>
+
+</div>
+<div class="notes">
+<div><span class="n">1</span> Corazón en cada evento del catálogo: vacío si no es favorito, lleno si lo es. Tocarlo lo agrega (<code>PUT /usuarios/:id/favoritos/:eventoId</code>) o lo quita (<code>DELETE</code>, la misma ruta) sin abrir el evento. Mientras se guarda, el corazón muestra un spinner chico; si falla, queda como estaba y se avisa con el mensaje del backend.</div>
+<div><span class="n">2</span> El mismo corazón en el header del detalle del evento.</div>
+<div><span class="n">3</span> Pestaña nueva <b>Favoritos</b>, entre Catálogo y Mis compras, con el ícono de corazón.</div>
+<div><span class="n">4</span> La lista sale de <code>GET /usuarios/:id/favoritos</code>, separada como en Mis eventos: próximos por fecha y los ya realizados al final, apagados (se pueden abrir pero no comprar). Tocar el corazón lo quita de la lista. Se vuelve a pedir al entrar a la pestaña.</div>
+<div><span class="n">5</span> Sin favoritos: invitación a explorar el catálogo.</div>
+</div>
+</body></html>

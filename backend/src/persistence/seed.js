@@ -1,3 +1,4 @@
+import * as usuarioRepository from './repositories/usuarioRepository.js';
 import { registrar } from '../domain/cuenta.js';
 import * as categoriaRepository from './repositories/categoriaRepository.js';
 import * as eventoRepository from './repositories/eventoRepository.js';
@@ -113,6 +114,11 @@ export function loadSeed() {
       ],
     }),
   };
+
+  // Favoritos de Sofía: dos eventos próximos y uno ya realizado. Los demás no tienen.
+  for (const evento of [eventos.partido, eventos.festival, eventos.acustico]) {
+    usuarioRepository.addFavorito(usuarios.sofia.id, evento.id);
+  }
 
   // Crea la compra y le aplica los cambios de estado en orden, con fechas coherentes.
   // El total sale del precio del tipo de entrada, no se escribe a mano.

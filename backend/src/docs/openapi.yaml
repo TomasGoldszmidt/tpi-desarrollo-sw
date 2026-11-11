@@ -331,6 +331,129 @@ paths:
                 error: No existe el usuario 99
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/favoritos:
+    get:
+      tags: [Usuarios]
+      summary: Listar mis eventos favoritos
+      description: >-
+        Solo el propio usuario activo. Los eventos con la misma forma que en el
+        catálogo, ordenados por fecha e incluidos los que ya se realizaron.
+      operationId: listFavoritos
+      security:
+        - usuarioActivo: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 3
+      responses:
+        '200':
+          description: Los eventos favoritos (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventoResumen'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/FavoritosAjenos'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/favoritos/{eventoId}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        example: 3
+      - name: eventoId
+        in: path
+        required: true
+        schema:
+          type: integer
+        example: 1
+    put:
+      tags: [Usuarios]
+      summary: Marcar un evento como favorito
+      description: >-
+        Solo el propio usuario activo. Marcar uno que ya es favorito no da error
+        ni lo duplica.
+      operationId: addFavorito
+      security:
+        - usuarioActivo: []
+      responses:
+        '204':
+          description: El evento quedó como favorito
+        '400':
+          description: El id o el eventoId no es un número válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo eventoId tiene que ser un id válido
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/FavoritosAjenos'
+        '404':
+          description: No existe el usuario o el evento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el evento 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+    delete:
+      tags: [Usuarios]
+      summary: Quitar un evento de favoritos
+      description: >-
+        Solo el propio usuario activo. Quitar uno que no era favorito no da error.
+      operationId: removeFavorito
+      security:
+        - usuarioActivo: []
+      responses:
+        '204':
+          description: El evento ya no es favorito
+        '400':
+          description: El id o el eventoId no es un número válido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo eventoId tiene que ser un id válido
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/FavoritosAjenos'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
   /sesiones:
     post:
       tags: [Sesiones]
@@ -1470,6 +1593,14 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Falta indicar el usuario activo
+    FavoritosAjenos:
+      description: El usuario activo no es el dueño de los favoritos
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Solo podés ver y cambiar tus propios favoritos.
     ErrorInterno:
       description: Error no previsto del servidor
       content:

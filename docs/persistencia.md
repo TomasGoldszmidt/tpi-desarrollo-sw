@@ -61,7 +61,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
 - ~~Sin login: en la app se elige el usuario activo de una lista.~~ Reemplazado por inicio de sesión con email y contraseña (`POST /sesiones`). Después de entrar, el usuario activo sigue viajando en `X-User-Id`.
-- Los favoritos se guardan aunque ningún caso de uso los pida. Las pantallas de favoritos quedan para el final si sobra tiempo.
+- Los favoritos se guardan aunque ningún caso de uso los pida. Se usan desde `GET /usuarios/:id/favoritos` y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, solo para el propio usuario. En el seed, Sofía tiene tres (dos próximos y uno ya realizado).
 - Ids numéricos incrementales.
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
 
