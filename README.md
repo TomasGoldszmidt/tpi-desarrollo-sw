@@ -63,7 +63,9 @@ Si la app no llega al backend, revisar que el firewall de Windows permita conexi
 
 ## Usuarios y datos de ejemplo
 
-No hay login: al abrir la app se elige con qué usuario usarla, y cualquiera puede comprar y organizar. La API recibe el usuario activo en el header `X-User-Id`.
+Al abrir la app se inicia sesión con email y contraseña, o se crea una cuenta. Cualquier usuario puede comprar y organizar, y editar su perfil desde el chip con sus iniciales. Después de entrar, la API recibe el usuario activo en el header `X-User-Id`.
+
+Cada cuenta del seed entra con `<nombre>@aiticketit.com` y la contraseña `<nombre>1234`, sin tildes. Por ejemplo, `sofia@aiticketit.com` / `sofia1234`.
 
 | Usuario | Para probar |
 |---|---|

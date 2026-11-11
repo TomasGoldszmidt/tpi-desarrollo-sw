@@ -3,21 +3,26 @@ import { setUsuarioActivoId } from '../api/client.js';
 
 const UsuarioContext = createContext(null);
 
-// Guarda el usuario activo. No hay login: se elige de la lista de GET /usuarios
-// y no se recuerda al cerrar la app.
+// Guarda la cuenta del usuario que inició sesión (con su email). Su id viaja en el
+// header X-User-Id. La sesión no se recuerda al cerrar la app.
 export function UsuarioProvider({ children }) {
   const [usuario, setUsuario] = useState(null);
 
-  function elegirUsuario(nuevoUsuario) {
-    setUsuarioActivoId(nuevoUsuario?.id ?? null);
-    setUsuario(nuevoUsuario);
+  function guardar(cuenta) {
+    setUsuarioActivoId(cuenta?.id ?? null);
+    setUsuario(cuenta);
   }
 
-  return (
-    <UsuarioContext.Provider value={{ usuario, elegirUsuario }}>
-      {children}
-    </UsuarioContext.Provider>
-  );
+  const valor = {
+    usuario,
+    // Al iniciar sesión o crear la cuenta.
+    iniciarSesion: guardar,
+    // Al editar el perfil, para que el chip y los datos queden al día.
+    actualizarCuenta: guardar,
+    cerrarSesion: () => guardar(null),
+  };
+
+  return <UsuarioContext.Provider value={valor}>{children}</UsuarioContext.Provider>;
 }
 
 export function useUsuario() {

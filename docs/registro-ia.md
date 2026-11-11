@@ -798,3 +798,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** separar las vistas en el repositorio evitó revisar uno por uno los lugares donde se embebe un usuario. Con curl se confirmó que el organizador de un evento ya no trae el email.
 - **Corregido / problemas:** el usuario agregó la edición del perfil con el boceto ya presentado, y se sumó a ese mismo boceto. Las dudas se aprobaron con lo que propuso la IA: seguir con `X-User-Id` (no es seguro, porque cualquiera puede mandar otro id), no recordar la sesión y pedir la contraseña actual solo para cambiarla.
 - **Aprendizaje:** pedir una pantalla puede esconder trabajo de backend. Hacer el boceto primero dejó a la vista que faltaban los datos antes de escribir código.
+
+### 2026-11-11 · Inicio de sesión, registro y perfil: app
+- **Tarea:** "Pantallas de inicio de sesión, registro y edición del perfil" (sección 3, agregada al TP)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` y `/registrar-ia`
+- **Pedido (prompt):** "Dale, seguí" a las pantallas, con el boceto ya aprobado.
+- **Resultado:**
+  - `app/index.js` pasa de la lista de usuarios a iniciar sesión. `app/registro.js` crea la cuenta y `app/perfil.js` edita nombre, apellido, email y contraseña. Todas siguen el boceto `docs/bocetos/inicio-sesion.html`.
+  - El chip de las pestañas abre `MenuCuenta`, con Editar perfil y Cerrar sesión. `UsuarioContext` pasa a tener `iniciarSesion`, `actualizarCuenta` y `cerrarSesion`.
+  - Piezas compartidas en `components/Formulario.js`: un campo con su error, la contraseña con Mostrar/Ocultar, el aviso de error o confirmación y el botón principal.
+  - Al crear la cuenta, `router.dismissAll()` vuelve a la primera pantalla, que con la sesión iniciada redirige al catálogo. Así no queda el login atrás en la pila.
+  - Se actualizaron el README (credenciales del seed), el guion del video (cerrar sesión para cambiar de usuario) y la skill `nueva-pantalla`.
+- **Bien:** reusar los estilos y `CargaEncima` de los formularios que ya existían hizo que las pantallas nuevas quedaran iguales al resto sin rediseñar nada.
+- **Corregido / problemas:**
+  - La IA sacó `getUsuarios` de `api/usuarios.js` creyendo que solo lo usaba la lista de usuarios. Lint pasó igual, pero al buscar las referencias apareció que Mis compras lo usa para los nombres de los compradores, y se volvió a agregar.
+  - La pantalla de perfil toma los datos de la sesión y no de `GET /usuarios/:id`, que ya no devuelve el email. Se avisó como diferencia con el boceto.
+  - El emulador siguió mostrando la pantalla vieja porque Fast Refresh no recargó. Se verificó que el bundle compila pidiéndoselo a Metro.
+- **Aprendizaje:** que lint pase no garantiza que no se rompió nada. Cuando se saca una función, hay que buscar quién la usa antes de commitear.
