@@ -1,7 +1,8 @@
 import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { UsuarioProvider } from '../context/UsuarioContext.js';
+import { UsuarioProvider, useUsuario } from '../context/UsuarioContext.js';
+import { FavoritosProvider } from '../context/FavoritosContext.js';
 import { Logo, Marca } from '../components/Logo.js';
 import { colors, spacing } from '../theme.js';
 
@@ -19,20 +20,28 @@ const conHeader = {
   ),
 };
 
+// Los favoritos dependen del usuario: con key, al cambiar de sesión arrancan de cero.
+function ConFavoritos({ children }) {
+  const { usuario } = useUsuario();
+  return <FavoritosProvider key={usuario?.id ?? 'sin-sesion'}>{children}</FavoritosProvider>;
+}
+
 export default function RootLayout() {
   return (
     <UsuarioProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="registro" options={conHeader} />
-        <Stack.Screen name="perfil" options={conHeader} />
-        <Stack.Screen name="eventos/nuevo" options={conHeader} />
-        <Stack.Screen name="eventos/[id]" options={conHeader} />
-        <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
-        <Stack.Screen name="eventos/[id]/ventas" options={conHeader} />
-        <Stack.Screen name="usuarios/[id]/resenias" options={conHeader} />
-        <Stack.Screen name="compras/[id]" options={conHeader} />
-        <Stack.Screen name="compras/[id]/chat" options={conHeader} />
-      </Stack>
+      <ConFavoritos>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="registro" options={conHeader} />
+          <Stack.Screen name="perfil" options={conHeader} />
+          <Stack.Screen name="eventos/nuevo" options={conHeader} />
+          <Stack.Screen name="eventos/[id]" options={conHeader} />
+          <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
+          <Stack.Screen name="eventos/[id]/ventas" options={conHeader} />
+          <Stack.Screen name="usuarios/[id]/resenias" options={conHeader} />
+          <Stack.Screen name="compras/[id]" options={conHeader} />
+          <Stack.Screen name="compras/[id]/chat" options={conHeader} />
+        </Stack>
+      </ConFavoritos>
       <StatusBar style="dark" />
     </UsuarioProvider>
   );

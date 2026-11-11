@@ -1,13 +1,14 @@
 import { useCallback } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router, useLocalSearchParams } from 'expo-router';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getEvento } from '../../api/eventos.js';
 import { getReseniasOrganizador } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { Avatar } from '../../components/Avatar.js';
+import { BotonFavorito } from '../../components/BotonFavorito.js';
 import { Estrellas } from '../../components/Estrellas.js';
 import { Galeria } from '../../components/Galeria.js';
 import { PantallaCarga } from '../../components/Carga.js';
@@ -26,7 +27,10 @@ export default function DetalleEvento() {
     const resenias = evento.organizador.cantidadResenias > 0
       ? await getReseniasOrganizador(evento.organizador.id)
       : [];
-    return { evento, resenias };
+    // Se puede llegar a un evento pasado desde Favoritos: se ve, pero no se compra.
+    // Se calcula al pedirlo y no al dibujar, que tiene que dar siempre lo mismo.
+    const realizado = new Date(evento.fecha).getTime() < Date.now();
+    return { evento, resenias, realizado };
   }, [id]);
   const { data, loading, error, recargar } = useCarga(pedir);
   // El botón de comprar queda fijo abajo: se separa de la barra de gestos del celular.
@@ -43,16 +47,19 @@ export default function DetalleEvento() {
     );
   }
 
-  const { evento, resenias } = data;
+  const { evento, resenias, realizado } = data;
   const agotado = evento.tiposEntrada.every((tipo) => tipo.disponibles === 0);
   // El backend no deja comprar en un evento propio: el organizador no ve el botón de compra.
   const esPropio = usuario?.id === evento.organizador.id;
+  const sinCompra = agotado || esPropio || realizado;
   let textoBoton = 'Comprar entradas';
-  if (esPropio) textoBoton = 'Es tu evento';
+  if (realizado) textoBoton = 'Ya se realizó';
+  else if (esPropio) textoBoton = 'Es tu evento';
   else if (agotado) textoBoton = 'Agotado';
 
   return (
     <View style={styles.pantalla}>
+      <Stack.Screen options={{ headerRight: () => <BotonFavorito eventoId={evento.id} size={24} /> }} />
       <ScrollView>
         <Galeria imagenes={evento.multimedia} />
         <View style={styles.contenido}>
@@ -80,11 +87,11 @@ export default function DetalleEvento() {
 
       <View style={[styles.pie, { paddingBottom: spacing.md + insets.bottom }]}>
         <Pressable
-          style={[styles.comprar, (agotado || esPropio) && styles.comprarAgotado]}
+          style={[styles.comprar, sinCompra && styles.comprarAgotado]}
           onPress={() => router.push(`/eventos/${evento.id}/comprar`)}
-          disabled={agotado || esPropio}
+          disabled={sinCompra}
         >
-          <Text style={[styles.comprarTexto, (agotado || esPropio) && styles.comprarTextoAgotado]}>
+          <Text style={[styles.comprarTexto, sinCompra && styles.comprarTextoAgotado]}>
             {textoBoton}
           </Text>
         </Pressable>

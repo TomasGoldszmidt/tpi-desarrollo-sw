@@ -858,3 +858,21 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** fue un cambio chico, solo de estilos.
 - **Corregido / problemas:** el boceto aprobado mostraba la fila deslizable cortada al borde, pero con 4 chips de ejemplo. Con los 5 estados de Juan en el emulador, el último quedaba afuera y no se notaba que se podía deslizar.
 - **Aprendizaje:** el boceto tiene que mostrar el peor caso (el usuario con todos los estados). Si no, un problema de espacio recién aparece en el celular.
+
+### 2026-11-11 · Favoritos
+- **Tarea:** "Favoritos" (backend en la sección 2 y pantallas en la 3, agregadas al TP)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla`, `/swagger` y `/registrar-ia`
+- **Pedido (prompt):** "Agregar eventos en favoritos", y "Aprobado, seguí" al boceto y al análisis.
+- **Resultado:**
+  - Boceto `docs/bocetos/favoritos.html`: corazón en el catálogo y en el detalle, pestaña Favoritos con próximos y ya realizados, y el estado vacío.
+  - Backend: `GET /usuarios/:id/favoritos` (con la misma forma que el catálogo, por fecha) y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, que se pueden repetir sin error. Solo los usa el propio usuario (403 si es otro). La persistencia ya tenía `addFavorito` y `removeFavorito` desde el principio. Sofía arranca con tres favoritos en el seed. Hay 5 tests nuevos (74 en total), swagger actualizado y cada caso probado con curl.
+  - App:
+    - `FavoritosContext` guarda los ids, que arrancan con los de la cuenta y se vuelven a pedir después de cada cambio. Se monta con `key` = id del usuario, así al cambiar de sesión arranca de cero.
+    - `BotonFavorito` es el corazón, con un spinner mientras guarda. Va en `EventoCard` y en el header del detalle.
+    - La pestaña Favoritos va entre Catálogo y Mis compras.
+    - El detalle muestra "Ya se realizó" y no deja comprar en un evento pasado, porque ahora se puede llegar a uno desde Favoritos.
+- **Bien:** la persistencia de favoritos se había decidido al principio del TP, "aunque ningún caso de uso los pida". Por eso el backend solo necesitó dominio y rutas.
+- **Corregido / problemas:**
+  - Lint rechazó `Date.now()` dentro del render del detalle (regla `react-hooks/purity`). Se pasó al momento de pedir el evento.
+  - La IA editó `EventoCard`, que usa el contexto nuevo, antes de agregar el provider en el layout. Mientras tanto, la app abierta podía mostrar un error de Fast Refresh. Se corrigió en el paso siguiente.
+- **Aprendizaje:** cuando una pieza nueva depende de otra (el provider), conviene agregar primero la base y después lo que la usa, igual que la regla de los imports con Fast Refresh.

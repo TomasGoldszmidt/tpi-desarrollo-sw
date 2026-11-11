@@ -60,6 +60,13 @@ export default function TabsLayout() {
           }}
         />
         <Tabs.Screen
+          name="favoritos"
+          options={{
+            title: 'Favoritos',
+            tabBarIcon: ({ color, size }) => <Ionicons name="heart-outline" size={size} color={color} />,
+          }}
+        />
+        <Tabs.Screen
           name="compras"
           options={{
             title: 'Mis compras',
