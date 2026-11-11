@@ -65,14 +65,12 @@ Si la app no llega al backend, revisar que el firewall de Windows permita conexi
 
 Al abrir la app se inicia sesión con email y contraseña, o se crea una cuenta. Cualquier usuario puede comprar y organizar, y editar su perfil desde el chip con sus iniciales. Después de entrar, la API recibe el usuario activo en el header `X-User-Id`.
 
-Cada cuenta del seed entra con `<nombre>@aiticketit.com` y la contraseña `<nombre>1234`, sin tildes. Por ejemplo, `sofia@aiticketit.com` / `sofia1234`.
-
-| Usuario | Para probar |
-|---|---|
-| **Lucía Fernández** | Organizadora de Noche de Rock, Bernarda Alba, Festival de Verano y el Acústico (pasado, con reseñas: 4.5 de promedio). Tiene ventas en varios estados y el Backstage del Festival agotado |
-| **Martín Gómez** | Organizador del Amistoso y del Stand-up (pasado, sin reseñas). Puede marcar como utilizada la compra de Juan para el Stand-up |
-| **Sofía Pérez** | Compradora con una compra de cada tipo: pendiente de pago, confirmada (con chat), utilizada con reseña y utilizada sin reseña |
-| **Juan Rodríguez** | Comprador con compras confirmada, reembolsada, cancelada y utilizada |
+| Usuario | Email | Contraseña | Para probar |
+|---|---|---|---|
+| **Lucía Fernández** | `lucia@aiticketit.com` | `lucia1234` | Organizadora de Noche de Rock, Bernarda Alba, Festival de Verano y el Acústico (pasado, con reseñas: 4.5 de promedio). Tiene ventas en varios estados y el Backstage del Festival agotado |
+| **Martín Gómez** | `martin@aiticketit.com` | `martin1234` | Organizador del Amistoso y del Stand-up (pasado, sin reseñas). Puede marcar como utilizada la compra de Juan para el Stand-up |
+| **Sofía Pérez** | `sofia@aiticketit.com` | `sofia1234` | Compradora con una compra de cada tipo: pendiente de pago, confirmada (con chat), utilizada con reseña y utilizada sin reseña. Tiene tres favoritos: el Amistoso, el Festival de Verano y el Acústico (pasado) |
+| **Juan Rodríguez** | `juan@aiticketit.com` | `juan1234` | Comprador con compras confirmada, reembolsada, cancelada y utilizada |
 
 Las fechas del seed son relativas al momento en que arranca el backend, así que siempre hay eventos próximos y pasados. **Como la persistencia es en memoria, al reiniciar el backend todo vuelve a estos datos.**
 
