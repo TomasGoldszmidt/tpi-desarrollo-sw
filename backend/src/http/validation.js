@@ -58,6 +58,23 @@ export function requireString(value, field, { maxLength } = {}) {
   return text;
 }
 
+// Devuelve el email sin espacios y en minúsculas.
+export function requireEmail(value, field = 'email') {
+  const email = requireString(value, field, { maxLength: 254 }).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ValidationError(`El campo ${field} tiene que ser un email válido`);
+  }
+  return email;
+}
+
+// La contraseña se usa tal cual (sin recortar espacios).
+export function requireContrasenia(value, field = 'contrasenia', { minLength = 8, maxLength = 100 } = {}) {
+  if (typeof value !== 'string' || value === '') throw new ValidationError(`Falta el campo ${field}`);
+  if (value.length < minLength) throw new ValidationError(`La contraseña tiene que tener al menos ${minLength} caracteres`);
+  if (value.length > maxLength) throw new ValidationError(`La contraseña puede tener como máximo ${maxLength} caracteres`);
+  return value;
+}
+
 // Fechas como texto ISO 8601 ("2027-03-15T19:00:00.000Z"), que es como las manda la app.
 export function requireDate(value, field) {
   if (isMissing(value)) throw new ValidationError(`Falta el campo ${field}`);

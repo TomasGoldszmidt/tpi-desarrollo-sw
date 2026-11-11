@@ -5,11 +5,23 @@
 
 /**
  * Colección `usuarios`. Sin rol: es organizador si tiene eventos creados.
+ * Es lo que ven los demás (organizador, comprador, autor de un mensaje): sin email ni contraseña.
  * @typedef {Object} Usuario
  * @property {number} id
  * @property {string} nombre
  * @property {string} apellido
  * @property {number[]} favoritos Ids de Evento (referencia).
+ */
+
+/**
+ * El usuario visto por él mismo: lo que devuelven el inicio de sesión, el registro y la edición del perfil.
+ * @typedef {Usuario & { email: string }} Cuenta
+ */
+
+/**
+ * El documento completo como se guarda. `contraseniaHash` es `sal:hash` en hex (scrypt) y
+ * solo sale del repositorio con `findCredenciales`, para verificar la contraseña.
+ * @typedef {Cuenta & { contraseniaHash: string }} UsuarioGuardado
  */
 
 /**

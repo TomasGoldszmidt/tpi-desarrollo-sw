@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Inicio de sesión y registro</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;padding:1rem 0}
+.cap{font-size:12px;color:#5F5E5A;margin-bottom:6px}
+.phone{position:relative;border:0.5px solid #B4B2A9;border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:440px;display:flex;flex-direction:column}
+.scr{flex:1;padding:12px 14px;font-size:12px}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:0.5px solid #D3D1C7;background:#fff}
+.head{text-align:center;padding:10px 0 14px}
+.h{font-size:15px;font-weight:500;margin:0 0 10px}
+.lbl{font-size:11px;color:#5F5E5A;margin:8px 0 3px}
+.in{border:0.5px solid #D3D1C7;border-radius:8px;padding:8px 10px;font-size:12px;color:#2C2C2A;display:flex;justify-content:space-between}
+.in.ph{color:#888780}
+.in.bad{border-color:#A32D2D}
+.err{font-size:11px;color:#A32D2D;margin-top:3px}
+.alert{background:#FCEBEB;color:#791F1F;border-radius:8px;padding:8px 10px;font-size:11px;margin:4px 0 6px}
+.cta{position:relative;margin-top:14px;background:#3B6D11;color:#fff;border-radius:8px;padding:9px;text-align:center;font-size:13px;font-weight:500}
+.link{position:relative;margin-top:12px;text-align:center;font-size:12px;color:#5F5E5A}
+.link b{color:#3B6D11;font-weight:500}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500}
+.cta .n,.link .n,.eye .n,.chip .n,.opt .n{position:absolute;right:-6px;top:-6px}
+.eye{position:relative;font-size:11px;color:#3B6D11}
+.chip{position:relative;width:28px;height:28px;border-radius:50%;background:#EAF3DE;color:#27500A;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.dim{position:absolute;inset:0;background:rgba(44,44,42,.45);display:flex;align-items:center;justify-content:center}
+.sheet{background:#fff;border-radius:12px;padding:14px;width:78%;font-size:12px}
+.opt{position:relative;padding:9px 0;border-top:0.5px solid #D3D1C7;font-size:13px}
+.spin{width:26px;height:26px;border-radius:50%;border:3px solid #EAF3DE;border-top-color:#3B6D11;margin:0 auto 8px}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.logo.big{height:44px;font-size:22px;padding:0 18px 0 17px;border-radius:10px;gap:12px}
+.logo.big::before,.logo.big::after{width:14px;height:14px;margin-top:-7px}.logo.big::before{left:-7px}.logo.big::after{right:-7px}
+.logo.big i{height:28px;border-left-width:2px}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.notes{font-size:13px;color:#5F5E5A;line-height:1.6;padding-bottom:1rem}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Inicio de sesión y registro</h1>
+<div class="grid">
+
+<div><div class="cap">A · Iniciar sesión</div>
+<div class="phone"><div class="scr">
+<div class="head"><span class="logo big">AI<i></i></span><div class="word" style="font-size:18px;margin-top:8px">Ticket <b>It</b></div><div style="font-size:11px;color:#888780;letter-spacing:1px">ENTRADAS A UN CLICK</div></div>
+<p class="h">Iniciá sesión</p>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div class="lbl">Contraseña</div><div class="in"><span>••••••••</span><span class="eye">Mostrar <span class="n">1</span></span></div>
+<div class="cta">Ingresar <span class="n">2</span></div>
+<div class="link">¿No tenés cuenta? <b>Creá una</b> <span class="n">3</span></div>
+</div></div></div>
+
+<div><div class="cap">B · Datos incorrectos</div>
+<div class="phone"><div class="scr">
+<div class="head"><span class="logo big">AI<i></i></span><div class="word" style="font-size:18px;margin-top:8px">Ticket <b>It</b></div><div style="font-size:11px;color:#888780;letter-spacing:1px">ENTRADAS A UN CLICK</div></div>
+<p class="h">Iniciá sesión</p>
+<div class="alert">El email o la contraseña no son correctos.</div>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div class="lbl">Contraseña</div><div class="in"><span>•••••</span><span class="eye">Mostrar</span></div>
+<div class="cta">Ingresar</div>
+<div class="link">¿No tenés cuenta? <b>Creá una</b></div>
+</div></div></div>
+
+<div><div class="cap">C · Ingresando</div>
+<div class="phone"><div class="scr">
+<div class="head"><span class="logo big">AI<i></i></span><div class="word" style="font-size:18px;margin-top:8px">Ticket <b>It</b></div><div style="font-size:11px;color:#888780;letter-spacing:1px">ENTRADAS A UN CLICK</div></div>
+<p class="h">Iniciá sesión</p>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div class="lbl">Contraseña</div><div class="in"><span>••••••••</span><span class="eye">Mostrar</span></div>
+<div class="cta">Ingresar</div>
+</div>
+<div class="dim" style="background:rgba(255,255,255,.8)"><div style="text-align:center;font-size:13px"><div class="spin"></div>Ingresando…</div></div>
+</div></div>
+
+<div><div class="cap">D · Crear cuenta</div>
+<div class="phone">
+<div class="bar"><span style="color:#3B6D11;font-size:16px">←</span><span style="display:flex;align-items:center;gap:8px;flex:1;margin-left:10px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<p class="h">Creá tu cuenta</p>
+<div class="row2"><div><div class="lbl">Nombre</div><div class="in">Camila</div></div><div><div class="lbl">Apellido</div><div class="in">Ríos</div></div></div>
+<div class="lbl">Email</div><div class="in">camila@gmail.com</div>
+<div class="lbl">Contraseña</div><div class="in"><span>••••••••</span><span class="eye">Mostrar</span></div>
+<div style="font-size:11px;color:#888780;margin-top:3px">Al menos 8 caracteres.</div>
+<div class="cta">Crear cuenta <span class="n">4</span></div>
+<div class="link">¿Ya tenés cuenta? <b>Iniciá sesión</b> <span class="n">5</span></div>
+</div></div></div>
+
+<div><div class="cap">E · Errores al crear la cuenta</div>
+<div class="phone">
+<div class="bar"><span style="color:#3B6D11;font-size:16px">←</span><span style="display:flex;align-items:center;gap:8px;flex:1;margin-left:10px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<p class="h">Creá tu cuenta</p>
+<div class="alert">Ya hay una cuenta con ese email.</div>
+<div class="row2"><div><div class="lbl">Nombre</div><div class="in">Lucía</div></div><div><div class="lbl">Apellido</div><div class="in ph">Apellido</div><div class="err">Completá tu apellido.</div></div></div>
+<div class="lbl">Email</div><div class="in">lucia@aiticketit.com</div>
+<div class="lbl">Contraseña</div><div class="in bad"><span>••••</span><span class="eye">Mostrar</span></div>
+<div class="err">Tiene que tener al menos 8 caracteres.</div>
+<div class="cta">Crear cuenta</div>
+</div></div></div>
+
+<div><div class="cap">F · Cerrar sesión</div>
+<div class="phone">
+<div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="chip">SP</span></div>
+<div class="scr"><p class="h" style="font-size:18px">Catálogo</p></div>
+<div class="dim"><div class="sheet">
+<div style="font-weight:500;font-size:13px">Sofía Pérez</div>
+<div style="color:#5F5E5A;margin:2px 0 10px">sofia@aiticketit.com</div>
+<div class="opt">Editar perfil <span class="n">7</span></div>
+<div class="opt" style="color:#A32D2D">Cerrar sesión <span class="n">6</span></div>
+<div class="opt" style="color:#5F5E5A">Cancelar</div>
+</div></div>
+</div></div>
+
+<div><div class="cap">G · Editar perfil</div>
+<div class="phone">
+<div class="bar"><span style="color:#3B6D11;font-size:16px">←</span><span style="display:flex;align-items:center;gap:8px;flex:1;margin-left:10px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="chip" style="width:40px;height:40px;font-size:14px">SP</span><p class="h" style="margin:0">Tu perfil</p></div>
+<div class="row2"><div><div class="lbl">Nombre</div><div class="in">Sofía</div></div><div><div class="lbl">Apellido</div><div class="in">Pérez</div></div></div>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div style="font-size:12px;font-weight:500;margin:14px 0 0">Cambiar contraseña</div>
+<div style="font-size:11px;color:#888780">Dejalo vacío para no cambiarla.</div>
+<div class="lbl">Contraseña actual</div><div class="in ph"><span>Contraseña actual</span><span class="eye">Mostrar</span></div>
+<div class="lbl">Nueva contraseña</div><div class="in ph"><span>Al menos 8 caracteres</span><span class="eye">Mostrar</span></div>
+<div class="cta">Guardar cambios <span class="n">8</span></div>
+</div></div></div>
+
+<div><div class="cap">H · Errores al guardar</div>
+<div class="phone">
+<div class="bar"><span style="color:#3B6D11;font-size:16px">←</span><span style="display:flex;align-items:center;gap:8px;flex:1;margin-left:10px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="chip" style="width:40px;height:40px;font-size:14px">SP</span><p class="h" style="margin:0">Tu perfil</p></div>
+<div class="alert">La contraseña actual no es correcta.</div>
+<div class="row2"><div><div class="lbl">Nombre</div><div class="in">Sofía</div></div><div><div class="lbl">Apellido</div><div class="in">Pérez</div></div></div>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div style="font-size:12px;font-weight:500;margin:14px 0 0">Cambiar contraseña</div>
+<div class="lbl">Contraseña actual</div><div class="in"><span>•••••••</span><span class="eye">Mostrar</span></div>
+<div class="lbl">Nueva contraseña</div><div class="in"><span>••••••••••</span><span class="eye">Mostrar</span></div>
+<div class="cta">Guardar cambios</div>
+</div></div></div>
+
+<div><div class="cap">I · Cambios guardados</div>
+<div class="phone">
+<div class="bar"><span style="color:#3B6D11;font-size:16px">←</span><span style="display:flex;align-items:center;gap:8px;flex:1;margin-left:10px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span></div>
+<div class="scr">
+<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><span class="chip" style="width:40px;height:40px;font-size:14px">SR</span><p class="h" style="margin:0">Tu perfil</p></div>
+<div style="background:#EAF3DE;color:#27500A;border-radius:8px;padding:8px 10px;font-size:11px;margin:4px 0 6px">Guardamos tus cambios.</div>
+<div class="row2"><div><div class="lbl">Nombre</div><div class="in">Sofía</div></div><div><div class="lbl">Apellido</div><div class="in">Ramírez</div></div></div>
+<div class="lbl">Email</div><div class="in">sofia@aiticketit.com</div>
+<div style="font-size:12px;font-weight:500;margin:14px 0 0">Cambiar contraseña</div>
+<div style="font-size:11px;color:#888780">Dejalo vacío para no cambiarla.</div>
+<div class="lbl">Contraseña actual</div><div class="in ph"><span>Contraseña actual</span><span class="eye">Mostrar</span></div>
+<div class="lbl">Nueva contraseña</div><div class="in ph"><span>Al menos 8 caracteres</span><span class="eye">Mostrar</span></div>
+<div class="cta">Guardar cambios</div>
+</div></div></div>
+
+</div>
+<div class="notes">
+<div><span class="n">1</span> Mostrar / Ocultar: alterna la contraseña visible. No llama a nada.</div>
+<div><span class="n">2</span> Ingresar: <code>POST /sesiones</code> con email y contraseña. Mientras espera se ve C. Si sale bien guarda el usuario activo y entra al Catálogo; si no, muestra B (401). Campos vacíos se marcan sin llamar al backend.</div>
+<div><span class="n">3</span> Creá una: abre D (<code>/registro</code>).</div>
+<div><span class="n">4</span> Crear cuenta: valida en la app (todo completo, email con formato, contraseña ≥ 8) y llama <code>POST /usuarios</code>. Si sale bien inicia sesión con ese usuario y entra al Catálogo; si el email ya existe (409) o el backend rechaza algo (400), lo muestra arriba como en E.</div>
+<div><span class="n">5</span> Iniciá sesión: vuelve a A.</div>
+<div><span class="n">6</span> El chip del usuario ahora abre este menú en vez de volver a la lista de usuarios. Cerrar sesión borra el usuario activo y vuelve a A.</div>
+<div><span class="n">7</span> Editar perfil: abre G (<code>/perfil</code>) con los datos del usuario activo (<code>GET /usuarios/:id</code>, con cargando y error con reintentar como el resto).</div>
+<div><span class="n">8</span> Guardar cambios: valida en la app como en D (la nueva contraseña solo si se completó, y en ese caso pide la actual) y llama <code>PATCH /usuarios/:id</code> con lo que cambió. Mientras espera, "Guardando tus cambios…" cubriendo la pantalla. Si sale bien muestra I, actualiza el chip y vacía los campos de contraseña; si no, el mensaje arriba como en H (401 contraseña actual incorrecta, 409 email ya usado, 400 datos inválidos).</div>
+</div>
+</body></html>

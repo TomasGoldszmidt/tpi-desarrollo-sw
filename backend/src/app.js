@@ -9,6 +9,7 @@ import categoriaRoutes from './routes/categoriaRoutes.js';
 import eventoRoutes from './routes/eventoRoutes.js';
 import compraRoutes from './routes/compraRoutes.js';
 import reseniaRoutes from './routes/reseniaRoutes.js';
+import sesionRoutes from './routes/sesionRoutes.js';
 
 const openapi = YAML.parse(readFileSync(new URL('./docs/openapi.yaml', import.meta.url), 'utf8'));
 
@@ -30,6 +31,7 @@ export function createApp() {
   app.use('/eventos', eventoRoutes);
   app.use('/compras', compraRoutes);
   app.use('/resenias', reseniaRoutes);
+  app.use('/sesiones', sesionRoutes);
 
   app.use(notFound);
   app.use(errorHandler);

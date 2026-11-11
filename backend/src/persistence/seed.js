@@ -1,4 +1,4 @@
-import * as usuarioRepository from './repositories/usuarioRepository.js';
+import { registrar } from '../domain/cuenta.js';
 import * as categoriaRepository from './repositories/categoriaRepository.js';
 import * as eventoRepository from './repositories/eventoRepository.js';
 import * as compraRepository from './repositories/compraRepository.js';
@@ -16,11 +16,12 @@ function daysFromNow(days, hour = 21) {
 // Carga los datos de ejemplo. Se ejecuta una vez al iniciar el servidor:
 // como la persistencia es en memoria, cada reinicio vuelve a este estado.
 export function loadSeed() {
+  // Cuentas de prueba: el email es <nombre>@aiticketit.com y la contraseña <nombre>1234 (sin tildes).
   const usuarios = {
-    lucia: usuarioRepository.create({ nombre: 'Lucía', apellido: 'Fernández' }),
-    martin: usuarioRepository.create({ nombre: 'Martín', apellido: 'Gómez' }),
-    sofia: usuarioRepository.create({ nombre: 'Sofía', apellido: 'Pérez' }),
-    juan: usuarioRepository.create({ nombre: 'Juan', apellido: 'Rodríguez' }),
+    lucia: registrar({ nombre: 'Lucía', apellido: 'Fernández', email: 'lucia@aiticketit.com', contrasenia: 'lucia1234' }),
+    martin: registrar({ nombre: 'Martín', apellido: 'Gómez', email: 'martin@aiticketit.com', contrasenia: 'martin1234' }),
+    sofia: registrar({ nombre: 'Sofía', apellido: 'Pérez', email: 'sofia@aiticketit.com', contrasenia: 'sofia1234' }),
+    juan: registrar({ nombre: 'Juan', apellido: 'Rodríguez', email: 'juan@aiticketit.com', contrasenia: 'juan1234' }),
   };
 
   const categorias = {

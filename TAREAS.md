@@ -28,6 +28,7 @@
 - [x] Chat de la compra: enviar y listar mensajes
 - [x] Reseñas: crear (solo compra utilizada) y listar por organizador
 - [x] Manejo de errores y validaciones
+- [x] Inicio de sesión, registro y edición del perfil (`POST /sesiones`, `POST /usuarios`, `PATCH /usuarios/:id`)
 
 ## 3. Front-End
 - [x] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
@@ -39,6 +40,7 @@
 - [x] Detalle de compra: acciones (pagar, cancelar, reseñar) y chat
 - [x] Pantalla de creación de evento (organizador)
 - [x] Pantalla de ventas por evento (organizador)
+- [ ] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular

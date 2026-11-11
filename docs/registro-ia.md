@@ -784,3 +784,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** como cada subtarea tenía su entrada con lo que salió bien y lo que hubo que corregir, la conclusión no hubo que reconstruirla de memoria.
 - **Corregido / problemas:** ninguno. La IA marcó qué partes eran más personales (la valoración y la frase de cierre) para que las revisara antes de aprobar.
 - **Aprendizaje:** llevar el registro durante todo el TP fue lo que hizo posible una conclusión concreta. Anotar los errores en el momento vale más que acordarse al final.
+
+### 2026-11-11 · Inicio de sesión, registro y perfil: backend
+- **Tarea:** "Inicio de sesión, registro y edición del perfil" (sección 2, agregada al TP)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` (boceto), `/swagger` y `/registrar-ia`
+- **Pedido (prompt):** "Implementá el inicio de sesión, en lugar de elegir los usuarios ya creados, y poder registrarme si no lo estoy". A mitad del boceto: "además dentro de la aplicación permití editar el perfil".
+- **Resultado:**
+  - Boceto `docs/bocetos/inicio-sesion.html` con 9 estados: iniciar sesión, datos incorrectos, ingresando, crear cuenta, sus errores, el menú del chip (editar perfil y cerrar sesión), el perfil, sus errores y los cambios guardados.
+  - Al analizar, la IA avisó que el backend no tenía email ni contraseña, así que la pantalla necesitaba endpoints nuevos.
+  - `Usuario` suma `email` y `contraseniaHash` (scrypt de Node, con sal, sin dependencias). El repositorio devuelve tres vistas: `Usuario` sin datos de la cuenta, que es lo que se embebe en eventos, compras y reseñas; `Cuenta` con email; y el documento completo solo para verificar la contraseña.
+  - `POST /sesiones` (200 o 401, con el mismo mensaje si el email no existe o la contraseña no coincide), `POST /usuarios` (201 con `Location`, 409 si el email ya tiene cuenta) y `PATCH /usuarios/:id` (solo el propio usuario; para cambiar la contraseña pide la actual).
+  - Seed con cuentas `<nombre>@aiticketit.com` / `<nombre>1234`. 13 tests nuevos (69 en total), swagger actualizado y cada caso probado con curl.
+- **Bien:** separar las vistas en el repositorio evitó revisar uno por uno los lugares donde se embebe un usuario. Con curl se confirmó que el organizador de un evento ya no trae el email.
+- **Corregido / problemas:** el usuario agregó la edición del perfil con el boceto ya presentado, y se sumó a ese mismo boceto. Las dudas se aprobaron con lo que propuso la IA: seguir con `X-User-Id` (no es seguro, porque cualquiera puede mandar otro id), no recordar la sesión y pedir la contraseña actual solo para cambiarla.
+- **Aprendizaje:** pedir una pantalla puede esconder trabajo de backend. Hacer el boceto primero dejó a la vista que faltaban los datos antes de escribir código.

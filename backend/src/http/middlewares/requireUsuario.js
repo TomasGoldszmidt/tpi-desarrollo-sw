@@ -1,7 +1,7 @@
 import * as usuarioRepository from '../../persistence/repositories/usuarioRepository.js';
 import { UnauthorizedError } from '../errors.js';
 
-// No hay login: la app manda el usuario activo en el header X-User-Id.
+// Después de iniciar sesión (POST /sesiones), la app manda el usuario activo en el header X-User-Id.
 // Se usa solo en las rutas que necesitan saber quién hace el pedido.
 export function requireUsuario(req, res, next) {
   const header = req.get('X-User-Id');

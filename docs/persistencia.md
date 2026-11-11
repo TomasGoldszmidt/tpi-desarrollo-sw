@@ -38,8 +38,13 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 
 **Documento:**
 ```json
-{ "id": 1, "nombre": "Lucía", "apellido": "Fernández", "favoritos": [3, 7] }
+{ "id": 1, "nombre": "Lucía", "apellido": "Fernández", "email": "lucia@aiticketit.com", "contraseniaHash": "<sal>:<hash>", "favoritos": [3, 7] }
 ```
+
+**Email y contraseña** (agregados con el inicio de sesión): se guardan en el mismo documento, porque son de la cuenta y no los referencia nadie más. La contraseña se guarda con hash (`scrypt` de Node, con sal propia). El repositorio devuelve tres vistas:
+- **`Usuario`**, sin email ni hash. Es lo que devuelven `findById` y `findAll`, y lo que se embebe como organizador, comprador o autor.
+- **`Cuenta`**, con email. La devuelven `findCuentaById`, `create` y `update`, y la ve solo el propio usuario.
+- **`UsuarioGuardado`**, el documento completo. Solo lo devuelve `findCredenciales`, para verificar la contraseña.
 
 | Relación | Decisión | Motivo |
 |---|---|---|
@@ -48,14 +53,14 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 | reputación del organizador | Se calcula, no se persiste | Es el promedio de sus reseñas; guardarla aparte podría desincronizarse |
 
 **Repositorio** (`backend/src/persistence/repositories/usuarioRepository.js`):
-- `create`
-- `findById`
-- `findAll`, para la selección de usuario activo
+- `create`, que guarda el email en minúsculas
+- `findById` y `findAll`, sin datos de la cuenta
+- `findCuentaById`, `findCredenciales(email)`, `existsEmail(email, { exceptoId })` y `update`, para el inicio de sesión, el registro y la edición del perfil
 - `addFavorito` y `removeFavorito`, que no generan duplicados
 
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
-- Sin login: en la app se elige el usuario activo de una lista.
+- ~~Sin login: en la app se elige el usuario activo de una lista.~~ Reemplazado por inicio de sesión con email y contraseña (`POST /sesiones`). Después de entrar, el usuario activo sigue viajando en `X-User-Id`.
 - Los favoritos se guardan aunque ningún caso de uso los pida. Las pantallas de favoritos quedan para el final si sobra tiempo.
 - Ids numéricos incrementales.
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
