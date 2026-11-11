@@ -69,7 +69,13 @@ export default function VentasEvento() {
           <DisponiblesFila key={tipo.id} tipo={tipo} />
         ))}
 
-        <Text style={styles.seccion}>Compras ({compras.length})</Text>
+        <View style={styles.seccionFila}>
+          <Text style={[styles.seccion, styles.seccionTitulo]}>Compras ({compras.length})</Text>
+          {/* Todas las conversaciones del evento juntas, sin entrar compra por compra. */}
+          <Pressable style={styles.verMensajes} onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}>
+            <Text style={styles.verMensajesTexto}>Ver mensajes</Text>
+          </Pressable>
+        </View>
         {compras.length === 0 ? (
           <View style={styles.vacio}>
             <Text style={styles.vacioTexto}>Todavía nadie compró entradas para este evento.</Text>
@@ -181,6 +187,27 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
+  },
+  seccionFila: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+  },
+  seccionTitulo: {
+    flex: 1,
+  },
+  verMensajes: {
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.md,
+    marginBottom: spacing.sm,
+  },
+  verMensajesTexto: {
+    color: colors.primaryText,
+    fontSize: fontSize.small,
+    fontWeight: 'bold',
   },
   tipo: {
     flexDirection: 'row',

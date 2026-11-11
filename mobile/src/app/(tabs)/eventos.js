@@ -110,7 +110,20 @@ function EventoFila({ evento, realizado, onPress }) {
           </View>
         ) : null}
       </View>
-      <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+      {/* Abre los mensajes del evento sin pasar por Ventas; el número es cuántos esperan respuesta. */}
+      <Pressable
+        style={styles.mensajes}
+        onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}
+        hitSlop={6}
+        accessibilityLabel={sinResponder > 0 ? `Mensajes, ${sinResponder} esperan tu respuesta` : 'Mensajes'}
+      >
+        <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
+        {sinResponder > 0 ? (
+          <View style={styles.numero}>
+            <Text style={styles.numeroTexto}>{sinResponder}</Text>
+          </View>
+        ) : null}
+      </Pressable>
     </Pressable>
   );
 }
@@ -149,6 +162,29 @@ const styles = StyleSheet.create({
   },
   realizado: {
     opacity: 0.75,
+  },
+  mensajes: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    padding: spacing.sm,
+  },
+  numero: {
+    position: 'absolute',
+    top: -7,
+    right: -7,
+    minWidth: 17,
+    height: 17,
+    borderRadius: 9,
+    paddingHorizontal: 4,
+    backgroundColor: '#E24B4A',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  numeroTexto: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   presionada: {
     backgroundColor: colors.primarySoft,

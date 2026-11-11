@@ -876,3 +876,33 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Lint rechazó `Date.now()` dentro del render del detalle (regla `react-hooks/purity`). Se pasó al momento de pedir el evento.
   - La IA editó `EventoCard`, que usa el contexto nuevo, antes de agregar el provider en el layout. Mientras tanto, la app abierta podía mostrar un error de Fast Refresh. Se corrigió en el paso siguiente.
 - **Aprendizaje:** cuando una pieza nueva depende de otra (el provider), conviene agregar primero la base y después lo que la usa, igual que la regla de los imports con Fast Refresh.
+
+### 2026-11-11 · Notificaciones y mensajes de cada evento
+- **Tarea:** "Notificaciones" (backend en la sección 2, pantalla en la 3) y "Mensajes de cada evento: bandeja de conversaciones responsive" (sección 3), agregadas al TP
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla`, `/swagger` y `/registrar-ia`
+- **Pedido (prompt):** "Agregar pantalla de notificaciones y cuando entrás se marque como leído, además mejorá la forma de ver los mensajes de cada evento, proponé una buena solución responsive", y "Aprobado, seguí" al boceto y al análisis.
+- **Resultado:**
+  - Boceto `docs/bocetos/notificaciones-mensajes.html`: campana, notificaciones nuevas y anteriores, estado vacío, bandeja de mensajes en celular y vista dividida en pantalla ancha.
+  - Backend (`b6d77e7`):
+    - Las notificaciones se calculan, sin guardarlas: lo que hizo otra persona en una compra en la que participás (cambios del historial y mensajes) y las reseñas de tus eventos.
+    - Del usuario solo se guarda `notificacionesLeidasHasta`.
+    - Las reseñas suman `fecha`.
+    - Endpoints: `GET /usuarios/:id/notificaciones` y `PUT /usuarios/:id/notificaciones/lectura`.
+    - El seed agrega dos preguntas de Juan sin responder y deja a todos con lectura de hace 4 días (Lucía 4 nuevas, Martín 2, Sofía 1, Juan 0).
+    - 6 tests nuevos (80 en total), swagger y curl.
+  - App, notificaciones (`0aa8a6d`):
+    - Campana en el header con el número de nuevas, que se actualiza al cambiar de pestaña y cada 30 segundos.
+    - Al entrar a la pantalla se marcan como leídas, pero quedan resaltadas mientras está abierta.
+    - Cada notificación abre el chat, la compra o las reseñas.
+  - App, mensajes:
+    - El chat pasó a un componente `Conversacion`.
+    - Pantalla nueva `eventos/[id]/mensajes`: una fila por compra con mensajes, primero las que esperan respuesta.
+    - Con `useWindowDimensions`, desde 700 de ancho se ven la lista y el chat lado a lado.
+    - Se llega desde un botón con contador en Mis eventos y desde Ventas.
+    - `app.json` pasa a orientación `default` para poder girar el emulador.
+- **Bien:** calcular las notificaciones a partir del historial y los mensajes evitó una colección nueva que habría que mantener en cada acción. El seed ya tenía casi todo lo necesario para que se vean con datos reales.
+- **Corregido / problemas:**
+  - Tres tests existentes daban por hecho que las compras de Juan no tenían mensajes. Se ajustaron al seed nuevo.
+  - Para no repetir el error de Fast Refresh de favoritos, esta vez el provider de notificaciones se agregó en el layout antes que la campana que lo usa.
+  - El boceto tenía mal el día de la semana de una fecha ("sáb 8 nov" en vez de "dom 8 nov"). La app usa `formatDia`, que lo calcula bien.
+- **Aprendizaje:** antes de agregar una entidad, conviene ver si lo que se quiere mostrar ya se puede calcular con lo guardado. Una notificación es otra forma de mirar el historial.
