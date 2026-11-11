@@ -34,6 +34,15 @@ export function formatFecha(iso) {
   return `${formatDia(iso)} · ${formatHora(iso)}`;
 }
 
+// Para algo que ya pasó: "Hoy · 10:00", "Ayer · 19:00" o "sáb 7 nov · 20:00".
+// ahora se recibe de afuera (en milisegundos) para que el resultado no dependa del render.
+export function formatCuando(iso, ahora) {
+  const dia = formatDia(iso);
+  if (dia === formatDia(new Date(ahora).toISOString())) return `Hoy · ${formatHora(iso)}`;
+  if (dia === formatDia(new Date(ahora - 24 * 60 * 60 * 1000).toISOString())) return `Ayer · ${formatHora(iso)}`;
+  return formatFecha(iso);
+}
+
 // 20000 → "$ 20.000"; los centavos solo se muestran si hay.
 export function formatPrecio(precio) {
   const [enteros, decimales] = precio.toFixed(2).split('.');

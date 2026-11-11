@@ -45,7 +45,7 @@
 - [ ] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
 - [ ] Mis compras: filtrar y diferenciar por estado
 - [ ] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
-- [ ] Pantalla de notificaciones (se marcan como leídas al entrar)
+- [ ] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header
 - [ ] Mensajes de cada evento: bandeja de conversaciones responsive
 
 ## 4. Cierre técnico

@@ -5,6 +5,8 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { Avatar } from '../../components/Avatar.js';
 import { MenuCuenta } from '../../components/MenuCuenta.js';
+import { Campana } from '../../components/Campana.js';
+import { useNotificaciones } from '../../context/NotificacionesContext.js';
 import { Logo, Marca } from '../../components/Logo.js';
 import { colors, spacing } from '../../theme.js';
 
@@ -12,6 +14,7 @@ import { colors, spacing } from '../../theme.js';
 export default function TabsLayout() {
   const { usuario, cerrarSesion } = useUsuario();
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const { actualizar } = useNotificaciones();
 
   // Sin sesión (se cerró, o se recargó la app) se vuelve a iniciar sesión.
   if (!usuario) {
@@ -31,6 +34,8 @@ export default function TabsLayout() {
   return (
     <>
       <Tabs
+        // Al entrar a una pestaña se vuelve a preguntar por notificaciones nuevas.
+        screenListeners={{ focus: actualizar }}
         screenOptions={{
           tabBarActiveTintColor: colors.primary,
           tabBarInactiveTintColor: colors.textMuted,
@@ -42,13 +47,15 @@ export default function TabsLayout() {
             </View>
           ),
           headerRight: () => (
-            <Pressable
-              style={styles.usuario}
-              onPress={() => setMenuAbierto(true)}
-              accessibilityLabel={`Tu cuenta (${usuario.nombre} ${usuario.apellido})`}
-            >
-              <Avatar usuario={usuario} />
-            </Pressable>
+            <View style={styles.derecha}>
+              <Campana />
+              <Pressable
+                onPress={() => setMenuAbierto(true)}
+                accessibilityLabel={`Tu cuenta (${usuario.nombre} ${usuario.apellido})`}
+              >
+                <Avatar usuario={usuario} />
+              </Pressable>
+            </View>
           ),
         }}
       >
@@ -99,7 +106,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: spacing.sm,
   },
-  usuario: {
+  derecha: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.lg,
     marginRight: spacing.lg,
   },
 });

@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { UsuarioProvider, useUsuario } from '../context/UsuarioContext.js';
 import { FavoritosProvider } from '../context/FavoritosContext.js';
+import { NotificacionesProvider } from '../context/NotificacionesContext.js';
 import { Logo, Marca } from '../components/Logo.js';
 import { colors, spacing } from '../theme.js';
 
@@ -20,10 +21,16 @@ const conHeader = {
   ),
 };
 
-// Los favoritos dependen del usuario: con key, al cambiar de sesión arrancan de cero.
+// Los favoritos y las notificaciones dependen del usuario: con key, al cambiar de sesión
+// arrancan de cero.
 function ConFavoritos({ children }) {
   const { usuario } = useUsuario();
-  return <FavoritosProvider key={usuario?.id ?? 'sin-sesion'}>{children}</FavoritosProvider>;
+  const key = usuario?.id ?? 'sin-sesion';
+  return (
+    <FavoritosProvider key={`favoritos-${key}`}>
+      <NotificacionesProvider key={`notificaciones-${key}`}>{children}</NotificacionesProvider>
+    </FavoritosProvider>
+  );
 }
 
 export default function RootLayout() {
@@ -33,6 +40,7 @@ export default function RootLayout() {
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="registro" options={conHeader} />
           <Stack.Screen name="perfil" options={conHeader} />
+          <Stack.Screen name="notificaciones" options={conHeader} />
           <Stack.Screen name="eventos/nuevo" options={conHeader} />
           <Stack.Screen name="eventos/[id]" options={conHeader} />
           <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
