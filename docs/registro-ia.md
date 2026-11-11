@@ -983,3 +983,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La skill `nuevo-endpoint` decía "el array directo, sin envoltorio ni paginación": hubo que cambiar la convención, no solo el código.
   - Mis compras, la bandeja y la campana ordenan, filtran o cuentan en la app sobre la lista entera. Para paginarlas, eso tiene que pasar al backend: quedó en el análisis de cada subtarea.
 - **Aprendizaje:** antes de paginar un listado hay que mirar qué hace la app con la lista completa (ordenar, contar, filtrar). Si lo hace en el cliente, paginar obliga a mover esa lógica al backend.
+
+### 2026-11-11 · Reseñas de un organizador de a páginas
+- **Tarea:** Paginación: reseñas de un organizador de a páginas
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/registrar-ia`
+- **Pedido (prompt):** seguir con la siguiente subtarea de paginación ("Sí, seguí").
+- **Resultado:**
+  - `GET /usuarios/:id/resenias` devuelve las reseñas de a páginas con el helper `http/pagination.js`, documentado en el swagger.
+  - El detalle del evento pide solo la reseña más reciente (`limite=1`), que es la única que muestra.
+  - Seed: 4 eventos viejos de Lucía con una compra utilizada y una reseña de Sofía, Juan y Martín en cada uno. Lucía pasa a tener 14 reseñas y sigue con 4,5. Como son anteriores a la última lectura, no suman notificaciones nuevas.
+  - Pantalla de reseñas: la cabecera se pide con `useCarga` y la lista con `usePaginado` y `PieLista`, más pull-to-refresh. Boceto `docs/bocetos/resenias-paginado.html`.
+- **Bien:** el hook y el pie del catálogo alcanzaron tal cual: la pantalla solo cambió en cómo pide los datos.
+- **Corregido / problemas:**
+  - Seis tests contaban las 2 reseñas del seed viejo y fallaron al sumar las nuevas. Se actualizaron a 14.
+  - Al probar, el usuario vio las 14 reseñas de una vez: "si la de 14 debería tener paginación, no la tuvo". La página 2 se pedía sola al abrir, porque con `onEndReachedThreshold={0.5}` (medio alto de pantalla) las reseñas, que son cortas, ya dejaban el final "cerca" desde el arranque. Se bajó a 0.1. En el catálogo no pasaba porque las tarjetas son más altas.
+  - Después de reiniciar, Expo Go se quedó en su pantalla de carga y hubo que volver a abrirlo.
+- **Aprendizaje:** el scroll infinito depende del alto de cada fila. Con filas cortas, el umbral para pedir la página siguiente tiene que ser chico, o la segunda página se carga sola y la paginación no se nota.

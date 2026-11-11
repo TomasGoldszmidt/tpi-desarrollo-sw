@@ -61,7 +61,7 @@
 
 ## 5. Paginación
 - [x] Catálogo de a páginas, con scroll infinito (`GET /eventos?pagina=&limite=`, helper `http/pagination.js`, hook `usePaginado`)
-- [ ] Reseñas de un organizador de a páginas (`GET /usuarios/:id/resenias`)
+- [x] Reseñas de un organizador de a páginas (`GET /usuarios/:id/resenias`)
 - [ ] Notificaciones de a páginas, con `noLeidas` para la campana (`GET /usuarios/:id/notificaciones`)
 - [ ] Mis eventos de a páginas, con filtro Próximos / Ya realizados / Con mensajes nuevos (`GET /usuarios/:id/eventos`)
 - [ ] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
