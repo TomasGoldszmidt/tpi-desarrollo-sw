@@ -6,12 +6,12 @@ import { Collection } from '../collection.js';
 
 const usuarios = new Collection();
 
-// Lo que ven los demás: sin email ni contraseña. Es lo que devuelven las consultas
+// Lo que ven los demás: sin email, contraseña ni datos de la cuenta. Es lo que devuelven las consultas
 // comunes, así el usuario se puede embeber en cualquier respuesta sin filtrar nada.
 /** @returns {Usuario | null} */
 function toUsuario(documento) {
   if (!documento) return null;
-  const { email: _email, contraseniaHash: _hash, ...usuario } = documento;
+  const { email: _email, contraseniaHash: _hash, notificacionesLeidasHasta: _leidas, ...usuario } = documento;
   return usuario;
 }
 
@@ -29,7 +29,7 @@ function normalizarEmail(email) {
 
 /** @returns {Cuenta} */
 export function create({ nombre, apellido, email, contraseniaHash }) {
-  return toCuenta(usuarios.insert({ nombre, apellido, email: normalizarEmail(email), contraseniaHash, favoritos: [] }));
+  return toCuenta(usuarios.insert({ nombre, apellido, email: normalizarEmail(email), contraseniaHash, favoritos: [], notificacionesLeidasHasta: null }));
 }
 
 /** @returns {Usuario | null} */
@@ -89,4 +89,10 @@ export function removeFavorito(usuarioId, eventoId) {
   return toUsuario(usuarios.update(usuarioId, {
     favoritos: usuario.favoritos.filter((id) => id !== Number(eventoId)),
   }));
+}
+
+// Desde ahora, las notificaciones anteriores a esta fecha se muestran como leídas.
+/** @returns {Cuenta | null} */
+export function marcarNotificacionesLeidas(id, fecha = new Date()) {
+  return toCuenta(usuarios.update(id, { notificacionesLeidasHasta: fecha }));
 }

@@ -57,11 +57,13 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - `findById` y `findAll`, sin datos de la cuenta
 - `findCuentaById`, `findCredenciales(email)`, `existsEmail(email, { exceptoId })` y `update`, para el inicio de sesión, el registro y la edición del perfil
 - `addFavorito` y `removeFavorito`, que no generan duplicados
+- `marcarNotificacionesLeidas(id, fecha)`
 
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
 - ~~Sin login: en la app se elige el usuario activo de una lista.~~ Reemplazado por inicio de sesión con email y contraseña (`POST /sesiones`). Después de entrar, el usuario activo sigue viajando en `X-User-Id`.
 - Los favoritos se guardan aunque ningún caso de uso los pida. Se usan desde `GET /usuarios/:id/favoritos` y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, solo para el propio usuario. En el seed, Sofía tiene tres (dos próximos y uno ya realizado).
+- **Notificaciones calculadas, no guardadas:** son lo que hizo otra persona en una compra en la que participa el usuario (cambios del historial y mensajes) y las reseñas de sus eventos. Del usuario solo se guarda `notificacionesLeidasHasta` (null si nunca las abrió), que lo actualiza `marcarNotificacionesLeidas`. Se descartó una colección `notificaciones`: habría que escribirla en cada acción y podría quedar desincronizada de las compras. En el seed todos las leyeron hace 4 días.
 - Ids numéricos incrementales.
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
 
@@ -222,7 +224,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 
 **Documento:**
 ```js
-{ id: 1, compradorId: 3, eventoId: 4, detalle: "Sonido impecable y muy buena organización en la entrada.", puntuacion: 5 }
+{ id: 1, compradorId: 3, eventoId: 4, detalle: "Sonido impecable y muy buena organización en la entrada.", puntuacion: 5, fecha: Date }
 ```
 
 | Relación | Decisión | Motivo |
@@ -241,7 +243,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 **Decisiones aprobadas:**
 - Sin `organizadorId`: la consulta en dos pasos es barata en memoria y no duplica datos.
 - Sin `compraId`: se sigue el diagrama (comprador + evento), con una reseña por comprador y evento.
-- Sin `fecha`: el enunciado no la menciona; alcanza con la fecha del evento.
+- ~~Sin `fecha`: el enunciado no la menciona; alcanza con la fecha del evento.~~ Se agregó `fecha` para ordenar las reseñas entre las notificaciones del organizador.
 - El dominio (sección 2) valida que haya una compra UTILIZADA y el rango de la puntuación.
 
 **Seed:** 2 reseñas del acústico (Sofía 5 y Juan 4), así Lucía queda con 4.5 de promedio.

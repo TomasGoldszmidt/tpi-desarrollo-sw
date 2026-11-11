@@ -6,12 +6,13 @@ const resenias = new Collection();
 
 // Que haya una compra UTILIZADA y que la puntuación esté en rango lo valida el dominio.
 /** @returns {Resenia} */
-export function create({ compradorId, eventoId, detalle, puntuacion }) {
+export function create({ compradorId, eventoId, detalle, puntuacion, fecha = new Date() }) {
   return resenias.insert({
     compradorId: Number(compradorId),
     eventoId: Number(eventoId),
     detalle,
     puntuacion: Number(puntuacion),
+    fecha,
   });
 }
 

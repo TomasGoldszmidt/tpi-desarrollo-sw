@@ -454,6 +454,87 @@ paths:
                 error: No existe el usuario 99
         '500':
           $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/notificaciones:
+    get:
+      tags: [Usuarios]
+      summary: Listar mis notificaciones
+      description: >-
+        Solo el propio usuario activo. No se guardan: se calculan con lo que hizo
+        otra persona en una compra en la que participa (como comprador o como
+        organizador del evento) y con las reseñas de sus eventos. Van de la más
+        reciente a la más vieja; `leida` es true si es anterior a la última vez
+        que las marcó como leídas.
+      operationId: listNotificaciones
+      security:
+        - usuarioActivo: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '200':
+          description: Las notificaciones (puede ser vacío)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notificacion'
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/NotificacionesAjenas'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
+  /usuarios/{id}/notificaciones/lectura:
+    put:
+      tags: [Usuarios]
+      summary: Marcar mis notificaciones como leídas
+      description: >-
+        Solo el propio usuario activo. Todas las notificaciones hasta este momento
+        quedan como leídas; las que lleguen después vuelven a ser nuevas.
+      operationId: markReadNotificaciones
+      security:
+        - usuarioActivo: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          example: 1
+      responses:
+        '204':
+          description: Quedaron marcadas como leídas
+        '400':
+          $ref: '#/components/responses/IdInvalido'
+        '401':
+          $ref: '#/components/responses/SinUsuarioActivo'
+        '403':
+          $ref: '#/components/responses/NotificacionesAjenas'
+        '404':
+          description: No existe el usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: No existe el usuario 99
+        '500':
+          $ref: '#/components/responses/ErrorInterno'
   /sesiones:
     post:
       tags: [Sesiones]
@@ -1152,6 +1233,77 @@ components:
             email:
               type: string
               example: sofia@aiticketit.com
+    Notificacion:
+      type: object
+      description: >-
+        Algo que hizo otra persona. Según el tipo trae `estado` (COMPRA y
+        CAMBIO_ESTADO), `mensaje` (MENSAJE) o `puntuacion` (RESENIA); todas menos
+        RESENIA traen `compra`.
+      properties:
+        id:
+          type: string
+          description: Identifica la notificación en la lista (se arma con lo que la origina)
+          example: compra-3-mensaje-0
+        tipo:
+          type: string
+          enum: [COMPRA, CAMBIO_ESTADO, MENSAJE, RESENIA]
+          example: MENSAJE
+        fecha:
+          type: string
+          format: date-time
+        leida:
+          type: boolean
+          example: false
+        de:
+          type: object
+          description: Quién la originó
+          properties:
+            id:
+              type: integer
+              example: 4
+            nombre:
+              type: string
+              example: Juan
+            apellido:
+              type: string
+              example: Rodríguez
+        evento:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+            nombre:
+              type: string
+              example: Festival de Verano
+        compra:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 3
+            estado:
+              type: string
+              description: Estado actual de la compra
+              example: CONFIRMADA
+            cantidad:
+              type: integer
+              example: 2
+            tipoEntrada:
+              type: string
+              example: Backstage
+        estado:
+          type: string
+          description: El estado al que pasó la compra (COMPRA y CAMBIO_ESTADO)
+          example: REEMBOLSADA
+        mensaje:
+          type: string
+          description: El texto del mensaje (MENSAJE)
+          example: ¿El Backstage incluye estacionamiento?
+        puntuacion:
+          type: integer
+          description: La puntuación de la reseña (RESENIA)
+          example: 5
     UsuarioPerfil:
       description: Un usuario con su puntaje como organizador
       allOf:
@@ -1593,6 +1745,14 @@ components:
             $ref: '#/components/schemas/Error'
           example:
             error: Falta indicar el usuario activo
+    NotificacionesAjenas:
+      description: El usuario activo no es el dueño de las notificaciones
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Solo podés ver tus propias notificaciones.
     FavoritosAjenos:
       description: El usuario activo no es el dueño de los favoritos
       content:

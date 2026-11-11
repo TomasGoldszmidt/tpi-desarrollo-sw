@@ -190,16 +190,29 @@ export function loadSeed() {
   compras.sofiaRock = compraRepository.addMensaje(compras.sofiaRock.id, {
     usuarioId: lucia.id, mensaje: 'Sí, chica, la revisan en la puerta.', enviado: daysFromNow(-4, 11),
   });
+  // Dos preguntas de Juan que Lucía todavía no respondió: aparecen en sus mensajes y notificaciones.
+  compras.juanRockReembolsada = compraRepository.addMensaje(compras.juanRockReembolsada.id, {
+    usuarioId: juan.id, mensaje: '¿En cuántos días me llega el reembolso?', enviado: daysFromNow(-3, 10),
+  });
+  compras.juanBackstage = compraRepository.addMensaje(compras.juanBackstage.id, {
+    usuarioId: juan.id, mensaje: '¿El Backstage incluye estacionamiento?', enviado: daysFromNow(-1, 19),
+  });
+
+  // Todos leyeron sus notificaciones hace unos días: lo posterior aparece como nuevo
+  // (Lucía tiene 4, Martín 2, Sofía 1 y Juan ninguna).
+  for (const usuario of Object.values(usuarios)) {
+    usuarioRepository.marcarNotificacionesLeidas(usuario.id, daysFromNow(-4, 10));
+  }
 
   // Sobre las compras utilizadas del acústico: Lucía queda con 4.5 de promedio.
   // Sofía no reseñó el stand-up (para probar crear una) y Martín queda sin reseñas.
   const resenias = {
     sofiaAcustico: reseniaRepository.create({
-      compradorId: sofia.id, eventoId: eventos.acustico.id, puntuacion: 5,
+      compradorId: sofia.id, eventoId: eventos.acustico.id, puntuacion: 5, fecha: daysFromNow(-14, 12),
       detalle: 'Sonido impecable y muy buena organización en la entrada.',
     }),
     juanAcustico: reseniaRepository.create({
-      compradorId: juan.id, eventoId: eventos.acustico.id, puntuacion: 4,
+      compradorId: juan.id, eventoId: eventos.acustico.id, puntuacion: 4, fecha: daysFromNow(-13, 18),
       detalle: 'Muy lindo show, aunque empezó media hora tarde.',
     }),
   };

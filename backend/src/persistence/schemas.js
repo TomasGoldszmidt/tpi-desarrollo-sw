@@ -15,7 +15,9 @@
 
 /**
  * El usuario visto por él mismo: lo que devuelven el inicio de sesión, el registro y la edición del perfil.
- * @typedef {Usuario & { email: string }} Cuenta
+ * `notificacionesLeidasHasta`: la última vez que abrió las notificaciones (null si nunca);
+ * las de antes se muestran como leídas.
+ * @typedef {Usuario & { email: string, notificacionesLeidasHasta: Date | null }} Cuenta
  */
 
 /**
@@ -103,6 +105,7 @@
  * @property {number} eventoId Id de Evento (referencia).
  * @property {string} detalle
  * @property {number} puntuacion
+ * @property {Date} fecha Cuándo se escribió (para ordenarla entre las notificaciones).
  */
 
 export {};

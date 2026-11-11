@@ -30,6 +30,7 @@
 - [x] Manejo de errores y validaciones
 - [x] Inicio de sesión, registro y edición del perfil (`POST /sesiones`, `POST /usuarios`, `PATCH /usuarios/:id`)
 - [x] Favoritos: listar, marcar y quitar (`GET /usuarios/:id/favoritos`, `PUT` y `DELETE /usuarios/:id/favoritos/:eventoId`)
+- [x] Notificaciones calculadas y marcar como leídas (`GET /usuarios/:id/notificaciones`, `PUT /usuarios/:id/notificaciones/lectura`)
 
 ## 3. Front-End
 - [x] Crear skill `nueva-pantalla` (pantalla, navegación, cliente HTTP)
@@ -44,6 +45,8 @@
 - [ ] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
 - [ ] Mis compras: filtrar y diferenciar por estado
 - [ ] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
+- [ ] Pantalla de notificaciones (se marcan como leídas al entrar)
+- [ ] Mensajes de cada evento: bandeja de conversaciones responsive
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular

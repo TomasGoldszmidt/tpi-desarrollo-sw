@@ -3,6 +3,7 @@ import * as usuarioController from '../controllers/usuarioController.js';
 import * as eventoController from '../controllers/eventoController.js';
 import * as reseniaController from '../controllers/reseniaController.js';
 import * as favoritoController from '../controllers/favoritoController.js';
+import * as notificacionController from '../controllers/notificacionController.js';
 import { methodNotAllowed } from '../http/middlewares/errorHandler.js';
 import { requireUsuario } from '../http/middlewares/requireUsuario.js';
 
@@ -22,5 +23,8 @@ router.route('/:id/favoritos/:eventoId')
   .put(requireUsuario, favoritoController.add)
   .delete(requireUsuario, favoritoController.remove)
   .all(methodNotAllowed);
+// Notificaciones: se calculan; solo se guarda hasta cuándo se leyeron.
+router.route('/:id/notificaciones').get(requireUsuario, notificacionController.list).all(methodNotAllowed);
+router.route('/:id/notificaciones/lectura').put(requireUsuario, notificacionController.markRead).all(methodNotAllowed);
 
 export default router;

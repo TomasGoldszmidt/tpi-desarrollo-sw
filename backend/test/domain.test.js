@@ -392,10 +392,10 @@ describe('chat de la compra', () => {
   });
 
   it('esperaRespuestaDe: el chat espera a quien no escribió el último mensaje', () => {
-    const { sofiaRock, juanBackstage } = seed.compras; // Rock: el último es de Lucía; Backstage: sin mensajes
+    const { sofiaRock, juanStandup } = seed.compras; // Rock: el último es de Lucía; Stand-up de Juan: sin mensajes
     assert.equal(esperaRespuestaDe(sofiaRock, sofia), true);
     assert.equal(esperaRespuestaDe(sofiaRock, lucia), false);
-    assert.equal(esperaRespuestaDe(juanBackstage, lucia), false);
+    assert.equal(esperaRespuestaDe(juanStandup, seed.usuarios.martin), false);
 
     const pregunta = { ...sofiaRock, mensajes: [...sofiaRock.mensajes, { usuarioId: sofia.id, mensaje: '¿A qué hora abren?', enviado: new Date() }] };
     assert.equal(esperaRespuestaDe(pregunta, sofia), false);
@@ -403,10 +403,11 @@ describe('chat de la compra', () => {
   });
 
   it('cantidadSinResponder cuenta las compras que esperan al organizador', () => {
+    // En el seed, Juan preguntó por el reembolso de Noche de Rock y Lucía no respondió.
     const { sofiaRock, juanRockReembolsada } = seed.compras;
-    const pregunta = { ...juanRockReembolsada, mensajes: [{ usuarioId: seed.usuarios.juan.id, mensaje: '¿Y el reembolso?', enviado: new Date() }] };
-    assert.equal(cantidadSinResponder([sofiaRock, juanRockReembolsada], lucia), 0);
-    assert.equal(cantidadSinResponder([sofiaRock, pregunta], lucia), 1);
+    const respondida = { ...juanRockReembolsada, mensajes: [...juanRockReembolsada.mensajes, { usuarioId: lucia.id, mensaje: 'En 5 días hábiles.', enviado: new Date() }] };
+    assert.equal(cantidadSinResponder([sofiaRock, juanRockReembolsada], lucia), 1);
+    assert.equal(cantidadSinResponder([sofiaRock, respondida], lucia), 0);
   });
 
   it('requireString respeta maxLength', () => {
