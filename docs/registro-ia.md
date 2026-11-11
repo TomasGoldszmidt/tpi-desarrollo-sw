@@ -815,3 +815,16 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - La pantalla de perfil toma los datos de la sesión y no de `GET /usuarios/:id`, que ya no devuelve el email. Se avisó como diferencia con el boceto.
   - El emulador siguió mostrando la pantalla vieja porque Fast Refresh no recargó. Se verificó que el bundle compila pidiéndoselo a Metro.
 - **Aprendizaje:** que lint pase no garantiza que no se rompió nada. Cuando se saca una función, hay que buscar quién la usa antes de commitear.
+
+### 2026-11-11 · Mis compras: filtro por estado
+- **Tarea:** "Mis compras: filtrar y diferenciar por estado" (sección 3, agregada al TP)
+- **Herramienta / skill:** Claude Code + `/nueva-pantalla` y `/registrar-ia`
+- **Pedido (prompt):** "Mejorá la pantalla de mis compras para poder diferenciar y filtrar los distintos estados", y "Aprobado, seguí" al boceto.
+- **Resultado:**
+  - Boceto `docs/bocetos/mis-compras-filtros.html` con las compras reales de Juan (que tiene compras en cuatro de los cinco estados) y de Sofía: todas, solo confirmadas, pendientes y el filtro que se queda vacío después de pagar.
+  - `FiltroEstados`: chips deslizables con "Todas" y un chip por cada estado que tiene el usuario, con su cantidad, un punto de color y, al elegirlo, los colores de su badge.
+  - `CompraCard` suma un borde izquierdo del color del estado. Los colores, el orden y los plurales salen de un solo lugar, `EstadoBadge`.
+  - El filtro se aplica en la app, sin cambios en el backend. Se mantiene al recargar, y si se queda sin compras muestra "No tenés compras …" con un botón "Ver todas".
+- **Bien:** la IA propuso filtrar en la app y no agregar `?estado=` al backend, porque la lista ya venía completa. Eso evitó tocar el endpoint, el swagger y los tests.
+- **Corregido / problemas:** el primer texto del vacío armaba el plural con una expresión regular ("pendiente de pago" → "pendientes de pago"). Era frágil y se reemplazó por un campo `enPlural` en cada estado.
+- **Aprendizaje:** antes de tocar el backend para un filtro, conviene preguntarse si los datos ya están en la app. Muchas veces el cambio es solo de pantalla.

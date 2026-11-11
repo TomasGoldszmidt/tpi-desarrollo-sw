@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { EstadoBadge, ESTADOS_INACTIVOS } from './EstadoBadge.js';
+import { EstadoBadge, ESTADOS_INACTIVOS, estiloEstado } from './EstadoBadge.js';
 import { AvisoMensaje, estiloEsperando, mensajeSinResponder } from './AvisoMensaje.js';
 import { formatDiasRestantes, formatFecha, formatPrecio } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
@@ -15,6 +15,7 @@ export function CompraCard({ compra, usuario, organizador, onPress }) {
     <Pressable
       style={({ pressed }) => [
         styles.card,
+        { borderLeftColor: estiloEstado(compra.estado).borde },
         sinResponder && estiloEsperando,
         inactiva && styles.inactiva,
         pressed && styles.presionada,
@@ -50,6 +51,7 @@ export function CompraCard({ compra, usuario, organizador, onPress }) {
 const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
+    borderLeftWidth: 4,
     borderColor: colors.border,
     borderRadius: 12,
     padding: spacing.md,

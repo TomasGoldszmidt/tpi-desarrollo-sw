@@ -41,6 +41,7 @@
 - [x] Pantalla de creación de evento (organizador)
 - [x] Pantalla de ventas por evento (organizador)
 - [ ] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
+- [ ] Mis compras: filtrar y diferenciar por estado
 
 ## 4. Cierre técnico
 - [x] Prueba integral de todos los casos de uso en el celular

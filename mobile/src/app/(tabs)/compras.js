@@ -1,4 +1,4 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,6 +8,8 @@ import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { CompraCard } from '../../components/CompraCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
+import { FiltroEstados } from '../../components/FiltroEstados.js';
+import { estiloEstado } from '../../components/EstadoBadge.js';
 import { Seccion } from '../../components/Seccion.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
@@ -22,6 +24,9 @@ async function pedirCompras() {
 export default function MisCompras() {
   const { usuario } = useUsuario();
   const { data, loading, error, recargar } = useCarga(pedirCompras);
+  // Estado elegido en los chips (null = Todas). Se filtra en la app: GET /compras ya trae todas.
+  // Se mantiene al recargar y al volver a la pestaña.
+  const [estado, setEstado] = useState(null);
 
   // Se vuelve a pedir cada vez que se vuelve a la pestaña, así se ven los cambios
   // después de comprar, pagar o cancelar. La primera vez ya lo pide useCarga.
@@ -41,31 +46,47 @@ export default function MisCompras() {
       {error || !data ? (
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus compras…" />
       ) : (
-        <FlatList
-          data={data.compras}
-          keyExtractor={(compra) => String(compra.id)}
-          renderItem={({ item }) => (
-            <CompraCard
-              compra={item}
-              usuario={usuario}
-              organizador={data.usuarios.get(item.evento.organizadorId)}
-              onPress={() => router.push(`/compras/${item.id}`)}
-            />
-          )}
-          refreshControl={
-            <RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />
-          }
-          ListEmptyComponent={
-            <View style={styles.vacio}>
-              <Ionicons name="ticket-outline" size={36} color={colors.textMuted} />
-              <Text style={styles.vacioTitulo}>Todavía no compraste entradas</Text>
-              <Text style={styles.vacioTexto}>Cuando compres, vas a ver acá el estado de cada compra.</Text>
-              <Pressable style={styles.boton} onPress={() => router.navigate('/catalogo')}>
-                <Text style={styles.botonTexto}>Explorar eventos</Text>
-              </Pressable>
-            </View>
-          }
-        />
+        <>
+          {data.compras.length > 0 ? (
+            <FiltroEstados compras={data.compras} elegido={estado} onElegir={setEstado} />
+          ) : null}
+          <FlatList
+            data={estado === null ? data.compras : data.compras.filter((compra) => compra.estado === estado)}
+            keyExtractor={(compra) => String(compra.id)}
+            renderItem={({ item }) => (
+              <CompraCard
+                compra={item}
+                usuario={usuario}
+                organizador={data.usuarios.get(item.evento.organizadorId)}
+                onPress={() => router.push(`/compras/${item.id}`)}
+              />
+            )}
+            refreshControl={
+              <RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />
+            }
+            ListEmptyComponent={
+              data.compras.length > 0 ? (
+                // Hay compras, pero ninguna en el estado elegido (ej: se pagó la única pendiente).
+                <View style={styles.vacio}>
+                  <Text style={styles.vacioTitulo}>No tenés compras {estiloEstado(estado).enPlural}</Text>
+                  <Text style={styles.vacioTexto}>Cambiá el filtro para ver las demás.</Text>
+                  <Pressable style={styles.boton} onPress={() => setEstado(null)}>
+                    <Text style={styles.botonTexto}>Ver todas</Text>
+                  </Pressable>
+                </View>
+              ) : (
+                <View style={styles.vacio}>
+                  <Ionicons name="ticket-outline" size={36} color={colors.textMuted} />
+                  <Text style={styles.vacioTitulo}>Todavía no compraste entradas</Text>
+                  <Text style={styles.vacioTexto}>Cuando compres, vas a ver acá el estado de cada compra.</Text>
+                  <Pressable style={styles.boton} onPress={() => router.navigate('/catalogo')}>
+                    <Text style={styles.botonTexto}>Explorar eventos</Text>
+                  </Pressable>
+                </View>
+              )
+            }
+          />
+        </>
       )}
     </Seccion>
   );
