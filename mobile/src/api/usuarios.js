@@ -20,8 +20,9 @@ export function getUsuario(id) {
 }
 
 // Las reseñas de los eventos que organiza, de la más reciente a la más vieja.
-export function getReseniasOrganizador(id) {
-  return request(`/usuarios/${id}/resenias`);
+// Vienen de a páginas: { resultados, pagina, limite, total, hayMas }.
+export function getReseniasOrganizador(id, { pagina = 1, limite = 10 } = {}) {
+  return request(`/usuarios/${id}/resenias?pagina=${pagina}&limite=${limite}`);
 }
 
 // Los eventos que organiza, incluidos los que ya se realizaron, ordenados por fecha.

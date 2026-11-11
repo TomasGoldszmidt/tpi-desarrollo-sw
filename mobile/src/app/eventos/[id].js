@@ -23,9 +23,9 @@ export default function DetalleEvento() {
   const { usuario } = useUsuario();
   const pedir = useCallback(async () => {
     const evento = await getEvento(id);
-    // Solo se piden las reseñas si hay alguna: la tarjeta muestra la más reciente.
+    // Solo se pide la reseña más reciente, y solo si hay alguna: es la que muestra la tarjeta.
     const resenias = evento.organizador.cantidadResenias > 0
-      ? await getReseniasOrganizador(evento.organizador.id)
+      ? (await getReseniasOrganizador(evento.organizador.id, { limite: 1 })).resultados
       : [];
     // Se puede llegar a un evento pasado desde Favoritos: se ve, pero no se compra.
     // Se calcula al pedirlo y no al dibujar, que tiene que dar siempre lo mismo.

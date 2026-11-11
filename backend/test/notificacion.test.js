@@ -28,7 +28,7 @@ describe('notificaciones', () => {
     const lista = notificacionesDe(lucia, lucia.id);
     const fechas = lista.map((n) => n.fecha.getTime());
     assert.deepEqual(fechas, [...fechas].sort((a, b) => b - a));
-    assert.equal(lista.filter((n) => n.tipo === 'RESENIA').length, 2);
+    assert.equal(lista.filter((n) => n.tipo === 'RESENIA').length, 14);
   });
 
   it('no incluyen lo que hizo el propio usuario', () => {

@@ -258,5 +258,53 @@ export function loadSeed() {
     }),
   };
 
+  // Eventos viejos de Lucía con una compra utilizada y una reseña de Sofía, Juan y Martín
+  // en cada uno, para que sus reseñas tengan más de una página (14 en total). Son anteriores
+  // a la lectura de notificaciones, así que no aparecen como nuevas. Lucía sigue con 4.5.
+  const eventosViejos = [
+    ['Recital de Cuarteto', 'Una noche de cuarteto cordobés en Buenos Aires', 'Teatro Ópera, Av. Corrientes 860, CABA', 'musica', -60, 30000, [
+      [sofia, 5, 'La banda sonó perfecto y se bailó toda la noche.'],
+      [juan, 4, 'Muy bueno, pero hacía mucho calor adentro.'],
+      [martin, 5, 'De lo mejor que vi este año.'],
+    ]],
+    ['Esperando a Godot', 'La obra de Beckett con dirección nueva', 'Teatro Regio, Av. Córdoba 6056, CABA', 'teatro', -75, 20000, [
+      [sofia, 4, 'Gran actuación, aunque se hace un poco larga.'],
+      [juan, 5, 'Los actores, impecables.'],
+      [martin, 4, 'Muy buena, las butacas algo incómodas.'],
+    ]],
+    ['Festival de Otoño', 'Un día de bandas independientes al aire libre', 'Parque Centenario, Av. Díaz Vélez 4800, CABA', 'festivales', -95, 25000, [
+      [sofia, 5, 'Excelente organización y mucha variedad de comida.'],
+      [juan, 4, 'Las filas para entrar eran largas.'],
+      [martin, 5, 'Volvería sin dudarlo.'],
+    ]],
+    ['Charla de Producción de Eventos', 'Cómo se organiza un show de punta a punta', 'Centro Cultural Recoleta, Junín 1930, CABA', 'conferencias', -115, 5000, [
+      [sofia, 4, 'Muy útil, me faltó tiempo para preguntas.'],
+      [juan, 5, 'Aprendí un montón.'],
+      [martin, 4, 'Interesante, el sonido de la sala no ayudaba.'],
+    ]],
+  ];
+  for (const [nombre, descripcion, lugar, categoria, dias, precio, reseniasDelEvento] of eventosViejos) {
+    const evento = eventoRepository.create({
+      nombre,
+      descripcion,
+      lugar,
+      categoriaId: categorias[categoria].id,
+      organizadorId: lucia.id,
+      fecha: daysFromNow(dias, 20),
+      multimedia: [`https://picsum.photos/seed/viejo${-dias}/800/400`],
+      tiposEntrada: [{ nombre: 'General', descripcion: 'Sin ubicación asignada', precio, cupo: 200 }],
+    });
+    reseniasDelEvento.forEach(([comprador, puntuacion, detalle], i) => {
+      createCompra({
+        comprador, evento, tipoEntradaId: 1, cantidad: 1,
+        creada: daysFromNow(dias - 20 + i, 12),
+        cambios: [[CONFIRMADA, comprador, daysFromNow(dias - 20 + i, 13)], [UTILIZADA, lucia, daysFromNow(dias, 20)]],
+      });
+      reseniaRepository.create({
+        compradorId: comprador.id, eventoId: evento.id, puntuacion, detalle, fecha: daysFromNow(dias + 1 + i, 12),
+      });
+    });
+  }
+
   return { usuarios, categorias, eventos, compras, resenias };
 }

@@ -199,7 +199,7 @@ describe('detalle de evento', () => {
     assert.equal(detalle.categoriaId, undefined);
     assert.equal(detalle.organizadorId, undefined);
     assert.deepEqual(detalle.categoria, { id: seed.categorias.festivales.id, nombre: 'Festivales' });
-    assert.deepEqual(detalle.organizador, { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 2 });
+    assert.deepEqual(detalle.organizador, { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 14 });
     assert.deepEqual(detalle.tiposEntrada.map((t) => [t.nombre, t.disponibles]), [['General', 1000], ['VIP', 100], ['Backstage', 0]]);
   });
 });
@@ -207,13 +207,13 @@ describe('detalle de evento', () => {
 describe('puntaje del organizador', () => {
   it('promedia las reseñas de los eventos de cada organizador', () => {
     const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
-    assert.deepEqual(puntajes.get(seed.usuarios.lucia.id), { puntaje: 4.5, cantidadResenias: 2 });
+    assert.deepEqual(puntajes.get(seed.usuarios.lucia.id), { puntaje: 4.5, cantidadResenias: 14 });
     assert.equal(puntajes.has(seed.usuarios.martin.id), false); // sin reseñas
   });
 
   it('puntajeDe y perfilUsuario dan null y 0 a quien no tiene reseñas', () => {
     const { lucia, martin } = seed.usuarios;
-    assert.deepEqual(puntajeDe(lucia), { puntaje: 4.5, cantidadResenias: 2 });
+    assert.deepEqual(puntajeDe(lucia), { puntaje: 4.5, cantidadResenias: 14 });
     assert.deepEqual(puntajeDe(martin), { puntaje: null, cantidadResenias: 0 });
     assert.deepEqual(perfilUsuario(martin), { ...martin, puntaje: null, cantidadResenias: 0 });
   });
@@ -249,7 +249,7 @@ describe('búsqueda de eventos', () => {
 
   it('cada resultado es un resumen con imagen, precio y puntaje', () => {
     const [primero] = buscarEventos({ texto: 'Bernarda' });
-    assert.deepEqual(primero.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 2 });
+    assert.deepEqual(primero.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 14 });
     assert.equal(primero.precioDesde, 20000);
     assert.equal(primero.imagen, 'https://picsum.photos/seed/bernarda/800/400');
     assert.equal(primero.tiposEntrada, undefined);
@@ -457,10 +457,13 @@ describe('reseñas', () => {
   }
 
   it('reseniasDeOrganizador trae las de sus eventos con comprador y evento', () => {
+    // Del evento más reciente al más viejo: primero el acústico y después los eventos viejos del seed.
     const resenias = reseniasDeOrganizador(lucia);
-    assert.deepEqual(resenias.map((r) => [r.comprador.nombre, r.evento.nombre, r.puntuacion]), [
+    assert.equal(resenias.length, 14);
+    assert.deepEqual(resenias.slice(0, 3).map((r) => [r.comprador.nombre, r.evento.nombre, r.puntuacion]), [
       ['Juan', 'Acústico en el Gran Rex', 4],
       ['Sofía', 'Acústico en el Gran Rex', 5],
+      ['Martín', 'Recital de Cuarteto', 5],
     ]);
   });
 

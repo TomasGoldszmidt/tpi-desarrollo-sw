@@ -301,7 +301,8 @@ paths:
       summary: Ver las reseñas de un organizador
       description: >-
         Las reseñas de todos los eventos que organiza el usuario, del evento más
-        reciente al más viejo. Si no organiza nada o no tiene reseñas, devuelve [].
+        reciente al más viejo (si empatan, la más nueva primero), de a páginas. Si no
+        organiza nada o no tiene reseñas, la página viene vacía.
       operationId: listReseniasOrganizador
       parameters:
         - name: id
@@ -310,17 +311,31 @@ paths:
           schema:
             type: integer
           example: 1
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
       responses:
         '200':
-          description: Las reseñas (puede ser vacío)
+          description: Una página de las reseñas (puede ser vacía)
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ReseniaDetalle'
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    required: [resultados]
+                    properties:
+                      resultados:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/ReseniaDetalle'
         '400':
-          $ref: '#/components/responses/IdInvalido'
+          description: El id no es válido, o pagina o limite no son enteros en rango (o vienen repetidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo limite tiene que ser como máximo 50
         '404':
           description: No existe el usuario
           content:

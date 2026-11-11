@@ -1,6 +1,7 @@
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearResenia, reseniasDeOrganizador } from '../domain/resenia.js';
 import { NotFoundError } from '../http/errors.js';
+import { paginar, parsePagina } from '../http/pagination.js';
 import { requireId, requireInteger, requireString } from '../http/validation.js';
 
 export async function create(req, res) {
@@ -13,10 +14,11 @@ export async function create(req, res) {
   res.status(201).json(crearResenia(datos, req.usuario));
 }
 
-// GET /usuarios/:id/resenias: las reseñas recibidas como organizador.
+// GET /usuarios/:id/resenias: las reseñas recibidas como organizador, de a páginas.
 export async function listByOrganizador(req, res) {
   const id = requireId(req.params.id);
   const usuario = usuarioRepository.findById(id);
   if (!usuario) throw new NotFoundError(`No existe el usuario ${id}`);
-  res.status(200).json(reseniasDeOrganizador(usuario));
+  const pagina = parsePagina(req.query);
+  res.status(200).json(paginar(reseniasDeOrganizador(usuario), pagina));
 }

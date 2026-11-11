@@ -16,7 +16,7 @@ import { colors, fontSize, spacing } from '../../../theme.js';
 export default function ReseniasOrganizador() {
   const { id } = useLocalSearchParams();
   const pedir = useCallback(
-    () => Promise.all([getUsuario(id), getReseniasOrganizador(id)]),
+    () => Promise.all([getUsuario(id), getReseniasOrganizador(id, { limite: 50 }).then((pagina) => pagina.resultados)]),
     [id],
   );
   const { data, loading, error, recargar } = useCarga(pedir);
