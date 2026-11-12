@@ -1064,11 +1064,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 
 ### 2026-11-12 · Bandeja de mensajes de a páginas
 - **Tarea:** Paginación: la bandeja de mensajes de un evento de a páginas, con "Ver más"
-- **Herramienta / skill:** Claude Code, , , , , - **Pedido (prompt):** "si y quiero que mantengamos el boton de ver mas en todas las otras pantallas, porque alguna al bajar recarga solo y en esta es tocando ver mas, prefiero esta solucion".
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "si y quiero que mantengamos el boton de ver mas en todas las otras pantallas, porque alguna al bajar recarga solo y en esta es tocando ver mas, prefiero esta solucion".
 - **Resultado:**
-  - : solo las compras con chat, primero las que tienen mensajes sin leer y después por el último mensaje (desempate por id), de a páginas y con  (las conversaciones sin leer de todas las páginas). Sin el parámetro sigue siendo Ventas. Función de dominio  con dos tests.
+  - `GET /eventos/:id/compras?conMensajes=true`: solo las compras con chat, primero las que tienen mensajes sin leer y después por el último mensaje (desempate por id), de a páginas y con `noLeidas` (las conversaciones sin leer de todas las páginas). Sin el parámetro sigue siendo Ventas. Función de dominio `conversaciones` con dos tests.
   - Seed: 10 de las ventas nuevas del Rock traen una pregunta y la respuesta de Lucía, ya leídas y de hace más de 4 días (12 conversaciones, 1 sin leer; no cambian la campana ni Mis eventos).
-  - App:  usa  y el botón "Ver más" de ; el orden, el filtro y la cuenta de sin leer pasaron de la app al backend. Boceto .
+  - App: `mensajes.js` usa `usePaginado` y el botón "Ver más" de `PieLista`; el orden, el filtro y la cuenta de sin leer pasaron de la app al backend. Boceto `docs/bocetos/mensajes-paginado.html`.
   - La IA lo probó en el emulador con Lucía: 10 conversaciones con la de Juan arriba, "Ver más (quedan 2)", "Ya viste las 12 conversaciones" y, al volver del chat de Juan, el encabezado sin "1 sin leer".
 - **Bien:** el usuario eligió el botón "Ver más" como forma única de paginar en toda la app, en lugar del scroll infinito; queda como la subtarea siguiente.
 - **Corregido / problemas:**
