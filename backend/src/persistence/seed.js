@@ -259,27 +259,35 @@ export function loadSeed() {
   }
 
   // Más ventas de Noche de Rock Nacional (de Martín y Juan), para que Ventas de ese evento
-  // tenga más de una página (13 en total). Son de hace más de 4 días: no suman
-  // notificaciones nuevas para Lucía.
+  // tenga más de una página (13 en total). Casi todas traen una pregunta del comprador
+  // y la respuesta de Lucía, así la bandeja de mensajes también tiene más de una página
+  // (12 conversaciones). Son de hace más de 4 días y los dos ya leyeron el chat: no suman
+  // notificaciones ni mensajes nuevos.
   const masVentasDelRock = [
-    [martin, 1, 2, -30, []],
-    [martin, 2, 1, -28, [[CONFIRMADA, 0]]],
-    [juan, 1, 4, -26, [[CONFIRMADA, 0]]],
-    [martin, 1, 1, -24, [[CANCELADA, 1]]],
-    [juan, 2, 2, -22, [[CONFIRMADA, 0], [REEMBOLSADA, 3]]],
-    [martin, 1, 3, -20, [[CONFIRMADA, 0]]],
-    [juan, 1, 1, -18, []],
-    [martin, 2, 2, -16, [[CONFIRMADA, 0]]],
-    [juan, 1, 2, -14, [[CANCELADA, 2]]],
-    [martin, 1, 1, -12, [[CONFIRMADA, 0]]],
-    [juan, 1, 3, -10, [[CONFIRMADA, 0]]],
+    [martin, 1, 2, -30, [], ['¿A qué hora abren las puertas?', 'A las 19, el show arranca 21.']],
+    [martin, 2, 1, -28, [[CONFIRMADA, 0]], ['¿La Platea tiene asientos numerados?', 'Sí, te llegan con la entrada.']],
+    [juan, 1, 4, -26, [[CONFIRMADA, 0]], ['¿Puedo pasarle una entrada a un amigo?', 'Sí, la entrada no es nominativa.']],
+    [martin, 1, 1, -24, [[CANCELADA, 1]], ['Me equivoqué de tipo de entrada, la cancelo.', 'Dale, sin problema.']],
+    [juan, 2, 2, -22, [[CONFIRMADA, 0], [REEMBOLSADA, 3]], ['¿Me devuelven el total?', 'Sí, te reintegramos todo.']],
+    [martin, 1, 3, -20, [[CONFIRMADA, 0]], ['¿Hay guardarropa?', 'Sí, en la entrada del Campo.']],
+    [juan, 1, 1, -18, [], null],
+    [martin, 2, 2, -16, [[CONFIRMADA, 0]], ['¿Se puede llevar cámara?', 'Cámaras de celular sí, profesionales no.']],
+    [juan, 1, 2, -14, [[CANCELADA, 2]], ['No llego a pagar a tiempo, la cancelo.', 'Ok, gracias por avisar.']],
+    [martin, 1, 1, -12, [[CONFIRMADA, 0]], ['¿Hay estacionamiento cerca?', 'Hay uno a media cuadra.']],
+    [juan, 1, 3, -10, [[CONFIRMADA, 0]], ['¿Venden comida adentro?', 'Sí, hay food trucks en el predio.']],
   ];
-  for (const [comprador, tipoEntradaId, cantidad, dias, cambios] of masVentasDelRock) {
-    createCompra({
+  for (const [comprador, tipoEntradaId, cantidad, dias, cambios, charla] of masVentasDelRock) {
+    const compra = createCompra({
       comprador, evento: eventos.rock, tipoEntradaId, cantidad,
       creada: daysFromNow(dias, 11),
       cambios: cambios.map(([estado, despues]) => [estado, comprador, daysFromNow(dias + despues, 12)]),
     });
+    if (!charla) continue;
+    const [pregunta, respuesta] = charla;
+    compraRepository.addMensaje(compra.id, { usuarioId: comprador.id, mensaje: pregunta, enviado: daysFromNow(dias + 1, 15) });
+    compraRepository.addMensaje(compra.id, { usuarioId: lucia.id, mensaje: respuesta, enviado: daysFromNow(dias + 1, 17) });
+    compraRepository.marcarMensajesLeidos(compra.id, 'organizador', daysFromNow(dias + 1, 17));
+    compraRepository.marcarMensajesLeidos(compra.id, 'comprador', daysFromNow(dias + 1, 18));
   }
 
   // Todos leyeron sus notificaciones hace unos días: lo posterior aparece como nuevo

@@ -4,7 +4,7 @@ import * as categoriaRepository from '../persistence/repositories/categoriaRepos
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador,
   FILTROS_ORGANIZADOR, filtroOrganizador, cantidadesOrganizador } from '../domain/evento.js';
-import { cantidadConMensajesNoLeidos, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
+import { cantidadConMensajesNoLeidos, conversaciones, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import { paginar, parsePagina } from '../http/pagination.js';
@@ -117,15 +117,24 @@ export async function listByOrganizador(req, res) {
 }
 
 // Caso de uso 2, de a páginas. Las disponibles por tipo salen de GET /eventos/:id.
+// Con ?conMensajes=true es la bandeja de mensajes: solo las compras con chat, primero las
+// que tienen mensajes sin leer, y noLeidas cuenta esas conversaciones en todas las páginas.
 export async function listCompras(req, res) {
   const id = requireId(req.params.id);
   const evento = eventoRepository.findById(id);
   if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
   verificarOrganizador(evento, req.usuario);
+  const conMensajes = optional(req.query.conMensajes, (v) => {
+    if (v !== 'true' && v !== 'false') throw new ValidationError('El campo conMensajes tiene que ser true o false');
+    return v === 'true';
+  });
   const pagina = parsePagina(req.query);
 
+  const compras = compraRepository.findByEvento(evento.id);
+  const lista = conMensajes ? conversaciones(compras, evento, req.usuario) : masRecientesPrimero(compras);
+  const extra = conMensajes ? { noLeidas: cantidadConMensajesNoLeidos(compras, evento, req.usuario) } : {};
   // Se arma el detalle solo de las compras de la página pedida.
-  const { resultados, ...datosPagina } = paginar(masRecientesPrimero(compraRepository.findByEvento(evento.id)), pagina);
+  const { resultados, ...datosPagina } = paginar(lista, pagina, extra);
   res.status(200).json({
     resultados: resultados.map((compra) => ({
       ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId), req.usuario),

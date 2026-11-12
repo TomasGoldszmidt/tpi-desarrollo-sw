@@ -249,6 +249,18 @@ export function cantidadConMensajesNoLeidos(compras, evento, usuario) {
   return compras.filter((compra) => mensajesNoLeidos(compra, evento, usuario) > 0).length;
 }
 
+// Bandeja de mensajes de un evento: las compras que tienen chat, primero las que tienen
+// mensajes que el usuario no leyó y, dentro de cada grupo, la del último mensaje más
+// reciente (si empatan, por id, así las páginas no repiten ni saltean conversaciones).
+/** @param {Compra[]} compras @param {Evento} evento @param {Usuario} usuario @returns {Compra[]} */
+export function conversaciones(compras, evento, usuario) {
+  const noLeida = (compra) => Number(mensajesNoLeidos(compra, evento, usuario) > 0);
+  const ultimo = (compra) => compra.mensajes.at(-1).enviado.getTime();
+  return compras
+    .filter((compra) => compra.mensajes.length > 0)
+    .sort((a, b) => noLeida(b) - noLeida(a) || ultimo(b) - ultimo(a) || b.id - a.id);
+}
+
 // Al abrir el chat: todo lo que hay hasta ahora queda leído para quien lo abrió.
 /** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @param {Date} [ahora] @returns {Compra} */
 export function leerMensajes(compra, evento, usuario, ahora = new Date()) {

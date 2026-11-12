@@ -13,7 +13,7 @@ import * as eventoRepository from '../src/persistence/repositories/eventoReposit
 import {
   actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
   ordenarPorImportancia, cantidadesPorEstado,
-  mensajesNoLeidos, cantidadConMensajesNoLeidos, leerMensajes, rolEnCompra,
+  mensajesNoLeidos, cantidadConMensajesNoLeidos, leerMensajes, rolEnCompra, conversaciones,
 } from '../src/domain/compra.js';
 import { requireString } from '../src/http/validation.js';
 import { EstadoCompra } from '../src/domain/estadoCompra.js';
@@ -448,6 +448,32 @@ describe('chat de la compra', () => {
     assert.equal(rolEnCompra(sofiaRock, rock, sofia), 'comprador');
     assert.equal(rolEnCompra(sofiaRock, rock, lucia), 'organizador');
     assert.equal(rolEnCompra(sofiaRock, rock, martin), null);
+  });
+
+  it('conversaciones: solo las compras con chat, primero las sin leer y después por el último mensaje', () => {
+    const { rock } = seed.eventos;
+    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    const compras = compraRepository.findByEvento(rock.id);
+    const lista = conversaciones(compras, rock, lucia);
+    // Las ventas del Rock sin mensajes quedan afuera (en el seed, 12 de 13 tienen chat).
+    assert.equal(lista.length, 12);
+    assert.ok(compras.length > lista.length);
+    assert.ok(lista.every((compra) => compra.mensajes.length > 0));
+    // La de Juan (sin leer, hace 3 días) primero; después la de Sofía (leída, hace 4).
+    assert.deepEqual(lista.slice(0, 2).map((c) => c.id), [juanRockReembolsada.id, sofiaRock.id]);
+    const ultimos = lista.slice(1).map((c) => c.mensajes.at(-1).enviado.getTime());
+    assert.deepEqual(ultimos, [...ultimos].sort((a, b) => b - a));
+  });
+
+  it('conversaciones: una sin leer va arriba aunque su último mensaje sea más viejo', () => {
+    const { rock } = seed.eventos;
+    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    // Lucía abre el chat de Juan y Sofía le escribe de nuevo (antes que la pregunta de Juan, hace 3 días):
+    // ahora la de Sofía es la sin leer y va primero.
+    const leida = { ...juanRockReembolsada, mensajesLeidosHasta: { ...juanRockReembolsada.mensajesLeidosHasta, organizador: new Date() } };
+    const nueva = { ...sofiaRock, mensajes: [...sofiaRock.mensajes, { usuarioId: sofia.id, mensaje: 'Gracias', enviado: new Date(sofiaRock.mensajesLeidosHasta.organizador.getTime() + 3600e3) }] };
+    const lista = conversaciones([leida, nueva], rock, lucia);
+    assert.deepEqual(lista.map((c) => c.id), [sofiaRock.id, juanRockReembolsada.id]);
   });
 
   it('mensajesNoLeidos: los del otro posteriores a la última vez que abrió el chat', () => {

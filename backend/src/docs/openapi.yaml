@@ -888,6 +888,11 @@ paths:
         Todas las compras del evento, en cualquier estado, de la más reciente a la
         más vieja (si empatan, por id), de a páginas. Solo para el organizador. Las
         entradas disponibles por tipo salen de GET /eventos/{id}.
+
+        Con conMensajes=true es la bandeja de mensajes del evento: solo las compras
+        que tienen chat, primero las que tienen mensajes que el organizador no leyó y,
+        dentro de cada grupo, la del último mensaje más reciente (si empatan, por id).
+        La respuesta suma noLeidas.
       operationId: listComprasEvento
       security:
         - usuarioActivo: []
@@ -898,6 +903,14 @@ paths:
           schema:
             type: integer
           example: 1
+        - name: conMensajes
+          in: query
+          required: false
+          description: true para la bandeja de mensajes (solo las compras con chat). Vacío o false, todas las compras.
+          schema:
+            type: string
+            enum: ['true', 'false']
+          example: 'true'
         - $ref: '#/components/parameters/Pagina'
         - $ref: '#/components/parameters/Limite'
       responses:
@@ -915,8 +928,16 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/CompraDetalle'
+                      noLeidas:
+                        type: integer
+                        description: >-
+                          Solo con conMensajes=true. Cuántas conversaciones tienen mensajes
+                          que el organizador no leyó, contando todas las páginas.
+                        example: 1
         '400':
-          description: El id no es válido, o pagina o limite no son enteros en rango (o vienen repetidos)
+          description: >-
+            El id no es válido, conMensajes no es true ni false, o pagina o limite no son
+            enteros en rango (o vienen repetidos)
           content:
             application/json:
               schema:
