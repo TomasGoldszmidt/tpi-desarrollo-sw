@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Mis eventos de a páginas</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:1rem 0}
+.cap{font-size:12px;color:#5F5E5A;margin-bottom:6px}
+.phone{position:relative;border:0.5px solid #B4B2A9;border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:560px;display:flex;flex-direction:column}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:0.5px solid #D3D1C7}
+.scr{flex:1;padding:10px 12px;font-size:12px;overflow:hidden}
+.h{font-size:16px;font-weight:500;margin:0 0 8px}
+.av{width:28px;height:28px;background:#EAF3DE;color:#27500A;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.chips{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.f{display:inline-flex;align-items:center;gap:5px;border:0.5px solid #D3D1C7;border-radius:999px;padding:4px 10px;font-size:11px;color:#5F5E5A}
+.f .d{width:7px;height:7px;border-radius:50%}
+.f .c{font-weight:500}
+.f.on{border-color:transparent}
+.cc{position:relative;border:0.5px solid #D3D1C7;border-left-width:4px;border-radius:10px;padding:8px;margin-bottom:7px}
+.cc.off{opacity:.6}
+.cc .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cc .nm{font-size:13px;font-weight:500}
+.cc .mt{font-size:11px;color:#5F5E5A}
+.cc .ft{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.cc .tt{font-size:12px;font-weight:500}
+.b{border-radius:999px;padding:1px 8px;font-size:10px;font-weight:500}
+.pen{background:#FAEEDA;color:#633806}.con{background:#EAF3DE;color:#27500A}.uti{background:#F1EFE8;color:#444441}
+.can{background:#FCEBEB;color:#791F1F}.ree{background:#EEEDFE;color:#3C3489}.all{background:#3B6D11;color:#fff}
+.lpen{border-left-color:#BA7517}.lcon{border-left-color:#639922}.luti{border-left-color:#888780}.lcan{border-left-color:#E24B4A}.lree{border-left-color:#7F77DD}
+.dpen{background:#BA7517}.dcon{background:#639922}.duti{background:#888780}.dcan{background:#E24B4A}.dree{background:#7F77DD}
+.dias{font-size:11px;font-weight:500;color:#27500A}.dias.pas{color:#888780;font-weight:400}
+.vacio{text-align:center;padding-top:60px;color:#5F5E5A}
+.btn{position:relative;display:inline-block;margin-top:10px;border:0.5px solid #3B6D11;color:#27500A;border-radius:8px;padding:6px 14px;font-size:12px}
+.tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
+.tabs .on{color:#3B6D11}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500}
+.chips .n,.cc .n,.btn .n{position:absolute;right:-4px;top:-6px}
+.notes{font-size:13px;color:#5F5E5A;line-height:1.6;padding-bottom:1rem}
+.grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ev{position:relative;display:flex;gap:8px;align-items:center;border:0.5px solid #D3D1C7;border-radius:10px;padding:7px;margin-bottom:6px}
+.ev.esp{border-color:#3B6D11;border-width:1.5px}
+.ev.off{opacity:.7}
+.ev .img{width:44px;height:44px;border-radius:8px;flex-shrink:0;background:linear-gradient(135deg,#97C459,#3B6D11)}
+.ev .img.b{background:linear-gradient(135deg,#B4B2A9,#5F5E5A)}.ev .img.c{background:linear-gradient(135deg,#FAC775,#D85A30)}.ev .img.d{background:linear-gradient(135deg,#AFA9EC,#3C3489)}
+.ev .inf{flex:1;min-width:0}.ev .cat{font-size:10px;font-weight:500;color:#27500A}.ev .nm{font-size:12px;font-weight:500}.ev .mt{font-size:10px;color:#5F5E5A}
+.pend{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:500;color:#27500A;margin-top:2px}.pt{width:6px;height:6px;border-radius:50%;background:#E24B4A}
+.chat{position:relative;border:0.5px solid #D3D1C7;border-radius:8px;padding:5px 6px;font-size:12px}
+.num{position:absolute;top:-6px;right:-6px;background:#E24B4A;color:#fff;border-radius:999px;font-size:9px;min-width:13px;height:13px;display:flex;align-items:center;justify-content:center}
+.crear{background:#3B6D11;color:#fff;border-radius:8px;text-align:center;padding:7px;font-size:12px;font-weight:500;margin-bottom:8px}
+.dmsj{background:#E24B4A}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid #EAF3DE;border-top-color:#3B6D11;display:inline-block}
+.pie{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 0 4px;font-size:11px;color:#5F5E5A}
+.pie .n{position:absolute;right:0;top:4px}
+.abajo{display:flex;flex-direction:column;justify-content:flex-end}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Mis eventos · con filtro y de a páginas</h1>
+<p style="font-size:13px;color:#5F5E5A">Cada evento se ve como hoy. Cambia lo de arriba de la lista: los chips reemplazan los títulos "Próximos" y "Ya realizados". Datos de Lucía: 15 eventos, 10 próximos, 5 realizados y 2 con mensajes nuevos.</p>
+<div class="grid">
+
+<div><div class="cap">A · Todos (al abrir)</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">LF</span></div><div class="scr">
+<p class="h">Mis eventos</p><div class="crear">＋ Crear evento</div>
+<div class="chips"><span class="f on all">Todos <span class="c">15</span></span><span class="f">Próximos <span class="c">10</span></span><span class="f">Ya realizados <span class="c">5</span></span><span class="f"><span class="d dmsj"></span>Con mensajes nuevos <span class="c">2</span></span><span class="n">1</span></div>
+<div class="ev"><div class="img b"></div><div class="inf"><div class="cat">Teatro</div><div class="nm">La casa de Bernarda Alba</div><div class="mt">mar 17 nov · 20:00 · Teatro San Martín</div></div><div class="chat">💬</div></div>
+<div class="ev"><div class="img "></div><div class="inf"><div class="cat">Música</div><div class="nm">Jazz en el Bebop</div><div class="mt">jue 19 nov · 22:00 · Bebop Club</div></div><div class="chat">💬</div></div>
+<div class="ev"><div class="img c"></div><div class="inf"><div class="cat">Teatro</div><div class="nm">Hamlet</div><div class="mt">mar 24 nov · 20:00 · Teatro Cervantes</div></div><div class="chat">💬</div></div>
+<div class="ev"><div class="img d"></div><div class="inf"><div class="cat">Música</div><div class="nm">Orquesta Sinfónica Nacional</div><div class="mt">jue 26 nov · 20:00 · Centro Cultural Kirchner</div></div><div class="chat">💬</div></div>
+<div class="ev esp"><div class="img "></div><div class="inf"><div class="cat">Música</div><div class="nm">Noche de Rock Nacional</div><div class="mt">mié 2 dic · 21:00 · Estadio Obras</div><div class="pend"><span class="pt"></span>1 chat con mensajes nuevos</div></div><div class="chat">💬<span class="num">1</span></div></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span>Mis compras</span><span class="on">Mis eventos</span></div></div></div>
+
+<div><div class="cap">B · Todos, al final: después de los próximos vienen los realizados</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">LF</span></div><div class="scr abajo">
+<div class="ev esp"><div class="img c"></div><div class="inf"><div class="cat">Festivales</div><div class="nm">Festival de Verano</div><div class="mt">lun 11 ene · 16:00 · Hipódromo de San Isidro</div><div class="pend"><span class="pt"></span>1 chat con mensajes nuevos</div></div><div class="chat">💬<span class="num">1</span></div></div>
+<div class="ev"><div class="img d"></div><div class="inf"><div class="cat">Festivales</div><div class="nm">Festival Electrónico</div><div class="mt">mar 26 ene · 22:00 · Costanera Sur</div></div><div class="chat">💬</div></div>
+<div class="ev off"><div class="img b"></div><div class="inf"><div class="cat">Música</div><div class="nm">Acústico en el Gran Rex</div><div class="mt">mié 28 oct · 21:00 · Teatro Gran Rex</div></div><div class="chat">💬</div></div>
+<div class="ev off"><div class="img "></div><div class="inf"><div class="cat">Música</div><div class="nm">Recital de Cuarteto</div><div class="mt">dom 13 sep · 20:00 · Teatro Ópera</div></div><div class="chat">💬</div></div>
+<div class="ev off"><div class="img c"></div><div class="inf"><div class="cat">Teatro</div><div class="nm">Esperando a Godot</div><div class="mt">sáb 29 ago · 20:00 · Teatro Regio</div></div><div class="chat">💬</div></div>
+<div class="ev off"><div class="img d"></div><div class="inf"><div class="cat">Festivales</div><div class="nm">Festival de Otoño</div><div class="mt">dom 9 ago · 20:00 · Parque Centenario</div></div><div class="chat">💬</div></div>
+<div class="ev off"><div class="img b"></div><div class="inf"><div class="cat">Conferencias</div><div class="nm">Charla de Producción de Eventos</div><div class="mt">lun 20 jul · 20:00 · Centro Cultural Recoleta</div></div><div class="chat">💬</div></div>
+<div class="pie">Ya viste los 15 eventos<span class="n">2</span></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span>Mis compras</span><span class="on">Mis eventos</span></div></div></div>
+
+<div><div class="cap">C · Con mensajes nuevos</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span class="av">LF</span></div><div class="scr">
+<p class="h">Mis eventos</p><div class="crear">＋ Crear evento</div>
+<div class="chips"><span class="f">Todos <span class="c">15</span></span><span class="f">Próximos <span class="c">10</span></span><span class="f">Ya realizados <span class="c">5</span></span><span class="f on all"><span class="d" style="background:#fff"></span>Con mensajes nuevos <span class="c">2</span></span><span class="n">3</span></div>
+<div class="ev esp"><div class="img "></div><div class="inf"><div class="cat">Música</div><div class="nm">Noche de Rock Nacional</div><div class="mt">mié 2 dic · 21:00 · Estadio Obras</div><div class="pend"><span class="pt"></span>1 chat con mensajes nuevos</div></div><div class="chat">💬<span class="num">1</span></div></div>
+<div class="ev esp"><div class="img c"></div><div class="inf"><div class="cat">Festivales</div><div class="nm">Festival de Verano</div><div class="mt">lun 11 ene · 16:00 · Hipódromo de San Isidro</div><div class="pend"><span class="pt"></span>1 chat con mensajes nuevos</div></div><div class="chat">💬<span class="num">1</span></div></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span>Mis compras</span><span class="on">Mis eventos</span></div></div></div>
+
+</div>
+<div class="notes">
+<div><span class="n">1</span> Chips (los mismos que en Mis compras, que pasan al renglón de abajo si no entran): Todos, Próximos, Ya realizados y Con mensajes nuevos, con las cantidades que manda el backend (<code>cantidades</code>). Tocar uno vuelve a pedir la página 1 con <code>?filtro=</code> y muestra "Cargando tus eventos…" en el lugar de la lista. El chip elegido se mantiene al recargar y al volver a la pestaña. Un chip con 0 se muestra igual (salvo "Con mensajes nuevos", que solo aparece si hay alguno o si está elegido).</div>
+<div><span class="n">2</span> De a 10 con scroll infinito, como el catálogo: spinner al pie mientras llega la siguiente, y al final "Ya viste los 15 eventos" (con una sola página no hay pie). Los realizados se siguen viendo más apagados.</div>
+<div><span class="n">3</span> Con mensajes nuevos: los eventos con algún chat sin leer, en el mismo orden (próximos y después realizados). Al volver de leer un chat se recarga: si ya no le quedan mensajes nuevos, sale de la lista y el número baja.</div>
+<div>Si el filtro elegido se queda sin eventos, se muestra "No tenés eventos con este filtro." con un botón "Ver todos". Sin ningún evento, sigue "Todavía no organizaste ningún evento."</div>
+</div>
+</body></html>

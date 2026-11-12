@@ -1,9 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { FiltroChips } from './FiltroChips.js';
 import { ORDEN_ESTADOS, estiloEstado } from './EstadoBadge.js';
-import { colors, fontSize, spacing } from '../theme.js';
 
-// Chips para filtrar compras por estado (en uno o más renglones): "Todas" y un chip por cada estado
-// que aparece en las compras, con su cantidad. El elegido toma los colores de su badge.
+// Chips para filtrar compras por estado: "Todas" y un chip por cada estado que aparece en
+// las compras, con su cantidad. El elegido toma los colores de su badge.
 // elegido es un EstadoCompra o null (Todas). Si el elegido se queda sin compras,
 // su chip se sigue mostrando con 0 para que se entienda por qué la lista está vacía.
 export function FiltroEstados({ compras, elegido, onElegir }) {
@@ -13,77 +12,19 @@ export function FiltroEstados({ compras, elegido, onElegir }) {
   }
   const estados = ORDEN_ESTADOS.filter((estado) => cantidades.has(estado) || estado === elegido);
 
-  return (
-    <View style={styles.fila}>
-      <Chip
-        texto="Todas"
-        cantidad={compras.length}
-        activo={elegido === null}
-        estiloActivo={{ backgroundColor: colors.primary, color: '#FFFFFF' }}
-        onPress={() => onElegir(null)}
-      />
-      {estados.map((estado) => {
-        const { plural, fondo, color, borde } = estiloEstado(estado);
-        return (
-          <Chip
-            key={estado}
-            texto={plural}
-            cantidad={cantidades.get(estado) ?? 0}
-            punto={borde}
-            activo={elegido === estado}
-            estiloActivo={{ backgroundColor: fondo, color }}
-            onPress={() => onElegir(estado)}
-          />
-        );
-      })}
-    </View>
-  );
-}
+  const opciones = [
+    { valor: null, texto: 'Todas', cantidad: compras.length },
+    ...estados.map((estado) => {
+      const { plural, fondo, color, borde } = estiloEstado(estado);
+      return {
+        valor: estado,
+        texto: plural,
+        cantidad: cantidades.get(estado) ?? 0,
+        punto: borde,
+        estiloActivo: { backgroundColor: fondo, color },
+      };
+    }),
+  ];
 
-function Chip({ texto, cantidad, punto, activo, estiloActivo, onPress }) {
-  const colorTexto = activo ? estiloActivo.color : colors.textSecondary;
-  return (
-    <Pressable
-      style={[styles.chip, activo && { backgroundColor: estiloActivo.backgroundColor, borderColor: 'transparent' }]}
-      onPress={onPress}
-      accessibilityRole="button"
-      accessibilityState={{ selected: activo }}
-      accessibilityLabel={`${texto}: ${cantidad}`}
-    >
-      {punto ? <View style={[styles.punto, { backgroundColor: punto }]} /> : null}
-      <Text style={[styles.texto, { color: colorTexto }]}>{texto}</Text>
-      <Text style={[styles.texto, styles.cantidad, { color: colorTexto }]}>{cantidad}</Text>
-    </Pressable>
-  );
+  return <FiltroChips opciones={opciones} elegido={elegido} onElegir={onElegir} />;
 }
-
-const styles = StyleSheet.create({
-  // Si no entran en un renglón, los chips pasan al de abajo: así se ven todos sin deslizar.
-  fila: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: spacing.md,
-  },
-  punto: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  texto: {
-    fontSize: fontSize.body,
-  },
-  cantidad: {
-    fontWeight: 'bold',
-  },
-});

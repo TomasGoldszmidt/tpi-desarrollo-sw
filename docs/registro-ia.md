@@ -1016,3 +1016,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Al abrir, Expo Go restauró el estado de ayer y mostró errores "undefined is not a function" en el contexto de notificaciones. Con un reinicio limpio de Expo Go no volvieron a aparecer: era el bundle viejo restaurado del snapshot del emulador.
   - En el análisis se había prometido un test de `noLeidas`, pero la cuenta quedó en el controlador y los tests son del dominio. Se verificó con curl y en la app.
 - **Aprendizaje:** cuando un listado se muestra separado en secciones (nuevas y anteriores), el orden del backend tiene que respetar esas secciones. Si no, paginar mezcla los grupos.
+
+### 2026-11-12 · Mis eventos de a páginas, con filtro
+- **Tarea:** Paginación: Mis eventos de a páginas, con filtro Próximos / Ya realizados / Con mensajes nuevos
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** el usuario sumó esta pantalla a la propuesta: "en mis eventos también, es más, en eventos agregá el mismo filtro que en mis compras".
+- **Resultado:**
+  - Como los eventos no tienen estado, el filtro se armó con lo que importa al organizador: Próximos, Ya realizados y Con mensajes nuevos.
+  - Backend: `GET /usuarios/:id/eventos` ordena primero los próximos (del más cercano) y después los realizados (del más reciente), acepta `?filtro=` y devuelve `cantidades` para los chips. Las reglas (`filtroOrganizador`, `cantidadesOrganizador`) están en el dominio, con tests.
+  - App: componente genérico `FiltroChips`. `FiltroEstados` de Mis compras pasó a usarlo sin cambiar cómo se ve. Mis eventos cambió `SectionList` por `FlatList` con chips, scroll infinito y pie. Boceto `docs/bocetos/mis-eventos-paginado.html`.
+  - La IA lo probó en el emulador: Todos (15 en 2 páginas, con los realizados apagados al final), Ya realizados (5), Con mensajes nuevos (2), y al leer el chat de Noche de Rock el evento sale del filtro y el chip baja a 1. Mis compras de Sofía se ve igual que antes.
+- **Bien:** los títulos "Próximos" y "Ya realizados" que la app calculaba sola se volvieron chips con números que manda el backend, así que el filtro funciona aunque no estén cargadas todas las páginas.
+- **Corregido / problemas:**
+  - Un script de edición escrito inline en bash se rompió por las comillas. Se pasó a un archivo `.cjs` en el scratchpad, que es más seguro para reemplazos largos.
+  - En el boceto, los chips scrolleaban con la lista. En la app quedaron fijos arriba de la lista, como en Mis compras. No se consultó porque es el mismo comportamiento que ya existía.
+- **Aprendizaje:** cuando quiero el "mismo filtro" en otra pantalla, conviene pensar qué significa ahí (los eventos no tienen estado) y reusar el componente visual, no la lógica.

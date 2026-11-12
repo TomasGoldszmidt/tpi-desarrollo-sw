@@ -1,28 +1,43 @@
-import { useCallback, useRef } from 'react';
-import { Image, Pressable, RefreshControl, SectionList, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { FlatList, Image, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getEventosOrganizador } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
-import { useCarga } from '../../hooks/useCarga.js';
+import { usePaginado } from '../../hooks/usePaginado.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
+import { FiltroChips } from '../../components/FiltroChips.js';
+import { PieLista } from '../../components/PieLista.js';
 import { Seccion } from '../../components/Seccion.js';
 import { estiloEsperando } from '../../components/AvisoMensaje.js';
 import { formatFecha } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
+// Eventos por página: se pide la siguiente al acercarse al final de la lista.
+const LIMITE = 10;
+
 // Casos de uso 2 y 4: los eventos que organiza el usuario activo, para entrar a las
-// ventas de cada uno, y el botón para crear uno nuevo.
+// ventas de cada uno, y el botón para crear uno nuevo. Vienen de a páginas, primero los
+// próximos y después los realizados, con chips para filtrarlos (los cuenta el backend).
 export default function Eventos() {
   const { usuario } = useUsuario();
-  const pedir = useCallback(
-    () => getEventosOrganizador(usuario.id, { limite: 50 }).then((pagina) => pagina.resultados),
-    [usuario.id],
-  );
-  const { data: eventos, loading, error, recargar } = useCarga(pedir);
+  // Chip elegido (null = Todos). Se mantiene al recargar y al volver a la pestaña.
+  const [filtro, setFiltro] = useState(null);
+  const pedirPagina = useCallback(async (pagina) => {
+    const respuesta = await getEventosOrganizador(usuario.id, { filtro, pagina, limite: LIMITE });
+    // Si ya se realizó se calcula al pedir y no al dibujar, que tiene que dar siempre lo mismo.
+    const ahora = Date.now();
+    const resultados = respuesta.resultados
+      .map((evento) => ({ ...evento, realizado: new Date(evento.fecha).getTime() < ahora }));
+    return { ...respuesta, resultados };
+  }, [usuario.id, filtro]);
+  // Otro chip arranca de nuevo desde la página 1.
+  const {
+    items: eventos, total, hayMas, extra, loading, recargando, error, cargandoMas, errorMas, cargarMas, recargar,
+  } = usePaginado(pedirPagina);
 
-  // Se vuelve a pedir al volver a la pestaña, así aparece un evento recién creado.
-  // La primera vez ya lo pide useCarga.
+  // Se vuelve a pedir al volver a la pestaña, así aparece un evento recién creado y se
+  // actualizan los chats con mensajes nuevos. La primera vez ya lo pide usePaginado.
   const primeraVez = useRef(true);
   useFocusEffect(
     useCallback(() => {
@@ -40,26 +55,49 @@ export default function Eventos() {
         <Ionicons name="add" size={20} color="#FFFFFF" />
         <Text style={styles.botonTexto}>Crear evento</Text>
       </Pressable>
-      {error || !eventos ? (
+      {extra.cantidades && extra.cantidades.todos > 0 ? (
+        <FiltroChips opciones={opcionesFiltro(extra.cantidades, filtro)} elegido={filtro} onElegir={setFiltro} />
+      ) : null}
+      {(loading && !recargando) || error || !eventos ? (
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus eventos…" />
       ) : (
-        <SectionList
-          sections={separarPorFecha(eventos)}
+        <FlatList
+          data={eventos}
           keyExtractor={(evento) => String(evento.id)}
-          renderSectionHeader={({ section }) => <Text style={styles.seccion}>{section.titulo}</Text>}
-          renderItem={({ item, section }) => (
+          renderItem={({ item }) => (
             <EventoFila
               evento={item}
-              realizado={section.realizados}
+              realizado={item.realizado}
               onPress={() => router.push(`/eventos/${item.id}/ventas`)}
             />
           )}
-          stickySectionHeadersEnabled={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+          onEndReached={cargarMas}
+          onEndReachedThreshold={0.1}
+          refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
+          ListFooterComponent={
+            <PieLista
+              cargandoMas={cargandoMas}
+              errorMas={errorMas}
+              hayMas={hayMas}
+              varias={total > LIMITE}
+              onReintentar={cargarMas}
+              cargando="Cargando más eventos…"
+              fin={`Ya viste los ${total} eventos`}
+            />
+          }
           ListEmptyComponent={
-            <View style={styles.vacio}>
-              <Text style={styles.vacioTexto}>Todavía no organizaste ningún evento.</Text>
-            </View>
+            filtro ? (
+              <View style={styles.vacio}>
+                <Text style={styles.vacioTexto}>No tenés eventos con este filtro.</Text>
+                <Pressable style={styles.botonVerTodos} onPress={() => setFiltro(null)}>
+                  <Text style={styles.botonVerTodosTexto}>Ver todos</Text>
+                </Pressable>
+              </View>
+            ) : (
+              <View style={styles.vacio}>
+                <Text style={styles.vacioTexto}>Todavía no organizaste ningún evento.</Text>
+              </View>
+            )
           }
         />
       )}
@@ -67,15 +105,24 @@ export default function Eventos() {
   );
 }
 
-// La API los devuelve primero los próximos y al final los ya realizados.
-function separarPorFecha(eventos) {
-  const ahora = Date.now();
-  const proximos = eventos.filter((evento) => new Date(evento.fecha).getTime() >= ahora);
-  const realizados = eventos.filter((evento) => new Date(evento.fecha).getTime() < ahora);
-  return [
-    { titulo: 'Próximos', realizados: false, data: proximos },
-    { titulo: 'Ya realizados', realizados: true, data: realizados },
-  ].filter((seccion) => seccion.data.length > 0);
+// Los chips, con las cantidades que manda el backend. "Con mensajes nuevos" solo aparece
+// si hay alguno o si está elegido.
+function opcionesFiltro(cantidades, elegido) {
+  const opciones = [
+    { valor: null, texto: 'Todos', cantidad: cantidades.todos },
+    { valor: 'proximos', texto: 'Próximos', cantidad: cantidades.proximos },
+    { valor: 'realizados', texto: 'Ya realizados', cantidad: cantidades.realizados },
+  ];
+  if (cantidades.conMensajesNuevos > 0 || elegido === 'conMensajesNuevos') {
+    opciones.push({
+      valor: 'conMensajesNuevos',
+      texto: 'Con mensajes nuevos',
+      cantidad: cantidades.conMensajesNuevos,
+      punto: colors.danger,
+      puntoActivo: '#FFFFFF',
+    });
+  }
+  return opciones;
 }
 
 function EventoFila({ evento, realizado, onPress }) {
@@ -140,18 +187,12 @@ const styles = StyleSheet.create({
     backgroundColor: colors.primary,
     borderRadius: 8,
     paddingVertical: spacing.md,
+    marginBottom: spacing.md,
   },
   botonTexto: {
     color: '#FFFFFF',
     fontSize: fontSize.body,
     fontWeight: 'bold',
-  },
-  seccion: {
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginTop: spacing.lg,
-    marginBottom: spacing.sm,
   },
   card: {
     flexDirection: 'row',
@@ -244,6 +285,18 @@ const styles = StyleSheet.create({
   },
   vacioTexto: {
     color: colors.textSecondary,
+    fontSize: fontSize.body,
+  },
+  botonVerTodos: {
+    marginTop: spacing.md,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    borderRadius: 8,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.lg,
+  },
+  botonVerTodosTexto: {
+    color: colors.primaryText,
     fontSize: fontSize.body,
   },
 });
