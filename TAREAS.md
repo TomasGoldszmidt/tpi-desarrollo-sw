@@ -64,6 +64,6 @@
 - [x] Reseñas de un organizador de a páginas (`GET /usuarios/:id/resenias`)
 - [x] Notificaciones de a páginas, con `noLeidas` para la campana (`GET /usuarios/:id/notificaciones`)
 - [x] Mis eventos de a páginas, con filtro Próximos / Ya realizados / Con mensajes nuevos (`GET /usuarios/:id/eventos`)
-- [ ] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
+- [x] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
 - [ ] Ventas de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras`)
 - [ ] Bandeja de mensajes de un evento de a páginas (opcional)

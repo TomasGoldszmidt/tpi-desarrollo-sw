@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Boceto · Mis compras de a páginas</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:760px;margin:24px auto;padding:0 16px;background:#F1EFE8;color:#2C2C2A}
+code{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;padding:1rem 0}
+.cap{font-size:12px;color:#5F5E5A;margin-bottom:6px}
+.phone{position:relative;border:0.5px solid #B4B2A9;border-radius:16px;overflow:hidden;background:#fff;color:#2C2C2A;height:560px;display:flex;flex-direction:column}
+.bar{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;border-bottom:0.5px solid #D3D1C7}
+.scr{flex:1;padding:10px 12px;font-size:12px;overflow:hidden}
+.h{font-size:16px;font-weight:500;margin:0 0 8px}
+.av{width:28px;height:28px;background:#EAF3DE;color:#27500A;border-radius:50%;font-size:11px;font-weight:500;display:inline-flex;align-items:center;justify-content:center}
+.logo{position:relative;display:inline-flex;align-items:center;background:#62C935;color:#fff;font-weight:500;border-radius:6px;height:22px;padding:0 10px 0 9px;font-size:12px;gap:7px}
+.logo::before,.logo::after{content:"";position:absolute;top:50%;width:8px;height:8px;margin-top:-4px;border-radius:50%;background:#fff}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.logo i{display:block;width:0;height:14px;border-left:1.5px dashed #fff}
+.word{font-weight:500;color:#2C2C2A}.word b{color:#4C9A2A;font-weight:500}
+.chips{position:relative;display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.f{display:inline-flex;align-items:center;gap:5px;border:0.5px solid #D3D1C7;border-radius:999px;padding:4px 10px;font-size:11px;color:#5F5E5A}
+.f .d{width:7px;height:7px;border-radius:50%}
+.f .c{font-weight:500}
+.f.on{border-color:transparent}
+.cc{position:relative;border:0.5px solid #D3D1C7;border-left-width:4px;border-radius:10px;padding:8px;margin-bottom:7px}
+.cc.off{opacity:.6}
+.cc .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px}
+.cc .nm{font-size:13px;font-weight:500}
+.cc .mt{font-size:11px;color:#5F5E5A}
+.cc .ft{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.cc .tt{font-size:12px;font-weight:500}
+.b{border-radius:999px;padding:1px 8px;font-size:10px;font-weight:500}
+.pen{background:#FAEEDA;color:#633806}.con{background:#EAF3DE;color:#27500A}.uti{background:#F1EFE8;color:#444441}
+.can{background:#FCEBEB;color:#791F1F}.ree{background:#EEEDFE;color:#3C3489}.all{background:#3B6D11;color:#fff}
+.lpen{border-left-color:#BA7517}.lcon{border-left-color:#639922}.luti{border-left-color:#888780}.lcan{border-left-color:#E24B4A}.lree{border-left-color:#7F77DD}
+.dpen{background:#BA7517}.dcon{background:#639922}.duti{background:#888780}.dcan{background:#E24B4A}.dree{background:#7F77DD}
+.dias{font-size:11px;font-weight:500;color:#27500A}.dias.pas{color:#888780;font-weight:400}
+.vacio{text-align:center;padding-top:60px;color:#5F5E5A}
+.btn{position:relative;display:inline-block;margin-top:10px;border:0.5px solid #3B6D11;color:#27500A;border-radius:8px;padding:6px 14px;font-size:12px}
+.tabs{display:flex;justify-content:space-around;border-top:0.5px solid #D3D1C7;padding:6px 0;font-size:11px;color:#888780}
+.tabs .on{color:#3B6D11}
+.n{display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#D85A30;color:#fff;font-size:11px;font-weight:500}
+.chips .n,.cc .n,.btn .n{position:absolute;right:-4px;top:-6px}
+.notes{font-size:13px;color:#5F5E5A;line-height:1.6;padding-bottom:1rem}
+
+.cc.row{display:flex;align-items:center;gap:8px}
+.cc .body{flex:1;min-width:0}
+.cc.esp{border-color:#3B6D11;border-width:1.5px;border-left-width:4px}
+.chat-btn{position:relative;font-size:15px;color:#3B6D11;border:0.5px solid #D3D1C7;border-radius:8px;padding:5px 7px;flex-shrink:0}
+.badge{position:absolute;top:-7px;right:-7px;background:#E24B4A;color:#fff;border-radius:999px;font-size:10px;font-weight:500;min-width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;padding:0 3px}
+.aviso{display:flex;align-items:center;gap:6px;margin-top:4px;padding-top:6px;border-top:0.5px solid #D3D1C7;font-size:11px;font-weight:500;color:#27500A;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aviso .p{width:7px;height:7px;border-radius:50%;background:#A32D2D;flex-shrink:0}
+.aviso span.m{color:#5F5E5A;font-weight:400}
+.bell{position:relative;font-size:16px;color:#5F5E5A}
+.chat-btn .n{position:absolute;right:-14px;top:14px}
+.aviso-wrap{position:relative}
+.aviso-wrap .n{position:absolute;right:-4px;top:2px}
+.back{color:#3B6D11;font-size:16px;margin-right:8px}
+.msgs{display:flex;flex-direction:column;gap:6px;padding:10px;flex:1}
+.m{max-width:78%;padding:6px 9px;border-radius:10px;font-size:12px}
+.m.otro{background:#F1EFE8;align-self:flex-start}
+.m.yo{background:#3B6D11;color:#fff;align-self:flex-end}
+.m small{display:block;font-size:9px;opacity:.7;margin-top:2px}
+.input{display:flex;gap:6px;padding:8px 10px;border-top:0.5px solid #D3D1C7}
+.input span{flex:1;border:0.5px solid #D3D1C7;border-radius:999px;padding:6px 10px;font-size:11px;color:#888780}
+.send{width:28px;height:28px;border-radius:50%;background:#3B6D11;color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px}
+.notes .n{position:static}
+.spin{width:12px;height:12px;border-radius:50%;border:2px solid #EAF3DE;border-top-color:#3B6D11;display:inline-block}
+.pie{position:relative;display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 0 4px;font-size:11px;color:#5F5E5A}
+.pie .n{position:absolute;right:0;top:4px}
+.abajo{display:flex;flex-direction:column;justify-content:flex-end}
+.chips{position:relative}.chips .n{position:absolute;right:-4px;top:-6px}
+</style></head><body>
+<h1 style="font-size:18px;font-weight:500">Mis compras · de a páginas</h1>
+<p style="font-size:13px;color:#5F5E5A">Cada compra se ve como en <code>mis-compras-chat.html</code> y el orden por importancia es el mismo (ahora lo resuelve el backend). Sofía tiene 14 compras: 3 pendientes, 3 confirmadas, 6 utilizadas y 2 canceladas.</p>
+<div class="grid" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+
+<div><div class="cap">A · Todas (al abrir)</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span style="display:flex;align-items:center;gap:12px"><span class="bell">🔔<span class="badge">1</span></span><span class="av">SP</span></span></div><div class="scr"><p class="h">Mis compras</p>
+<div class="chips"><span class="f on all">Todas <span class="c">14</span></span><span class="f"><span class="d dpen"></span>Pendientes <span class="c">3</span></span><span class="f"><span class="d dcon"></span>Confirmadas <span class="c">3</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">6</span></span><span class="f"><span class="d dcan"></span>Canceladas <span class="c">2</span></span><span class="n">1</span></div>
+<div class="cc row lpen"><div class="body"><div class="top"><span class="b pen">Pendiente</span></div><div class="nm">La casa de Bernarda Alba</div><div class="mt">mar 17 nov · 20:00 · Platea × 1</div><div class="ft"><span class="mt">Pagala para confirmarla</span><span class="tt">$ 30.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lpen"><div class="body"><div class="top"><span class="b pen">Pendiente</span></div><div class="nm">Hamlet</div><div class="mt">mar 24 nov · 20:00 · General × 1</div><div class="ft"><span class="mt">Pagala para confirmarla</span><span class="tt">$ 22.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lpen"><div class="body"><div class="top"><span class="b pen">Pendiente</span></div><div class="nm">El principito</div><div class="mt">lun 7 dic · 17:00 · General × 2</div><div class="ft"><span class="mt">Pagala para confirmarla</span><span class="tt">$ 30.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lcon"><div class="body"><div class="top"><span class="b con">Confirmada</span><span class="dias">Faltan 7 días</span></div><div class="nm">Jazz en el Bebop</div><div class="mt">jue 19 nov · 22:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 12.000</span></div></div><span class="chat-btn">💬</span></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span class="on">Mis compras</span><span>Mis eventos</span></div></div></div>
+
+<div><div class="cap">B · Todas, al final de la lista</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span style="display:flex;align-items:center;gap:12px"><span class="bell">🔔<span class="badge">1</span></span><span class="av">SP</span></span></div><div class="scr abajo">
+<div class="cc row luti"><div class="body"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Esperando a Godot</div><div class="mt">sáb 29 ago · 20:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 20.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row luti"><div class="body"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Festival de Otoño</div><div class="mt">dom 9 ago · 20:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 25.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row luti"><div class="body"><div class="top"><span class="b uti">Utilizada</span></div><div class="nm">Charla de Producción de Eventos</div><div class="mt">lun 20 jul · 20:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 5.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lcan off"><div class="body"><div class="top"><span class="b can">Cancelada</span></div><div class="nm">Cumbia en el Konex</div><div class="mt">vie 4 dic · 23:00 · General × 2</div><div class="ft"><span class="mt"></span><span class="tt">$ 36.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lcan off"><div class="body"><div class="top"><span class="b can">Cancelada</span></div><div class="nm">Final del Torneo de Vóley</div><div class="mt">vie 20 nov · 19:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 8.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="pie">Ya viste las 14 compras<span class="n">2</span></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span class="on">Mis compras</span><span>Mis eventos</span></div></div></div>
+
+<div><div class="cap">C · Canceladas</div><div class="phone"><div class="bar"><span style="display:flex;align-items:center;gap:8px"><span class="logo">AI<i></i></span><span class="word">Ticket <b>It</b></span></span><span style="display:flex;align-items:center;gap:12px"><span class="bell">🔔<span class="badge">1</span></span><span class="av">SP</span></span></div><div class="scr"><p class="h">Mis compras</p>
+<div class="chips"><span class="f">Todas <span class="c">14</span></span><span class="f"><span class="d dpen"></span>Pendientes <span class="c">3</span></span><span class="f"><span class="d dcon"></span>Confirmadas <span class="c">3</span></span><span class="f"><span class="d duti"></span>Utilizadas <span class="c">6</span></span><span class="f on can"><span class="d dcan"></span>Canceladas <span class="c">2</span></span><span class="n">3</span></div>
+<div class="cc row lcan off"><div class="body"><div class="top"><span class="b can">Cancelada</span></div><div class="nm">Cumbia en el Konex</div><div class="mt">vie 4 dic · 23:00 · General × 2</div><div class="ft"><span class="mt"></span><span class="tt">$ 36.000</span></div></div><span class="chat-btn">💬</span></div>
+<div class="cc row lcan off"><div class="body"><div class="top"><span class="b can">Cancelada</span></div><div class="nm">Final del Torneo de Vóley</div><div class="mt">vie 20 nov · 19:00 · General × 1</div><div class="ft"><span class="mt"></span><span class="tt">$ 8.000</span></div></div><span class="chat-btn">💬</span></div>
+</div><div class="tabs"><span>Catálogo</span><span>Favoritos</span><span class="on">Mis compras</span><span>Mis eventos</span></div></div></div>
+
+</div>
+<div class="notes">
+<div><span class="n">1</span> Chips como hoy: "Todas" y un chip por cada estado que tiene compras, con el punto de su color. Los números ahora los manda el backend (<code>cantidades</code>), así que cuentan todas las compras aunque no estén cargadas todas las páginas. Tocar uno pide la página 1 con <code>?estado=</code> y muestra "Cargando tus compras…" en el lugar de la lista.</div>
+<div><span class="n">2</span> De a 10 con scroll infinito: spinner al pie mientras llega la siguiente y, al final, "Ya viste las 14 compras" (con una sola página no hay pie).</div>
+<div><span class="n">3</span> El chip elegido toma los colores de su estado, como hoy. Si se queda sin compras (ej: pagaste la única pendiente), se sigue mostrando con 0 y la lista dice "No tenés compras pendientes" con "Ver todas".</div>
+<div>Al volver a la pestaña (después de comprar, pagar o cancelar) y al tirar hacia abajo se recarga desde la página 1, con el mismo chip. El aviso "Lucía te escribió" sale del organizador que ahora viene en cada compra: ya no se piden todos los usuarios.</div>
+</div>
+</body></html>

@@ -1031,3 +1031,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Un script de edición escrito inline en bash se rompió por las comillas. Se pasó a un archivo `.cjs` en el scratchpad, que es más seguro para reemplazos largos.
   - En el boceto, los chips scrolleaban con la lista. En la app quedaron fijos arriba de la lista, como en Mis compras. No se consultó porque es el mismo comportamiento que ya existía.
 - **Aprendizaje:** cuando quiero el "mismo filtro" en otra pantalla, conviene pensar qué significa ahí (los eventos no tienen estado) y reusar el componente visual, no la lógica.
+
+### 2026-11-12 · Mis compras de a páginas
+- **Tarea:** Paginación: Mis compras de a páginas, con el orden y el filtro por estado en el backend
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** seguir con la siguiente subtarea ("Sí, seguí").
+- **Resultado:**
+  - El orden por importancia (por estado y, en pendientes y confirmadas, el evento más próximo primero) pasó de la pantalla al dominio (`ordenarPorImportancia`), sin cambiar las reglas. `cantidadesPorEstado` cuenta las compras de cada chip. Tests de los dos.
+  - `GET /compras` acepta `?estado=`, va de a páginas y devuelve `cantidades`. Cada compra trae el organizador del evento, así que Mis compras ya no pide `GET /usuarios` solo para el nombre del aviso de mensajes.
+  - Seed: 6 compras más de Sofía en los eventos nuevos (14 en total), sin cambiar las notificaciones nuevas de nadie.
+  - App: `FiltroEstados` recibe las cantidades del backend; la pantalla usa `usePaginado` y `PieLista`. Boceto `docs/bocetos/mis-compras-paginado.html`.
+  - La IA lo probó en el emulador: Todas (14, en 2 páginas, con el orden de siempre y "Ya viste las 14 compras"), Canceladas (2), Confirmadas (3, con "Lucía te escribió" en Noche de Rock).
+- **Bien:** mover el orden al dominio lo dejó con tests propios, cosa que en la pantalla no tenía. El componente de chips de la subtarea anterior alcanzó tal cual.
+- **Corregido / problemas:** ninguno en esta subtarea. Lo que sí quedó claro en el análisis: con páginas, un chip ya no filtra al instante sobre lo cargado, vuelve a pedir al backend.
+- **Aprendizaje:** antes de paginar, conviene revisar qué pide la pantalla además de la lista (acá, todos los usuarios para un nombre): suele ser otro listado que crece y se puede resolver en la misma respuesta.
