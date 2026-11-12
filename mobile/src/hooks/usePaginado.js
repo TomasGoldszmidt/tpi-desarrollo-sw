@@ -10,7 +10,7 @@ function extraDe({ resultados: _resultados, pagina: _pagina, limite: _limite, to
 // que pide la página n; pasarla con useCallback: cuando cambia (otra búsqueda, otros
 // filtros) se arranca de nuevo desde la página 1.
 // - items: lo cargado hasta ahora (null hasta que llega la primera página).
-// - cargarMas: pide la página siguiente (para FlatList.onEndReached). No hace nada si
+// - cargarMas: pide la página siguiente (el botón "Ver más" de PieLista). No hace nada si
 //   no hay más, si ya está pidiendo una o si la primera página todavía no llegó.
 // - recargar: vuelve a la página 1 sin borrar lo que se ve (recargando = true).
 // - errorMas: si falló una página que no es la primera; cargarMas la vuelve a pedir.
@@ -20,7 +20,7 @@ export function usePaginado(pedirPagina) {
   // La última respuesta, con el pedido y el intento a los que corresponde.
   const [lista, setLista] = useState(null);
   // El pedido de página siguiente en curso: evita pedir dos veces la misma página si
-  // onEndReached se dispara seguido.
+  // tocan "Ver más" dos veces seguidas.
   const pidiendoMas = useRef(null);
 
   // Los setState van en los callbacks de la promesa (regla react-hooks/set-state-in-effect).

@@ -13,7 +13,7 @@ import { estiloEsperando } from '../../components/AvisoMensaje.js';
 import { formatFecha } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
-// Eventos por página: se pide la siguiente al acercarse al final de la lista.
+// Eventos por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
 // Casos de uso 2 y 4: los eventos que organiza el usuario activo, para entrar a las
@@ -71,8 +71,6 @@ export default function Eventos() {
               onPress={() => router.push(`/eventos/${item.id}/ventas`)}
             />
           )}
-          onEndReached={cargarMas}
-          onEndReachedThreshold={0.1}
           refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
           ListFooterComponent={
             <PieLista
@@ -80,8 +78,8 @@ export default function Eventos() {
               errorMas={errorMas}
               hayMas={hayMas}
               varias={total > LIMITE}
-              onReintentar={cargarMas}
-              cargando="Cargando más eventos…"
+              onVerMas={cargarMas}
+              restantes={total - (eventos?.length ?? 0)}
               fin={`Ya viste los ${total} eventos`}
             />
           }

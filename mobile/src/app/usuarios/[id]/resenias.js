@@ -13,7 +13,7 @@ import { ReseniaItem } from '../../../components/ReseniaItem.js';
 import { formatPuntaje } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
-// Reseñas por página: se pide la siguiente al acercarse al final de la lista.
+// Reseñas por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
 // Caso de uso 10: todas las reseñas de los eventos de un organizador, con su promedio.
@@ -54,10 +54,6 @@ export default function ReseniasOrganizador() {
       data={resenias}
       keyExtractor={(resenia) => String(resenia.id)}
       renderItem={({ item }) => <ReseniaItem resenia={item} />}
-      onEndReached={lista.cargarMas}
-      // Las reseñas son cortas: con 0.5 (medio alto de pantalla) la primera página ya quedaba
-      // "cerca del final" al abrir y se pedía la segunda sin scrollear.
-      onEndReachedThreshold={0.1}
       refreshControl={
         <RefreshControl refreshing={lista.recargando} onRefresh={recargar} colors={[colors.primary]} />
       }
@@ -67,8 +63,8 @@ export default function ReseniasOrganizador() {
           errorMas={lista.errorMas}
           hayMas={lista.hayMas}
           varias={lista.total > LIMITE}
-          onReintentar={lista.cargarMas}
-          cargando="Cargando más reseñas…"
+          onVerMas={lista.cargarMas}
+          restantes={lista.total - (lista.items?.length ?? 0)}
           fin={`Ya viste las ${lista.total} reseñas`}
         />
       }

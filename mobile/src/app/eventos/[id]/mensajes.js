@@ -118,12 +118,11 @@ export default function MensajesEvento() {
       refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
       ListFooterComponent={
         <PieLista
-          conBoton
           cargandoMas={bandeja.cargandoMas}
           errorMas={bandeja.errorMas}
           hayMas={bandeja.hayMas}
           varias={bandeja.total > LIMITE}
-          onReintentar={bandeja.cargarMas}
+          onVerMas={bandeja.cargarMas}
           restantes={bandeja.total - conversaciones.length}
           fin={`Ya viste las ${bandeja.total} conversaciones`}
         />

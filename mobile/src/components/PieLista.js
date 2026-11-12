@@ -1,51 +1,32 @@
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Pie de un listado que carga de a páginas (ver usePaginado): spinner mientras llega
-// la página siguiente, el error con Reintentar si falló, y al final cuántos hay en total.
-// Con una sola página no muestra nada. cargando y fin son los textos de cada listado
-// ("Cargando más eventos…", "Ya viste los 18 eventos").
-// Con conBoton (para listas dentro de un ScrollView, como Ventas) la página siguiente se
-// pide con un botón "Ver más (quedan N)" en lugar del scroll infinito; onReintentar es
-// lo que pide la página siguiente y restantes, cuántos faltan cargar.
-export function PieLista({ cargandoMas, errorMas, hayMas, varias, onReintentar, cargando, fin, conBoton = false, restantes }) {
-  if (conBoton && hayMas) {
+// Pie de un listado que carga de a páginas (ver usePaginado). Todas las listas de la app
+// piden la página siguiente con un botón "Ver más (quedan N)", nunca solas al scrollear:
+// - Mientras llega, el botón muestra un spinner, dice "Cargando…" y no se puede tocar.
+// - Si falló, arriba del botón va el mensaje y el mismo botón la vuelve a pedir.
+// - Sin más páginas, el texto del final ("Ya viste los 18 eventos"); con una sola página, nada.
+// onVerMas pide la página siguiente (cargarMas del hook) y restantes es cuántos faltan cargar.
+export function PieLista({ cargandoMas, errorMas, hayMas, varias, onVerMas, restantes, fin }) {
+  if (hayMas) {
     return (
-      <View style={styles.conBoton}>
+      <View style={styles.pie}>
         {errorMas && !cargandoMas ? <Text style={[styles.texto, styles.centrado]}>{errorMas}</Text> : null}
         <Pressable
-          style={({ pressed }) => [styles.botonAncho, (pressed || cargandoMas) && styles.presionado]}
-          onPress={onReintentar}
+          style={({ pressed }) => [styles.boton, (pressed || cargandoMas) && styles.presionado]}
+          onPress={onVerMas}
           disabled={cargandoMas}
           accessibilityRole="button"
         >
           {cargandoMas ? <ActivityIndicator size="small" color={colors.primary} /> : null}
-          <Text style={styles.botonAnchoTexto}>{cargandoMas ? 'Cargando…' : `Ver más (quedan ${restantes})`}</Text>
+          <Text style={styles.botonTexto}>{cargandoMas ? 'Cargando…' : `Ver más (quedan ${restantes})`}</Text>
         </Pressable>
       </View>
     );
   }
-  if (cargandoMas) {
+  if (varias) {
     return (
-      <View style={styles.pie}>
-        <ActivityIndicator size="small" color={colors.primary} />
-        <Text style={styles.texto}>{cargando}</Text>
-      </View>
-    );
-  }
-  if (errorMas) {
-    return (
-      <View style={[styles.pie, styles.error]}>
-        <Text style={[styles.texto, styles.centrado]}>{errorMas}</Text>
-        <Pressable style={styles.boton} onPress={onReintentar}>
-          <Text style={styles.botonTexto}>Reintentar</Text>
-        </Pressable>
-      </View>
-    );
-  }
-  if (!hayMas && varias) {
-    return (
-      <View style={styles.pie}>
+      <View style={styles.fin}>
         <Text style={styles.texto}>{fin}</Text>
       </View>
     );
@@ -55,14 +36,12 @@ export function PieLista({ cargandoMas, errorMas, hayMas, varias, onReintentar, 
 
 const styles = StyleSheet.create({
   pie: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     gap: spacing.sm,
-    paddingVertical: spacing.lg,
+    paddingVertical: spacing.md,
   },
-  error: {
-    flexDirection: 'column',
+  fin: {
+    alignItems: 'center',
+    paddingVertical: spacing.lg,
   },
   texto: {
     color: colors.textSecondary,
@@ -72,21 +51,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   boton: {
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  botonTexto: {
-    color: colors.primaryText,
-    fontSize: fontSize.body,
-  },
-  conBoton: {
-    gap: spacing.sm,
-    paddingVertical: spacing.md,
-  },
-  botonAncho: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -99,7 +63,7 @@ const styles = StyleSheet.create({
   presionado: {
     backgroundColor: colors.primarySoft,
   },
-  botonAnchoTexto: {
+  botonTexto: {
     color: colors.primaryText,
     fontSize: fontSize.body,
     fontWeight: 'bold',

@@ -63,6 +63,7 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
   - Al abrir una pantalla sin datos todavía: `PantallaCarga` (`src/components/Carga.js`) con un mensaje ("Cargando el evento…").
   - Dentro de una pantalla abierta (buscar, filtrar, reintentar): `EstadoCarga` con `mensaje` en el lugar de la lista; el error, con el mismo componente.
   - Al confirmar una acción (comprar, pagar, cancelar): `CargaEncima` cubriendo la pantalla ("Confirmando tu compra…").
+- **Listados de a páginas** (los que el backend devuelve como `{ resultados, total, hayMas }`): `src/hooks/usePaginado.js` en lugar de `useCarga`, de a 10, y al final de la lista `PieLista` (`src/components/PieLista.js`). La página siguiente se pide **siempre con el botón "Ver más (quedan N)"**, nunca sola al scrollear (`onEndReached`): así lo eligió el usuario para toda la app. Al terminar, "Ya viste los N …". Ver `docs/bocetos/ver-mas-listas.html`.
 - **Teclado:** en Android la pantalla es de borde a borde y `KeyboardAvoidingView` no corre el contenido. En las pantallas con un campo de texto abajo (como el chat), usar `src/hooks/useAlturaTeclado.js` y dejar ese alto como `paddingBottom`.
 - **Nada técnico en la app:** ni URLs, ni el backend, ni status. Los errores de conexión y los inesperados ya los traduce `api/client.js`; los del backend vienen en español. Después de una acción (pagar, cancelar) se vuelven a pedir los datos al backend en lugar de modificar el estado a mano.
 - **Fechas y precios** se formatean en un solo lugar (`src/format.js`), en es-AR.

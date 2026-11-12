@@ -12,7 +12,7 @@ import { PieLista } from '../components/PieLista.js';
 import { formatCuando } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Notificaciones por página: se pide la siguiente al acercarse al final de la lista.
+// Notificaciones por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
 // Lo que hicieron otros en las compras y los eventos del usuario. Cada notificación nueva
@@ -117,9 +117,6 @@ export default function Notificaciones() {
           <NotificacionFila notificacion={item} onPress={() => abrirNotificacion(item)} />
         )}
         stickySectionHeadersEnabled={false}
-        onEndReached={cargarMas}
-        // Las filas son cortas: con un umbral más grande la segunda página se pediría al abrir.
-        onEndReachedThreshold={0.1}
         refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
         ListFooterComponent={
           <PieLista
@@ -127,8 +124,8 @@ export default function Notificaciones() {
             errorMas={errorMas}
             hayMas={hayMas}
             varias={total > LIMITE}
-            onReintentar={cargarMas}
-            cargando="Cargando más notificaciones…"
+            onVerMas={cargarMas}
+            restantes={total - (notificaciones?.length ?? 0)}
             fin={`Ya viste las ${total} notificaciones`}
           />
         }

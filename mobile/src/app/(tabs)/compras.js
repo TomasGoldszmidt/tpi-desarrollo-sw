@@ -13,7 +13,7 @@ import { estiloEstado } from '../../components/EstadoBadge.js';
 import { Seccion } from '../../components/Seccion.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
-// Compras por página: se pide la siguiente al acercarse al final de la lista.
+// Compras por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
 // El chat con el organizador, directo desde la lista (sin pasar por el detalle).
@@ -79,8 +79,6 @@ export default function MisCompras() {
               onChat={() => abrirChat(item)}
             />
           )}
-          onEndReached={cargarMas}
-          onEndReachedThreshold={0.1}
           refreshControl={
             <RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />
           }
@@ -90,8 +88,8 @@ export default function MisCompras() {
               errorMas={errorMas}
               hayMas={hayMas}
               varias={total > LIMITE}
-              onReintentar={cargarMas}
-              cargando="Cargando más compras…"
+              onVerMas={cargarMas}
+              restantes={total - (compras?.length ?? 0)}
               fin={`Ya viste las ${total} compras`}
             />
           }

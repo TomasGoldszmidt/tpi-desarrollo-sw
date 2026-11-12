@@ -1077,3 +1077,16 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Otro test contaba las compras del Rock, pero un test anterior compra una entrada; se dejó de depender del total.
   - No se probó la vista dividida (tablet) ni el error de "Ver más" sin conexión.
 - **Aprendizaje:** los tests comparten el seed en memoria: los que corren antes pueden agregar datos, así que conviene no contar totales.
+
+### 2026-11-12 · "Ver más" en todas las listas
+- **Tarea:** Paginación: reemplazar el scroll infinito por el botón "Ver más" en Catálogo, Reseñas, Notificaciones, Mis eventos y Mis compras
+- **Herramienta / skill:** Claude Code, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "quiero que mantengamos el boton de ver mas en todas las otras pantallas, porque alguna al bajar recarga solo y en esta es tocando ver mas, prefiero esta solucion".
+- **Resultado:**
+  - Las cinco listas dejaron de usar `onEndReached`: al final de las primeras 10 muestran "Ver más (quedan N)", con "Cargando…" mientras llega, el error arriba del botón si falla y "Ya viste los N …" al terminar.
+  - `PieLista` quedó con un solo modo (el botón): se borraron el spinner del scroll infinito, el "Reintentar" aparte y los props `conBoton` y `cargando`; `onReintentar` pasó a llamarse `onVerMas`. Un solo boceto para las cinco: `docs/bocetos/ver-mas-listas.html`.
+  - La skill `nueva-pantalla` ahora dice que todo listado de a páginas usa `usePaginado` y el botón "Ver más", nunca la carga al scrollear.
+  - La IA lo probó en el emulador: Catálogo (quedan 8 → "Ya viste los 18 eventos"), Mis eventos (quedan 5), Notificaciones (quedan 82) y Reseñas (quedan 4) con Lucía, y Mis compras (quedan 4) con Sofía.
+- **Bien:** se probó por fin el error de "Ver más" sin conexión (wifi y datos apagados con adb): aparece "No pudimos conectarnos…" arriba del botón y, al volver la conexión, el mismo botón trae la página.
+- **Corregido / problemas:** el script de cambios calculó mal la sangría de los props en la primera pasada y no encontró el texto; como escribía recién al final, no dejó archivos a medias.
+- **Aprendizaje:** con el botón desaparece el problema del umbral de `onEndReached` (las listas de filas cortas pedían la segunda página solas al abrir): la carga depende de una acción del usuario.

@@ -67,3 +67,4 @@
 - [x] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
 - [x] Ventas de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras`)
 - [x] Bandeja de mensajes de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras?conMensajes=true`)
+- [x] "Ver más" en todas las listas, en lugar del scroll infinito (Catálogo, Reseñas, Notificaciones, Mis eventos y Mis compras)

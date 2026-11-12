@@ -16,7 +16,7 @@ import { colors, fontSize, spacing } from '../../theme.js';
 const ORDEN_POR_DEFECTO = ORDENES[0].valor;
 // Espera después de la última tecla antes de buscar, para no pedir por cada letra.
 const ESPERA_BUSQUEDA_MS = 500;
-// Eventos por página: se pide la siguiente al acercarse al final de la lista.
+// Eventos por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
 // Casos de uso 3 y 11: buscar eventos por texto o categoría y ordenarlos.
@@ -119,8 +119,6 @@ export default function Catalogo() {
             <EventoCard evento={item} onPress={() => router.push(`/eventos/${item.id}`)} />
           )}
           keyboardShouldPersistTaps="handled"
-          onEndReached={cargarMas}
-          onEndReachedThreshold={0.5}
           refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
           ListFooterComponent={
             <PieLista
@@ -128,8 +126,8 @@ export default function Catalogo() {
               errorMas={errorMas}
               hayMas={hayMas}
               varias={total > LIMITE}
-              onReintentar={cargarMas}
-              cargando="Cargando más eventos…"
+              onVerMas={cargarMas}
+              restantes={total - (eventos?.length ?? 0)}
               fin={`Ya viste los ${total} eventos`}
             />
           }

@@ -101,12 +101,11 @@ export default function VentasEvento() {
           ))
         )}
         <PieLista
-          conBoton
           cargandoMas={ventas.cargandoMas}
           errorMas={ventas.errorMas}
           hayMas={ventas.hayMas}
           varias={ventas.total > LIMITE}
-          onReintentar={ventas.cargarMas}
+          onVerMas={ventas.cargarMas}
           restantes={ventas.total - compras.length}
           fin={`Ya viste las ${ventas.total} compras`}
         />
