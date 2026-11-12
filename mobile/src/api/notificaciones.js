@@ -1,8 +1,9 @@
 import { request } from './client.js';
 
-// De la más reciente a la más vieja, cada una con `leida`.
-export function getNotificaciones(usuarioId) {
-  return request(`/usuarios/${usuarioId}/notificaciones`);
+// Primero las nuevas y cada grupo de la más reciente a la más vieja, con `leida`. Vienen de a
+// páginas: { resultados, pagina, limite, total, hayMas, noLeidas } (noLeidas cuenta todas).
+export function getNotificaciones(usuarioId, { pagina = 1, limite = 10 } = {}) {
+  return request(`/usuarios/${usuarioId}/notificaciones?pagina=${pagina}&limite=${limite}`);
 }
 
 // Todas las que hay hasta ahora quedan como leídas.

@@ -476,8 +476,10 @@ paths:
       description: >-
         Solo el propio usuario activo. No se guardan: se calculan con lo que hizo
         otra persona en una compra en la que participa (como comprador o como
-        organizador del evento) y con las reseñas de sus eventos. Van de la más
-        reciente a la más vieja; `leida` es true si es anterior a la última vez
+        organizador del evento) y con las reseñas de sus eventos. Van de a páginas:
+        primero las no leídas y, dentro de cada grupo, de la más reciente a la más
+        vieja (si empatan, por id). `noLeidas` cuenta todas las no leídas, no solo
+        las de la página (es el número de la campana). `leida` es true si es anterior a la última vez
         que las marcó todas como leídas, si la abrió (PUT
         /usuarios/{id}/notificaciones/{notificacionId}/lectura) o, si es un mensaje,
         si ya abrió ese chat después (PUT /compras/{id}/mensajes/lectura).
@@ -491,17 +493,35 @@ paths:
           schema:
             type: integer
           example: 1
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
       responses:
         '200':
-          description: Las notificaciones (puede ser vacío)
+          description: Una página de las notificaciones (puede ser vacía)
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Notificacion'
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    required: [resultados, noLeidas]
+                    properties:
+                      resultados:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Notificacion'
+                      noLeidas:
+                        type: integer
+                        description: Cuántas no leídas tiene en total, en todas las páginas
+                        example: 4
         '400':
-          $ref: '#/components/responses/IdInvalido'
+          description: El id no es válido, o pagina o limite no son enteros en rango (o vienen repetidos)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: El campo pagina tiene que ser como mínimo 1
         '401':
           $ref: '#/components/responses/SinUsuarioActivo'
         '403':

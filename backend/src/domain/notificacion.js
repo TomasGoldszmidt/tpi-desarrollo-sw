@@ -69,7 +69,9 @@ function estaLeida(notificacion, chatLeidoHasta, cuenta) {
 }
 
 /**
- * Las notificaciones del usuario, de la más reciente a la más vieja, con `leida`.
+ * Las notificaciones del usuario, con `leida`: primero las no leídas y, dentro de cada grupo,
+ * de la más reciente a la más vieja (si empatan, por id). Así las páginas no mezclan las
+ * nuevas con las anteriores: la app las muestra en dos secciones.
  * @param {Usuario} usuarioActivo
  */
 export function notificacionesDe(usuarioActivo, id) {
@@ -107,7 +109,7 @@ export function notificacionesDe(usuarioActivo, id) {
         leida: estaLeida(notificacion, chatLeidoHasta, cuenta),
       };
     })
-    .sort((a, b) => b.fecha - a.fecha);
+    .sort((a, b) => a.leida - b.leida || b.fecha - a.fecha || a.id.localeCompare(b.id));
 }
 
 // "Marcar todas como leídas": las que hay hasta ahora quedan como leídas.

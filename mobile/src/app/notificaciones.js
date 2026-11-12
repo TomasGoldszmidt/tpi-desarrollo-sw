@@ -18,7 +18,7 @@ export default function Notificaciones() {
   const { usuario } = useUsuario();
   const { actualizar } = useNotificaciones();
   const pedir = useCallback(async () => {
-    const lista = await getNotificaciones(usuario.id);
+    const { resultados: lista } = await getNotificaciones(usuario.id, { limite: 50 });
     // "Hoy" y "Ayer" se calculan al pedir, no al dibujar.
     const ahora = Date.now();
     return lista.map((notificacion) => ({ ...notificacion, cuando: formatCuando(notificacion.fecha, ahora) }));

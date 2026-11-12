@@ -20,8 +20,9 @@ export function NotificacionesProvider({ children }) {
   // Si falla (sin conexión) se deja el número que había: no es para mostrar un error.
   const actualizar = useCallback(() => {
     if (usuarioId === null) return;
-    getNotificaciones(usuarioId).then(
-      (lista) => setNoLeidas(lista.filter((notificacion) => !notificacion.leida).length),
+    // Alcanza con una sola: la respuesta trae cuántas no leídas hay en total.
+    getNotificaciones(usuarioId, { limite: 1 }).then(
+      (pagina) => setNoLeidas(pagina.noLeidas),
       () => {},
     );
   }, [usuarioId]);

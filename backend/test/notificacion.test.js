@@ -24,10 +24,15 @@ describe('notificaciones', () => {
     );
   });
 
-  it('van de la más reciente a la más vieja e incluyen las reseñas de sus eventos', () => {
+  it('van primero las nuevas, cada grupo de la más reciente a la más vieja, e incluyen las reseñas', () => {
     const lista = notificacionesDe(lucia, lucia.id);
-    const fechas = lista.map((n) => n.fecha.getTime());
-    assert.deepEqual(fechas, [...fechas].sort((a, b) => b - a));
+    const cantidadNuevas = nuevas(lista).length;
+    assert.ok(lista.slice(0, cantidadNuevas).every((n) => !n.leida));
+    assert.ok(lista.slice(cantidadNuevas).every((n) => n.leida));
+    for (const grupo of [lista.slice(0, cantidadNuevas), lista.slice(cantidadNuevas)]) {
+      const fechas = grupo.map((n) => n.fecha.getTime());
+      assert.deepEqual(fechas, [...fechas].sort((a, b) => b - a));
+    }
     assert.equal(lista.filter((n) => n.tipo === 'RESENIA').length, 14);
   });
 

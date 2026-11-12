@@ -2,6 +2,7 @@ import * as usuarioRepository from '../persistence/repositories/usuarioRepositor
 import { marcarLeida, marcarLeidas, notificacionesDe } from '../domain/notificacion.js';
 import { NotFoundError } from '../http/errors.js';
 import { requireId } from '../http/validation.js';
+import { paginar, parsePagina } from '../http/pagination.js';
 
 function requireUsuarioExistente(params) {
   const id = requireId(params.id);
@@ -11,7 +12,11 @@ function requireUsuarioExistente(params) {
 
 export async function list(req, res) {
   const id = requireUsuarioExistente(req.params);
-  res.status(200).json(notificacionesDe(req.usuario, id));
+  const pagina = parsePagina(req.query);
+  const notificaciones = notificacionesDe(req.usuario, id);
+  // noLeidas cuenta todas, no solo las de esta página: es el número de la campana.
+  const noLeidas = notificaciones.filter((notificacion) => !notificacion.leida).length;
+  res.status(200).json(paginar(notificaciones, pagina, { noLeidas }));
 }
 
 export async function markRead(req, res) {
