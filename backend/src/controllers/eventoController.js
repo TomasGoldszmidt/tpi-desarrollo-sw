@@ -116,16 +116,21 @@ export async function listByOrganizador(req, res) {
   res.status(200).json(paginar(filtrados, pagina, { cantidades: cantidadesOrganizador(eventos, ahora) }));
 }
 
-// Caso de uso 2. Las disponibles por tipo salen de GET /eventos/:id.
+// Caso de uso 2, de a páginas. Las disponibles por tipo salen de GET /eventos/:id.
 export async function listCompras(req, res) {
   const id = requireId(req.params.id);
   const evento = eventoRepository.findById(id);
   if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
   verificarOrganizador(evento, req.usuario);
+  const pagina = parsePagina(req.query);
 
-  const compras = masRecientesPrimero(compraRepository.findByEvento(evento.id));
-  res.status(200).json(compras.map((compra) => ({
-    ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId), req.usuario),
-    resenia: reseniaDeCompra(compra),
-  })));
+  // Se arma el detalle solo de las compras de la página pedida.
+  const { resultados, ...datosPagina } = paginar(masRecientesPrimero(compraRepository.findByEvento(evento.id)), pagina);
+  res.status(200).json({
+    resultados: resultados.map((compra) => ({
+      ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId), req.usuario),
+      resenia: reseniaDeCompra(compra),
+    })),
+    ...datosPagina,
+  });
 }

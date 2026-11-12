@@ -26,7 +26,7 @@ export default function MensajesEvento() {
   const dividido = width >= ANCHO_DIVIDIDO;
 
   const pedir = useCallback(async () => {
-    const [evento, compras] = await Promise.all([getEvento(id), getVentasEvento(id)]);
+    const [evento, { resultados: compras }] = await Promise.all([getEvento(id), getVentasEvento(id, { limite: 50 })]);
     return { evento, compras };
   }, [id]);
   const { data, loading, error, recargar } = useCarga(pedir);

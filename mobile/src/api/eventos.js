@@ -28,6 +28,7 @@ export function crearEvento(datos) {
 
 // Caso de uso 2: las compras del evento en cualquier estado, de la más reciente a la
 // más vieja. Solo para el organizador; las disponibles por tipo salen de getEvento.
-export function getVentasEvento(id) {
-  return request(`/eventos/${id}/compras`);
+// Vienen de a páginas: { resultados, pagina, limite, total, hayMas }.
+export function getVentasEvento(id, { pagina = 1, limite = 10 } = {}) {
+  return request(`/eventos/${id}/compras?pagina=${pagina}&limite=${limite}`);
 }

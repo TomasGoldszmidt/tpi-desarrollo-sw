@@ -127,11 +127,12 @@ export function diasRestantes(compra, evento, ahora = new Date()) {
   return Math.round((inicioDelDia(evento.fecha) - inicioDelDia(ahora)) / UN_DIA);
 }
 
-// Orden de los listados de compras (las del comprador y las ventas del organizador).
+// Orden de las ventas del organizador: la compra más reciente primero (si empatan, por id,
+// así las páginas no repiten ni saltean compras).
 /** @param {Compra[]} compras @returns {Compra[]} */
 export function masRecientesPrimero(compras) {
   const fechaDeCompra = (compra) => compra.historial[0].fechaHora;
-  return [...compras].sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a));
+  return [...compras].sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a) || b.id - a.id);
 }
 
 // Caso de uso 1: Mis compras, de la más importante a la menos. Primero por estado

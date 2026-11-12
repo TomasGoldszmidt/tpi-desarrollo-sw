@@ -39,13 +39,16 @@ describe('cupo disponible', () => {
     assert.equal(calcularDisponibles(tipo(obra, 'Platea'), compras), 149);
   });
 
+  // Solo las dos compras del Rock que importan acá (el seed le suma más ventas en otros estados).
+  const comprasDelRock = () => [seed.compras.sofiaRock, seed.compras.juanRockReembolsada];
+
   it('una REEMBOLSADA libera el cupo', () => {
-    const compras = compraRepository.findByEvento(rock.id);
+    const compras = comprasDelRock();
     assert.equal(calcularDisponibles(tipo(rock, 'Platea'), compras), 200);
   });
 
   it('solo cuenta las compras de ese tipo de entrada', () => {
-    const compras = compraRepository.findByEvento(rock.id);
+    const compras = comprasDelRock();
     assert.equal(calcularDisponibles(tipo(rock, 'Campo'), compras), 498);
   });
 

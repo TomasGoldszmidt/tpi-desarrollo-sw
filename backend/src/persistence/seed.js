@@ -258,6 +258,30 @@ export function loadSeed() {
     });
   }
 
+  // Más ventas de Noche de Rock Nacional (de Martín y Juan), para que Ventas de ese evento
+  // tenga más de una página (13 en total). Son de hace más de 4 días: no suman
+  // notificaciones nuevas para Lucía.
+  const masVentasDelRock = [
+    [martin, 1, 2, -30, []],
+    [martin, 2, 1, -28, [[CONFIRMADA, 0]]],
+    [juan, 1, 4, -26, [[CONFIRMADA, 0]]],
+    [martin, 1, 1, -24, [[CANCELADA, 1]]],
+    [juan, 2, 2, -22, [[CONFIRMADA, 0], [REEMBOLSADA, 3]]],
+    [martin, 1, 3, -20, [[CONFIRMADA, 0]]],
+    [juan, 1, 1, -18, []],
+    [martin, 2, 2, -16, [[CONFIRMADA, 0]]],
+    [juan, 1, 2, -14, [[CANCELADA, 2]]],
+    [martin, 1, 1, -12, [[CONFIRMADA, 0]]],
+    [juan, 1, 3, -10, [[CONFIRMADA, 0]]],
+  ];
+  for (const [comprador, tipoEntradaId, cantidad, dias, cambios] of masVentasDelRock) {
+    createCompra({
+      comprador, evento: eventos.rock, tipoEntradaId, cantidad,
+      creada: daysFromNow(dias, 11),
+      cambios: cambios.map(([estado, despues]) => [estado, comprador, daysFromNow(dias + despues, 12)]),
+    });
+  }
+
   // Todos leyeron sus notificaciones hace unos días: lo posterior aparece como nuevo
   // (Lucía tiene 4, Martín 2, Sofía 1 y Juan ninguna).
   for (const usuario of Object.values(usuarios)) {
