@@ -1045,3 +1045,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** mover el orden al dominio lo dejó con tests propios, cosa que en la pantalla no tenía. El componente de chips de la subtarea anterior alcanzó tal cual.
 - **Corregido / problemas:** ninguno en esta subtarea. Lo que sí quedó claro en el análisis: con páginas, un chip ya no filtra al instante sobre lo cargado, vuelve a pedir al backend.
 - **Aprendizaje:** antes de paginar, conviene revisar qué pide la pantalla además de la lista (acá, todos los usuarios para un nombre): suele ser otro listado que crece y se puede resolver en la misma respuesta.
+
+### 2026-11-12 · Ventas de un evento de a páginas
+- **Tarea:** Paginación: ventas de un evento de a páginas, con "Ver más"
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** seguir con la siguiente subtarea ("Sí, seguí").
+- **Resultado:**
+  - `GET /eventos/:id/compras` va de a páginas (la más reciente primero, desempate por id), y arma el detalle solo de las compras de la página pedida.
+  - Seed: 11 ventas más de Noche de Rock (13 en total), de Martín y Juan, en varios estados y sin notificaciones nuevas.
+  - App: como la lista de Ventas está dentro de un ScrollView (galería y disponibles arriba), en lugar de scroll infinito va un botón "Ver más (quedan N)". `PieLista` sumó ese modo (`conBoton`). "Compras (13)" usa el total. Boceto `docs/bocetos/ventas-paginado.html`.
+  - La bandeja de mensajes usa el mismo endpoint: por ahora pide `limite=50` (el máximo). Con más de 50 compras en un evento perdería conversaciones: lo resuelve la subtarea de la bandeja.
+  - La IA lo probó en el emulador con Lucía: 10 compras, "Ver más (quedan 3)", y después "Ya viste las 13 compras".
+- **Bien:** separar el pie en un solo componente permitió sumar el modo con botón sin repetir el spinner, el error y el texto del final.
+- **Corregido / problemas:**
+  - Dos tests de cupo contaban todas las compras del Rock y fallaron con las ventas nuevas del seed. Se cambiaron para usar solo las dos compras que les importan, así no dependen de cuántas ventas tenga el seed.
+  - El caso de error de "Ver más" (sin conexión) no se probó en el emulador; usa el mismo `errorMas` del hook que las otras pantallas.
+- **Aprendizaje:** los tests que dependen de contar los datos del seed se rompen cada vez que el seed crece; conviene que usen los documentos concretos que les importan.

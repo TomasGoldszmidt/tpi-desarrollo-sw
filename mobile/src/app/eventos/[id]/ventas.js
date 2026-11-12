@@ -3,28 +3,44 @@ import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'r
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { getEvento, getVentasEvento } from '../../../api/eventos.js';
 import { useCarga } from '../../../hooks/useCarga.js';
+import { usePaginado } from '../../../hooks/usePaginado.js';
 import { PantallaCarga } from '../../../components/Carga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge, ESTADOS_INACTIVOS } from '../../../components/EstadoBadge.js';
 import { Galeria } from '../../../components/Galeria.js';
+import { PieLista } from '../../../components/PieLista.js';
 import { AvisoMensaje, estiloEsperando, mensajeNoLeido } from '../../../components/AvisoMensaje.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
 import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
+// Compras por página: las siguientes se piden con "Ver más".
+const LIMITE = 10;
+
 // Caso de uso 2: las compras de un evento con su estado y las entradas que quedan
-// disponibles de cada tipo. Solo la ve el organizador.
+// disponibles de cada tipo. Solo la ve el organizador. El evento se pide una vez; las
+// compras, de a páginas con un botón "Ver más" (la lista va dentro del ScrollView).
 export default function VentasEvento() {
   const { id } = useLocalSearchParams();
   const { usuario } = useUsuario();
-  const pedir = useCallback(async () => {
-    const [evento, { resultados: compras }] = await Promise.all([getEvento(id), getVentasEvento(id, { limite: 50 })]);
-    return { evento, compras };
-  }, [id]);
-  const { data, loading, error, recargar } = useCarga(pedir);
+  const pedirEvento = useCallback(() => getEvento(id), [id]);
+  const cabecera = useCarga(pedirEvento);
+  const pedirCompras = useCallback((pagina) => getVentasEvento(id, { pagina, limite: LIMITE }), [id]);
+  const ventas = usePaginado(pedirCompras);
 
-  // Al volver del detalle de una compra se vuelven a pedir las ventas.
-  // La primera vez ya lo pide useCarga.
+  const { recargar: recargarEvento } = cabecera;
+  const { recargar: recargarCompras } = ventas;
+  const recargar = useCallback(() => {
+    recargarEvento();
+    recargarCompras();
+  }, [recargarEvento, recargarCompras]);
+  const evento = cabecera.data;
+  const compras = ventas.items;
+  const error = cabecera.error ?? ventas.error;
+  const loading = cabecera.loading || ventas.loading;
+
+  // Al volver del detalle de una compra se vuelven a pedir el evento y las ventas
+  // (desde las primeras 10). La primera vez ya lo piden useCarga y usePaginado.
   const primeraVez = useRef(true);
   useFocusEffect(
     useCallback(() => {
@@ -36,10 +52,10 @@ export default function VentasEvento() {
     }, [recargar]),
   );
 
-  if (loading && !data) {
+  if ((cabecera.loading && !evento) || (ventas.loading && !compras)) {
     return <PantallaCarga mensaje="Cargando las ventas…" />;
   }
-  if (error || !data) {
+  if (error || !evento || !compras) {
     return (
       <View style={styles.centrado}>
         <EstadoCarga loading={loading} error={error} onRetry={recargar} />
@@ -47,7 +63,6 @@ export default function VentasEvento() {
     );
   }
 
-  const { evento, compras } = data;
   // Del lugar se muestra solo el nombre, sin la dirección.
   const lugar = evento.lugar.split(',')[0];
 
@@ -70,7 +85,7 @@ export default function VentasEvento() {
         ))}
 
         <View style={styles.seccionFila}>
-          <Text style={[styles.seccion, styles.seccionTitulo]}>Compras ({compras.length})</Text>
+          <Text style={[styles.seccion, styles.seccionTitulo]}>Compras ({ventas.total})</Text>
           {/* Todas las conversaciones del evento juntas, sin entrar compra por compra. */}
           <Pressable style={styles.verMensajes} onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}>
             <Text style={styles.verMensajesTexto}>Ver mensajes</Text>
@@ -85,6 +100,16 @@ export default function VentasEvento() {
             <VentaCard key={compra.id} compra={compra} usuario={usuario} onPress={() => router.push(`/compras/${compra.id}`)} />
           ))
         )}
+        <PieLista
+          conBoton
+          cargandoMas={ventas.cargandoMas}
+          errorMas={ventas.errorMas}
+          hayMas={ventas.hayMas}
+          varias={ventas.total > LIMITE}
+          onReintentar={ventas.cargarMas}
+          restantes={ventas.total - compras.length}
+          fin={`Ya viste las ${ventas.total} compras`}
+        />
       </View>
     </ScrollView>
   );
