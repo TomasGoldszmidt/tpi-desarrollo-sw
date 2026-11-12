@@ -999,3 +999,20 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Al probar, el usuario vio las 14 reseñas de una vez: "si la de 14 debería tener paginación, no la tuvo". La página 2 se pedía sola al abrir, porque con `onEndReachedThreshold={0.5}` (medio alto de pantalla) las reseñas, que son cortas, ya dejaban el final "cerca" desde el arranque. Se bajó a 0.1. En el catálogo no pasaba porque las tarjetas son más altas.
   - Después de reiniciar, Expo Go se quedó en su pantalla de carga y hubo que volver a abrirlo.
 - **Aprendizaje:** el scroll infinito depende del alto de cada fila. Con filas cortas, el umbral para pedir la página siguiente tiene que ser chico, o la segunda página se carga sola y la paginación no se nota.
+
+### 2026-11-12 · Notificaciones de a páginas
+- **Tarea:** Paginación: notificaciones de a páginas, con `noLeidas` para la campana
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/nueva-pantalla`, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** seguir con la siguiente subtarea ("Sí, seguí"). Al final: "perdón, probalo vos".
+- **Resultado:**
+  - `GET /usuarios/:id/notificaciones` va de a páginas, con las no leídas primero y cada grupo de la más reciente a la más vieja (desempate por id). La respuesta suma `noLeidas`, contado sobre todas.
+  - La campana pide `limite=1` y usa `noLeidas`: antes bajaba todas (53 para Lucía) cada 30 segundos.
+  - `usePaginado` devuelve `extra` con los campos propios del listado. La pantalla usa `usePaginado` y `PieLista`, con umbral 0.1, y "Marcar todas" según `noLeidas`. Boceto `docs/bocetos/notificaciones-paginado.html`.
+  - La IA probó los 6 casos en el emulador con adb: campana en 4, nuevas arriba, scroll hasta "Ya viste las 53 notificaciones", abrir una (quedan 3), marcar todas (campana en 0) y Martín con una sola página.
+- **Bien:** ordenar primero las no leídas en el backend evitó que una nueva apareciera recién en la página 2 y moviera la sección "Nuevas". Con el hook y el pie ya hechos, la pantalla fueron pocas líneas.
+- **Corregido / problemas:**
+  - Al empezar el día, el puerto 3000 lo tenía Docker Desktop y `localhost:3000` respondía otra app (`{"status":"fail",...}`). La IA lo detectó, no tocó Docker, y levantó el backend cuando el puerto quedó libre.
+  - El emulador y Metro estaban apagados. El usuario pidió que la IA probara: levantó el emulador por línea de comandos y Metro en una pestaña del terminal.
+  - Al abrir, Expo Go restauró el estado de ayer y mostró errores "undefined is not a function" en el contexto de notificaciones. Con un reinicio limpio de Expo Go no volvieron a aparecer: era el bundle viejo restaurado del snapshot del emulador.
+  - En el análisis se había prometido un test de `noLeidas`, pero la cuenta quedó en el controlador y los tests son del dominio. Se verificó con curl y en la app.
+- **Aprendizaje:** cuando un listado se muestra separado en secciones (nuevas y anteriores), el orden del backend tiene que respetar esas secciones. Si no, paginar mezcla los grupos.

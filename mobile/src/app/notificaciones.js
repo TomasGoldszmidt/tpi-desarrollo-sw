@@ -5,25 +5,34 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getNotificaciones, marcarNotificacionLeida, marcarNotificacionesLeidas } from '../api/notificaciones.js';
 import { useUsuario } from '../context/UsuarioContext.js';
 import { useNotificaciones } from '../context/NotificacionesContext.js';
-import { useCarga } from '../hooks/useCarga.js';
+import { usePaginado } from '../hooks/usePaginado.js';
 import { CargaEncima, PantallaCarga } from '../components/Carga.js';
 import { EstadoCarga } from '../components/EstadoCarga.js';
+import { PieLista } from '../components/PieLista.js';
 import { formatCuando } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
+
+// Notificaciones por página: se pide la siguiente al acercarse al final de la lista.
+const LIMITE = 10;
 
 // Lo que hicieron otros en las compras y los eventos del usuario. Cada notificación nueva
 // se marca como leída al abrirla; el botón de arriba las marca todas. Al volver de lo que
 // se abrió, la lista se vuelve a pedir y la que se leyó pasa a Anteriores.
+// Vienen de a páginas, con las nuevas primero: las páginas siguientes solo suman Anteriores.
 export default function Notificaciones() {
   const { usuario } = useUsuario();
   const { actualizar } = useNotificaciones();
-  const pedir = useCallback(async () => {
-    const { resultados: lista } = await getNotificaciones(usuario.id, { limite: 50 });
+  const pedirPagina = useCallback(async (pagina) => {
+    const respuesta = await getNotificaciones(usuario.id, { pagina, limite: LIMITE });
     // "Hoy" y "Ayer" se calculan al pedir, no al dibujar.
     const ahora = Date.now();
-    return lista.map((notificacion) => ({ ...notificacion, cuando: formatCuando(notificacion.fecha, ahora) }));
+    const resultados = respuesta.resultados
+      .map((notificacion) => ({ ...notificacion, cuando: formatCuando(notificacion.fecha, ahora) }));
+    return { ...respuesta, resultados };
   }, [usuario.id]);
-  const { data: notificaciones, loading, error, recargar } = useCarga(pedir);
+  const {
+    items: notificaciones, total, hayMas, extra, loading, recargando, error, cargandoMas, errorMas, cargarMas, recargar,
+  } = usePaginado(pedirPagina);
 
   const [marcandoTodas, setMarcandoTodas] = useState(false);
   const [errorMarcar, setErrorMarcar] = useState(null);
@@ -73,7 +82,8 @@ export default function Notificaciones() {
     );
   }
 
-  const hayNuevas = notificaciones.some((notificacion) => !notificacion.leida);
+  // Según todas las nuevas, no solo las cargadas.
+  const hayNuevas = extra.noLeidas > 0;
   const secciones = [
     { titulo: 'Nuevas', data: notificaciones.filter((notificacion) => !notificacion.leida) },
     { titulo: 'Anteriores', data: notificaciones.filter((notificacion) => notificacion.leida) },
@@ -107,7 +117,21 @@ export default function Notificaciones() {
           <NotificacionFila notificacion={item} onPress={() => abrirNotificacion(item)} />
         )}
         stickySectionHeadersEnabled={false}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+        onEndReached={cargarMas}
+        // Las filas son cortas: con un umbral más grande la segunda página se pediría al abrir.
+        onEndReachedThreshold={0.1}
+        refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
+        ListFooterComponent={
+          <PieLista
+            cargandoMas={cargandoMas}
+            errorMas={errorMas}
+            hayMas={hayMas}
+            varias={total > LIMITE}
+            onReintentar={cargarMas}
+            cargando="Cargando más notificaciones…"
+            fin={`Ya viste las ${total} notificaciones`}
+          />
+        }
         ListEmptyComponent={
           <View style={styles.vacio}>
             <Ionicons name="notifications-outline" size={36} color={colors.textMuted} />

@@ -1,5 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+// Lo que no es la lista ni los datos de la página: los campos propios de cada listado.
+function extraDe({ resultados: _resultados, pagina: _pagina, limite: _limite, total: _total, hayMas: _hayMas, ...extra }) {
+  return extra;
+}
+
 // Como useCarga, pero para los listados que el backend devuelve de a páginas
 // ({ resultados, pagina, limite, total, hayMas }). pedirPagina(n) es una función async
 // que pide la página n; pasarla con useCallback: cuando cambia (otra búsqueda, otros
@@ -9,6 +14,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 //   no hay más, si ya está pidiendo una o si la primera página todavía no llegó.
 // - recargar: vuelve a la página 1 sin borrar lo que se ve (recargando = true).
 // - errorMas: si falló una página que no es la primera; cargarMas la vuelve a pedir.
+// - extra: los campos propios del listado que vinieron en la última página (ej: noLeidas).
 export function usePaginado(pedirPagina) {
   const [intento, setIntento] = useState(0);
   // La última respuesta, con el pedido y el intento a los que corresponde.
@@ -31,6 +37,7 @@ export function usePaginado(pedirPagina) {
           pagina: 1,
           total: respuesta.total,
           hayMas: respuesta.hayMas,
+          extra: extraDe(respuesta),
           error: null,
           cargandoMas: false,
           errorMas: null,
@@ -39,7 +46,7 @@ export function usePaginado(pedirPagina) {
       (e) => {
         if (!vigente) return;
         setLista((anterior) => ({
-          ...(anterior ?? { items: null, pagina: 0, total: 0, hayMas: false, cargandoMas: false, errorMas: null }),
+          ...(anterior ?? { items: null, pagina: 0, total: 0, hayMas: false, extra: {}, cargandoMas: false, errorMas: null }),
           pedirPagina,
           intento,
           error: e.message,
@@ -79,6 +86,7 @@ export function usePaginado(pedirPagina) {
             pagina: siguiente,
             total: respuesta.total,
             hayMas: respuesta.hayMas,
+            extra: extraDe(respuesta),
             cargandoMas: false,
           };
         });
@@ -100,6 +108,7 @@ export function usePaginado(pedirPagina) {
     items: lista?.items ?? null,
     total: lista?.total ?? 0,
     hayMas: lista?.hayMas ?? false,
+    extra: lista?.extra ?? {},
     loading,
     // Se está volviendo a pedir la misma lista (tirar para recargar): se puede seguir mostrando.
     recargando: loading && vigente,
