@@ -66,4 +66,4 @@
 - [x] Mis eventos de a páginas, con filtro Próximos / Ya realizados / Con mensajes nuevos (`GET /usuarios/:id/eventos`)
 - [x] Mis compras de a páginas, con el orden y el filtro por estado en el backend (`GET /compras`)
 - [x] Ventas de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras`)
-- [ ] Bandeja de mensajes de un evento de a páginas (opcional)
+- [x] Bandeja de mensajes de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras?conMensajes=true`)

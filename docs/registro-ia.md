@@ -1061,3 +1061,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Dos tests de cupo contaban todas las compras del Rock y fallaron con las ventas nuevas del seed. Se cambiaron para usar solo las dos compras que les importan, así no dependen de cuántas ventas tenga el seed.
   - El caso de error de "Ver más" (sin conexión) no se probó en el emulador; usa el mismo `errorMas` del hook que las otras pantallas.
 - **Aprendizaje:** los tests que dependen de contar los datos del seed se rompen cada vez que el seed crece; conviene que usen los documentos concretos que les importan.
+
+### 2026-11-12 · Bandeja de mensajes de a páginas
+- **Tarea:** Paginación: la bandeja de mensajes de un evento de a páginas, con "Ver más"
+- **Herramienta / skill:** Claude Code, , , , , - **Pedido (prompt):** "si y quiero que mantengamos el boton de ver mas en todas las otras pantallas, porque alguna al bajar recarga solo y en esta es tocando ver mas, prefiero esta solucion".
+- **Resultado:**
+  - : solo las compras con chat, primero las que tienen mensajes sin leer y después por el último mensaje (desempate por id), de a páginas y con  (las conversaciones sin leer de todas las páginas). Sin el parámetro sigue siendo Ventas. Función de dominio  con dos tests.
+  - Seed: 10 de las ventas nuevas del Rock traen una pregunta y la respuesta de Lucía, ya leídas y de hace más de 4 días (12 conversaciones, 1 sin leer; no cambian la campana ni Mis eventos).
+  - App:  usa  y el botón "Ver más" de ; el orden, el filtro y la cuenta de sin leer pasaron de la app al backend. Boceto .
+  - La IA lo probó en el emulador con Lucía: 10 conversaciones con la de Juan arriba, "Ver más (quedan 2)", "Ya viste las 12 conversaciones" y, al volver del chat de Juan, el encabezado sin "1 sin leer".
+- **Bien:** el usuario eligió el botón "Ver más" como forma única de paginar en toda la app, en lugar del scroll infinito; queda como la subtarea siguiente.
+- **Corregido / problemas:**
+  - Un test del orden ponía el mensaje nuevo antes de la última lectura de Lucía, así que contaba como leído; se fechó una hora después de esa lectura.
+  - Otro test contaba las compras del Rock, pero un test anterior compra una entrada; se dejó de depender del total.
+  - No se probó la vista dividida (tablet) ni el error de "Ver más" sin conexión.
+- **Aprendizaje:** los tests comparten el seed en memoria: los que corren antes pueden agregar datos, así que conviene no contar totales.

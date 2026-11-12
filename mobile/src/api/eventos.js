@@ -29,6 +29,8 @@ export function crearEvento(datos) {
 // Caso de uso 2: las compras del evento en cualquier estado, de la más reciente a la
 // más vieja. Solo para el organizador; las disponibles por tipo salen de getEvento.
 // Vienen de a páginas: { resultados, pagina, limite, total, hayMas }.
-export function getVentasEvento(id, { pagina = 1, limite = 10 } = {}) {
-  return request(`/eventos/${id}/compras?pagina=${pagina}&limite=${limite}`);
+// Con conMensajes es la bandeja de mensajes: solo las compras con chat, primero las que
+// tienen mensajes sin leer, y la página suma noLeidas (conversaciones sin leer en total).
+export function getVentasEvento(id, { conMensajes, pagina = 1, limite = 10 } = {}) {
+  return request(`/eventos/${id}/compras${queryString({ conMensajes, pagina, limite })}`);
 }

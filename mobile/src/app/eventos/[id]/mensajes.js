@@ -4,9 +4,11 @@ import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { getEvento, getVentasEvento } from '../../../api/eventos.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
 import { useCarga } from '../../../hooks/useCarga.js';
+import { usePaginado } from '../../../hooks/usePaginado.js';
 import { Avatar } from '../../../components/Avatar.js';
 import { Conversacion } from '../../../components/Conversacion.js';
 import { PantallaCarga } from '../../../components/Carga.js';
+import { PieLista } from '../../../components/PieLista.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { EstadoBadge } from '../../../components/EstadoBadge.js';
 import { tieneNoLeidos } from '../../../components/AvisoMensaje.js';
@@ -15,9 +17,12 @@ import { colors, fontSize, spacing } from '../../../theme.js';
 
 // Desde este ancho la lista y el chat se ven lado a lado (tablet o celular en horizontal).
 const ANCHO_DIVIDIDO = 700;
+// Conversaciones por página: las siguientes se piden con "Ver más".
+const LIMITE = 10;
 
 // Los mensajes de un evento, para su organizador: una conversación por compra con
-// mensajes. Primero las que tienen mensajes sin leer y después la más reciente.
+// mensajes. Primero las que tienen mensajes sin leer y después la más reciente (el orden
+// y la cuenta de sin leer vienen del backend). Se cargan de a 10 con "Ver más".
 // En pantallas angostas, tocar una abre el chat; en anchas, el chat se ve a la derecha.
 export default function MensajesEvento() {
   const { id } = useLocalSearchParams();
@@ -25,11 +30,24 @@ export default function MensajesEvento() {
   const { width } = useWindowDimensions();
   const dividido = width >= ANCHO_DIVIDIDO;
 
-  const pedir = useCallback(async () => {
-    const [evento, { resultados: compras }] = await Promise.all([getEvento(id), getVentasEvento(id, { limite: 50 })]);
-    return { evento, compras };
-  }, [id]);
-  const { data, loading, error, recargar } = useCarga(pedir);
+  const pedirEvento = useCallback(() => getEvento(id), [id]);
+  const cabecera = useCarga(pedirEvento);
+  const pedirConversaciones = useCallback(
+    (pagina) => getVentasEvento(id, { conMensajes: true, pagina, limite: LIMITE }),
+    [id],
+  );
+  const bandeja = usePaginado(pedirConversaciones);
+
+  const { recargar: recargarEvento } = cabecera;
+  const { recargar: recargarBandeja } = bandeja;
+  const recargar = useCallback(() => {
+    recargarEvento();
+    recargarBandeja();
+  }, [recargarEvento, recargarBandeja]);
+  const evento = cabecera.data;
+  const conversaciones = bandeja.items;
+  const error = cabecera.error ?? bandeja.error;
+  const loading = cabecera.loading || bandeja.loading;
   // La conversación abierta a la derecha (solo en pantallas anchas).
   const [elegidaId, setElegidaId] = useState(null);
 
@@ -45,10 +63,10 @@ export default function MensajesEvento() {
     }, [recargar]),
   );
 
-  if (loading && !data) {
+  if ((cabecera.loading && !evento) || (bandeja.loading && !conversaciones)) {
     return <PantallaCarga mensaje="Cargando los mensajes…" />;
   }
-  if (error || !data) {
+  if (error || !evento || !conversaciones) {
     return (
       <View style={styles.centrado}>
         <EstadoCarga loading={loading} error={error} onRetry={recargar} />
@@ -56,9 +74,7 @@ export default function MensajesEvento() {
     );
   }
 
-  const { evento } = data;
-  const conversaciones = ordenar(data.compras.filter((compra) => compra.mensajes.length > 0));
-  const sinLeer = conversaciones.filter(tieneNoLeidos).length;
+  const sinLeer = bandeja.extra.noLeidas ?? 0;
   // En pantallas anchas, si no se eligió ninguna (o ya no está), se abre la primera.
   const elegida = conversaciones.find((compra) => compra.id === elegidaId) ?? conversaciones[0];
 
@@ -83,9 +99,9 @@ export default function MensajesEvento() {
         <View style={styles.encabezado}>
           <Text style={styles.etiqueta}>Mensajes</Text>
           <Text style={styles.nombre}>{evento.nombre}</Text>
-          {conversaciones.length > 0 ? (
+          {bandeja.total > 0 ? (
             <Text style={styles.resumen}>
-              {conversaciones.length === 1 ? '1 conversación' : `${conversaciones.length} conversaciones`}
+              {bandeja.total === 1 ? '1 conversación' : `${bandeja.total} conversaciones`}
               {sinLeer > 0 ? ` · ${sinLeer} sin leer` : ''}
             </Text>
           ) : null}
@@ -100,6 +116,18 @@ export default function MensajesEvento() {
         />
       )}
       refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+      ListFooterComponent={
+        <PieLista
+          conBoton
+          cargandoMas={bandeja.cargandoMas}
+          errorMas={bandeja.errorMas}
+          hayMas={bandeja.hayMas}
+          varias={bandeja.total > LIMITE}
+          onReintentar={bandeja.cargarMas}
+          restantes={bandeja.total - conversaciones.length}
+          fin={`Ya viste las ${bandeja.total} conversaciones`}
+        />
+      }
       ListEmptyComponent={
         <View style={styles.vacio}>
           <Text style={styles.vacioTitulo}>Todavía nadie te escribió</Text>
@@ -135,15 +163,6 @@ export default function MensajesEvento() {
         )}
       </View>
     </View>
-  );
-}
-
-// Primero las que tienen mensajes sin leer; dentro de cada grupo, la del
-// último mensaje más reciente primero.
-function ordenar(compras) {
-  const ultimo = (compra) => new Date(compra.mensajes.at(-1).enviado).getTime();
-  return [...compras].sort(
-    (a, b) => Number(tieneNoLeidos(b)) - Number(tieneNoLeidos(a)) || ultimo(b) - ultimo(a),
   );
 }
 
