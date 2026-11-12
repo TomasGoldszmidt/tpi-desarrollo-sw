@@ -2,7 +2,8 @@ import * as eventoRepository from '../persistence/repositories/eventoRepository.
 import * as compraRepository from '../persistence/repositories/compraRepository.js';
 import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador } from '../domain/evento.js';
+import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador,
+  FILTROS_ORGANIZADOR, filtroOrganizador, cantidadesOrganizador } from '../domain/evento.js';
 import { cantidadConMensajesNoLeidos, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
@@ -90,17 +91,29 @@ export async function getById(req, res) {
 }
 
 // GET /usuarios/:id/eventos: los eventos que organiza, incluidos los pasados. Son públicos.
-// Cada uno trae cuántas compras tienen mensajes que el organizador no leyó.
+// Cada uno trae cuántas compras tienen mensajes que el organizador no leyó. Van de a
+// páginas, con un filtro opcional y cuántos hay con cada filtro (los chips de la app).
 export async function listByOrganizador(req, res) {
   const id = requireId(req.params.id);
   const organizador = usuarioRepository.findById(id);
   if (!organizador) throw new NotFoundError(`No existe el usuario ${id}`);
-  res.status(200).json(eventosOrganizados(organizador).map((evento) => ({
+  const filtro = optional(req.query.filtro, (v) => {
+    if (!FILTROS_ORGANIZADOR.includes(v)) {
+      throw new ValidationError(`El campo filtro tiene que ser uno de: ${FILTROS_ORGANIZADOR.join(', ')}`);
+    }
+    return v;
+  });
+  const pagina = parsePagina(req.query);
+
+  const ahora = new Date();
+  const eventos = eventosOrganizados(organizador, ahora).map((evento) => ({
     ...evento,
     conMensajesNoLeidos: cantidadConMensajesNoLeidos(
       compraRepository.findByEvento(evento.id), eventoRepository.findById(evento.id), organizador,
     ),
-  })));
+  }));
+  const filtrados = eventos.filter((evento) => filtroOrganizador(evento, filtro, ahora));
+  res.status(200).json(paginar(filtrados, pagina, { cantidades: cantidadesOrganizador(eventos, ahora) }));
 }
 
 // Caso de uso 2. Las disponibles por tipo salen de GET /eventos/:id.

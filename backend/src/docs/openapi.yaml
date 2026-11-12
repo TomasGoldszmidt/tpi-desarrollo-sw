@@ -262,10 +262,13 @@ paths:
       tags: [Usuarios, Eventos]
       summary: Ver los eventos de un organizador
       description: >-
-        Los eventos que organiza el usuario, incluidos los que ya se realizaron,
-        ordenados por fecha. La app lo usa con el usuario activo para entrar a las
-        ventas de cada evento. Cada evento trae cuántas compras tienen mensajes que el
-        organizador todavía no leyó (`conMensajesNoLeidos`). Si no organiza nada, devuelve [].
+        Los eventos que organiza el usuario, incluidos los que ya se realizaron:
+        primero los próximos, del más cercano al más lejano, y después los realizados,
+        del más reciente al más viejo (si empatan, por id). La app lo usa con el usuario
+        activo para entrar a las ventas de cada evento. Cada evento trae cuántas compras
+        tienen mensajes que el organizador todavía no leyó (`conMensajesNoLeidos`).
+        Van de a páginas, con un filtro opcional; `cantidades` dice cuántos hay con cada
+        filtro, sobre todos sus eventos. Si no organiza nada, la página viene vacía.
       operationId: listEventosOrganizador
       parameters:
         - name: id
@@ -274,17 +277,56 @@ paths:
           schema:
             type: integer
           example: 1
+        - name: filtro
+          in: query
+          description: Sin filtro trae todos. conMensajesNuevos son los que tienen conMensajesNoLeidos mayor a 0.
+          schema:
+            type: string
+            enum: [proximos, realizados, conMensajesNuevos]
+          example: proximos
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
       responses:
         '200':
-          description: Los eventos que organiza (puede ser vacío)
+          description: Una página de los eventos que organiza (puede ser vacía)
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EventoOrganizado'
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    required: [resultados, cantidades]
+                    properties:
+                      resultados:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/EventoOrganizado'
+                      cantidades:
+                        type: object
+                        description: Cuántos eventos hay con cada filtro (los números de los chips de la app)
+                        properties:
+                          todos:
+                            type: integer
+                            example: 15
+                          proximos:
+                            type: integer
+                            example: 10
+                          realizados:
+                            type: integer
+                            example: 5
+                          conMensajesNuevos:
+                            type: integer
+                            example: 2
         '400':
-          $ref: '#/components/responses/IdInvalido'
+          description: >-
+            El id no es válido, el filtro no es uno de los permitidos (o viene repetido),
+            o pagina o limite no son enteros en rango
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'El campo filtro tiene que ser uno de: proximos, realizados, conMensajesNuevos'
         '404':
           description: No existe el usuario
           content:

@@ -15,7 +15,10 @@ import { colors, fontSize, spacing } from '../../theme.js';
 // ventas de cada uno, y el botón para crear uno nuevo.
 export default function Eventos() {
   const { usuario } = useUsuario();
-  const pedir = useCallback(() => getEventosOrganizador(usuario.id), [usuario.id]);
+  const pedir = useCallback(
+    () => getEventosOrganizador(usuario.id, { limite: 50 }).then((pagina) => pagina.resultados),
+    [usuario.id],
+  );
   const { data: eventos, loading, error, recargar } = useCarga(pedir);
 
   // Se vuelve a pedir al volver a la pestaña, así aparece un evento recién creado.
@@ -64,7 +67,7 @@ export default function Eventos() {
   );
 }
 
-// La API los devuelve ordenados por fecha: primero los próximos y al final los ya realizados.
+// La API los devuelve primero los próximos y al final los ya realizados.
 function separarPorFecha(eventos) {
   const ahora = Date.now();
   const proximos = eventos.filter((evento) => new Date(evento.fecha).getTime() >= ahora);

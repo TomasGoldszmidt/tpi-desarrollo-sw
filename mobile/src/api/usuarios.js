@@ -25,7 +25,10 @@ export function getReseniasOrganizador(id, { pagina = 1, limite = 10 } = {}) {
   return request(`/usuarios/${id}/resenias?pagina=${pagina}&limite=${limite}`);
 }
 
-// Los eventos que organiza, incluidos los que ya se realizaron, ordenados por fecha.
-export function getEventosOrganizador(id) {
-  return request(`/usuarios/${id}/eventos`);
+// Los eventos que organiza, incluidos los que ya se realizaron: primero los próximos y
+// después los realizados. filtro: 'proximos' | 'realizados' | 'conMensajesNuevos' (o nada).
+// Vienen de a páginas, con cantidades: cuántos hay con cada filtro.
+export function getEventosOrganizador(id, { filtro, pagina = 1, limite = 10 } = {}) {
+  const conFiltro = filtro ? `&filtro=${filtro}` : '';
+  return request(`/usuarios/${id}/eventos?pagina=${pagina}&limite=${limite}${conFiltro}`);
 }

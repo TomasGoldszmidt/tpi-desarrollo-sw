@@ -122,10 +122,36 @@ export function buscarEventos({ texto, categoriaId, precioMin, precioMax, orden 
 }
 
 // Los eventos que organiza el usuario, incluidos los pasados: los necesita para ver
-// las ventas y marcar entradas como utilizadas.
-/** @param {Usuario} organizador */
-export function eventosOrganizados(organizador) {
-  return resumenes(eventoRepository.findByOrganizador(organizador.id)).sort(porFecha);
+// las ventas y marcar entradas como utilizadas. Primero los próximos, del más cercano al
+// más lejano, y después los realizados, del más reciente al más viejo (como historial).
+// Mis eventos va de a páginas: el orden tiene que estar resuelto acá y no en la app.
+/** @param {Usuario} organizador @param {Date} [ahora] */
+export function eventosOrganizados(organizador, ahora = new Date()) {
+  const eventos = resumenes(eventoRepository.findByOrganizador(organizador.id));
+  const proximos = eventos.filter((evento) => !yaSeRealizo(evento, ahora)).sort(porFecha);
+  const realizados = eventos.filter((evento) => yaSeRealizo(evento, ahora)).sort((a, b) => porFecha(b, a));
+  return [...proximos, ...realizados];
+}
+
+// Los chips de Mis eventos. conMensajesNuevos usa conMensajesNoLeidos, que se calcula para
+// cada evento con sus compras (ver cantidadConMensajesNoLeidos en compra.js).
+export const FILTROS_ORGANIZADOR = Object.freeze(['proximos', 'realizados', 'conMensajesNuevos']);
+
+/** @param {{ fecha: Date, conMensajesNoLeidos: number }} evento @param {string} [filtro] @param {Date} [ahora] */
+export function filtroOrganizador(evento, filtro, ahora = new Date()) {
+  if (filtro === 'proximos') return !yaSeRealizo(evento, ahora);
+  if (filtro === 'realizados') return yaSeRealizo(evento, ahora);
+  if (filtro === 'conMensajesNuevos') return evento.conMensajesNoLeidos > 0;
+  return true;
+}
+
+// Cuántos eventos hay con cada filtro, para los números de los chips.
+export function cantidadesOrganizador(eventos, ahora = new Date()) {
+  const cantidades = { todos: eventos.length };
+  for (const filtro of FILTROS_ORGANIZADOR) {
+    cantidades[filtro] = eventos.filter((evento) => filtroOrganizador(evento, filtro, ahora)).length;
+  }
+  return cantidades;
 }
 
 // Los eventos favoritos del usuario, incluidos los que ya se realizaron, ordenados por fecha.

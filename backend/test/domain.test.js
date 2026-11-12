@@ -3,7 +3,10 @@ import assert from 'node:assert/strict';
 import { loadSeed } from '../src/persistence/seed.js';
 import * as compraRepository from '../src/persistence/repositories/compraRepository.js';
 import { calcularDisponibles, hayCupoPara } from '../src/domain/tipoEntrada.js';
-import { tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador } from '../src/domain/evento.js';
+import {
+  tuPrecioEstaEntre, crearEvento, detalleEvento, buscarEventos, precioDesde, eventosOrganizados, verificarOrganizador,
+  filtroOrganizador, cantidadesOrganizador,
+} from '../src/domain/evento.js';
 import { calcularPuntajes, crearResenia, perfilUsuario, puntajeDe, reseniaDeCompra, reseniasDeOrganizador } from '../src/domain/resenia.js';
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
@@ -344,10 +347,28 @@ describe('ventas del organizador', () => {
   const { rock, obra, festival, acustico } = seed.eventos;
   const delSeed = new Set(Object.values(seed.eventos).map((e) => e.id));
 
-  it('eventosOrganizados trae solo los suyos, con los pasados, por fecha', () => {
-    const ids = eventosOrganizados(lucia).map((e) => e.id).filter((id) => delSeed.has(id));
-    assert.deepEqual(ids, [acustico.id, obra.id, rock.id, festival.id]);
-    assert.equal(eventosOrganizados(lucia).every((e) => e.organizador.id === lucia.id), true);
+  it('eventosOrganizados trae solo los suyos: primero los próximos y después los realizados', () => {
+    const lista = eventosOrganizados(lucia);
+    const ids = lista.map((e) => e.id).filter((id) => delSeed.has(id));
+    assert.deepEqual(ids, [obra.id, rock.id, festival.id, acustico.id]);
+    assert.equal(lista.every((e) => e.organizador.id === lucia.id), true);
+    // Los realizados, del más reciente al más viejo: el acústico (hace 15 días) es el primero.
+    const realizados = lista.filter((e) => e.fecha <= new Date());
+    assert.equal(realizados[0].id, acustico.id);
+    const fechas = realizados.map((e) => e.fecha.getTime());
+    assert.deepEqual(fechas, [...fechas].sort((a, b) => b - a));
+  });
+
+  it('filtroOrganizador y cantidadesOrganizador separan próximos, realizados y con mensajes nuevos', () => {
+    const lista = eventosOrganizados(lucia).map((e) => ({ ...e, conMensajesNoLeidos: e.id === rock.id ? 1 : 0 }));
+    assert.deepEqual(lista.filter((e) => filtroOrganizador(e, 'conMensajesNuevos')).map((e) => e.id), [rock.id]);
+    assert.ok(lista.filter((e) => filtroOrganizador(e, 'realizados')).some((e) => e.id === acustico.id));
+    assert.ok(!lista.filter((e) => filtroOrganizador(e, 'proximos')).some((e) => e.id === acustico.id));
+    assert.equal(lista.filter((e) => filtroOrganizador(e, undefined)).length, lista.length);
+    const cantidades = cantidadesOrganizador(lista);
+    assert.equal(cantidades.todos, lista.length);
+    assert.equal(cantidades.proximos + cantidades.realizados, cantidades.todos);
+    assert.equal(cantidades.conMensajesNuevos, 1);
   });
 
   it('solo el organizador ve las ventas de su evento', () => {
