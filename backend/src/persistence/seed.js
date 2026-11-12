@@ -133,8 +133,9 @@ export function loadSeed() {
     ['Improvisación teatral', 'Una obra distinta cada noche, armada con el público', 'Teatro La Comedia, Rodríguez Peña 1062, CABA', 'teatro', 'martin', 45, 21, 11000],
     ['Festival Electrónico', 'Una noche con DJs nacionales e internacionales', 'Costanera Sur, Av. Tristán Achával Rodríguez, CABA', 'festivales', 'lucia', 75, 22, 55000],
   ];
+  const eventosNuevos = {};
   for (const [nombre, descripcion, lugar, categoria, organizador, dias, hora, precio] of masEventos) {
-    eventoRepository.create({
+    eventosNuevos[nombre] = eventoRepository.create({
       nombre,
       descripcion,
       lugar,
@@ -238,6 +239,24 @@ export function loadSeed() {
   compras.sofiaRock = compraRepository.marcarMensajesLeidos(compras.sofiaRock.id, 'organizador', daysFromNow(-4, 11));
   compras.juanRockReembolsada = compraRepository.marcarMensajesLeidos(compras.juanRockReembolsada.id, 'comprador', daysFromNow(-3, 10));
   compras.juanBackstage = compraRepository.marcarMensajesLeidos(compras.juanBackstage.id, 'comprador', daysFromNow(-1, 19));
+
+  // Más compras de Sofía, para que Mis compras tenga más de una página (14 en total).
+  // Son de hace más de 4 días: no suman notificaciones nuevas para Lucía ni Martín.
+  const masComprasDeSofia = [
+    ['Hamlet', 1, -9, []],
+    ['El principito', 2, -7, []],
+    ['Jazz en el Bebop', 1, -12, [[CONFIRMADA, sofia, 0]]],
+    ['Tango en la Usina', 2, -15, [[CONFIRMADA, sofia, 0]]],
+    ['Final del Torneo de Vóley', 1, -20, [[CANCELADA, sofia, 1]]],
+    ['Cumbia en el Konex', 2, -18, [[CANCELADA, sofia, 2]]],
+  ];
+  for (const [nombre, cantidad, dias, cambios] of masComprasDeSofia) {
+    createCompra({
+      comprador: sofia, evento: eventosNuevos[nombre], tipoEntradaId: 1, cantidad,
+      creada: daysFromNow(dias, 12),
+      cambios: cambios.map(([estado, usuario, despues]) => [estado, usuario, daysFromNow(dias + despues, 13)]),
+    });
+  }
 
   // Todos leyeron sus notificaciones hace unos días: lo posterior aparece como nuevo
   // (Lucía tiene 4, Martín 2, Sofía 1 y Juan ninguna).

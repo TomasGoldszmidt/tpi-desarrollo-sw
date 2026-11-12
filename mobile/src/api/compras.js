@@ -6,10 +6,12 @@ export function crearCompra({ eventoId, tipoEntradaId, cantidad }) {
   return request('/compras', { method: 'POST', body: { eventoId, tipoEntradaId, cantidad } });
 }
 
-// Caso de uso 1: las compras del usuario activo, de la más reciente a la más vieja,
-// con diasRestantes si están CONFIRMADAS.
-export function getMisCompras() {
-  return request('/compras');
+// Caso de uso 1: las compras del usuario activo, de la más importante a la menos (primero
+// por estado), con diasRestantes si están CONFIRMADAS. estado filtra (opcional).
+// Vienen de a páginas, con cantidades: cuántas hay en cada estado.
+export function getMisCompras({ estado, pagina = 1, limite = 10 } = {}) {
+  const conEstado = estado ? `&estado=${estado}` : '';
+  return request(`/compras?pagina=${pagina}&limite=${limite}${conEstado}`);
 }
 
 // Detalle de una compra: la ven el comprador y el organizador del evento.

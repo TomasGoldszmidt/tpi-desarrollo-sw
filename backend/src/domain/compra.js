@@ -134,14 +134,55 @@ export function masRecientesPrimero(compras) {
   return [...compras].sort((a, b) => fechaDeCompra(b) - fechaDeCompra(a));
 }
 
+// Caso de uso 1: Mis compras, de la más importante a la menos. Primero por estado
+// (pendiente, confirmada, utilizada, cancelada, reembolsada) y dentro de cada estado:
+// - pendientes y confirmadas: el evento más próximo primero; las de eventos que ya
+//   pasaron van al final de su estado, la más reciente primero;
+// - utilizadas, canceladas y reembolsadas: como historial, la más reciente primero.
+// Si empatan, por id. Recibe detalles (con evento.fecha); va de a páginas, así que el
+// orden tiene que estar resuelto acá y no en la app.
+export const ORDEN_ESTADOS = Object.freeze([
+  EstadoCompra.PENDIENTE, EstadoCompra.CONFIRMADA, EstadoCompra.UTILIZADA, EstadoCompra.CANCELADA, EstadoCompra.REEMBOLSADA,
+]);
+const ESTADOS_ACTIVOS = [EstadoCompra.PENDIENTE, EstadoCompra.CONFIRMADA];
+
+/** @template {{ id: number, estado: string, evento: { fecha: Date } }} T @param {T[]} compras @param {Date} [ahora] @returns {T[]} */
+export function ordenarPorImportancia(compras, ahora = new Date()) {
+  return [...compras].sort((a, b) => {
+    const porEstado = ORDEN_ESTADOS.indexOf(a.estado) - ORDEN_ESTADOS.indexOf(b.estado);
+    if (porEstado !== 0) return porEstado;
+
+    const fechaA = a.evento.fecha.getTime();
+    const fechaB = b.evento.fecha.getTime();
+    const porFecha = (() => {
+      if (!ESTADOS_ACTIVOS.includes(a.estado)) return fechaB - fechaA;
+      const pasoA = fechaA < ahora.getTime();
+      const pasoB = fechaB < ahora.getTime();
+      if (pasoA !== pasoB) return pasoA ? 1 : -1;
+      return pasoA ? fechaB - fechaA : fechaA - fechaB;
+    })();
+    return porFecha || b.id - a.id;
+  });
+}
+
+// Cuántas compras hay en cada estado (solo los que tienen alguna), para los chips.
+/** @param {{ estado: string }[]} compras */
+export function cantidadesPorEstado(compras) {
+  const cantidades = { todas: compras.length };
+  for (const compra of compras) {
+    cantidades[compra.estado] = (cantidades[compra.estado] ?? 0) + 1;
+  }
+  return cantidades;
+}
+
 // La compra la ven el comprador y el organizador del evento, que también usa su chat.
 /** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {boolean} */
 export function puedeVer(compra, evento, usuario) {
   return esComprador(usuario, compra) || esOrganizador(usuario, compra, evento);
 }
 
-// Forma de la compra para la app: resúmenes del evento, el tipo de entrada y el comprador
-// en lugar de sus ids, y los días que faltan (calculados). El historial y el chat van tal cual.
+// Forma de la compra para la app: resúmenes del evento (con su organizador), el tipo de
+// entrada y el comprador en lugar de sus ids, y los días que faltan (calculados). El historial y el chat van tal cual.
 // Con `lector` (quien pide), suma cuántos mensajes del chat todavía no leyó.
 /**
  * @param {Compra} compra @param {Evento} evento @param {Usuario} comprador
@@ -150,9 +191,18 @@ export function puedeVer(compra, evento, usuario) {
 export function detalleCompra(compra, evento, comprador, lector = null, ahora = new Date()) {
   const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, mensajesLeidosHasta: _leidos, ...resto } = compra;
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
+  // El nombre del organizador lo usa Mis compras para el aviso de mensajes ("Lucía te escribió").
+  const organizador = usuarioRepository.findById(evento.organizadorId);
   return {
     id: compra.id,
-    evento: { id: evento.id, nombre: evento.nombre, fecha: evento.fecha, lugar: evento.lugar, organizadorId: evento.organizadorId },
+    evento: {
+      id: evento.id,
+      nombre: evento.nombre,
+      fecha: evento.fecha,
+      lugar: evento.lugar,
+      organizadorId: evento.organizadorId,
+      organizador: { id: organizador.id, nombre: organizador.nombre, apellido: organizador.apellido },
+    },
     tipoEntrada: { id: tipoEntrada.id, nombre: tipoEntrada.nombre, precio: tipoEntrada.precio },
     comprador: { id: comprador.id, nombre: comprador.nombre, apellido: comprador.apellido },
     ...resto,

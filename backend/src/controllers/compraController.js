@@ -2,12 +2,13 @@ import * as compraRepository from '../persistence/repositories/compraRepository.
 import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import {
-  comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
-  leerMensajes,
+  comprar, detalleCompra, actualizarEstado, estadoAlCancelar, puedeVer, enviarMensaje, mensajesConAutor,
+  leerMensajes, ordenarPorImportancia, cantidadesPorEstado, ORDEN_ESTADOS,
 } from '../domain/compra.js';
 import { EstadoCompra } from '../domain/estadoCompra.js';
 import { reseniaDeCompra } from '../domain/resenia.js';
-import { ForbiddenError, NotFoundError } from '../http/errors.js';
+import { ForbiddenError, NotFoundError, ValidationError } from '../http/errors.js';
+import { paginar, parsePagina } from '../http/pagination.js';
 import { requireId, requireInteger, requireString } from '../http/validation.js';
 
 // lector: quien pide, para contar los mensajes que todavía no leyó.
@@ -41,10 +42,20 @@ function changeEstado(destino) {
   };
 }
 
-// Caso de uso 1: las compras del usuario activo como comprador, de la más reciente a la más vieja.
+// Caso de uso 1: las compras del usuario activo como comprador, de la más importante a la
+// menos (ver ordenarPorImportancia), de a páginas. ?estado= filtra; cantidades cuenta todas.
 export async function list(req, res) {
-  const compras = masRecientesPrimero(compraRepository.findByComprador(req.usuario.id));
-  res.status(200).json(compras.map((compra) => toDetalle(compra, req.usuario)));
+  const { estado } = req.query;
+  if (estado !== undefined && estado !== '' && !ORDEN_ESTADOS.includes(estado)) {
+    throw new ValidationError(`El campo estado tiene que ser uno de: ${ORDEN_ESTADOS.join(', ')}`);
+  }
+  const pagina = parsePagina(req.query);
+
+  const compras = ordenarPorImportancia(
+    compraRepository.findByComprador(req.usuario.id).map((compra) => toDetalle(compra, req.usuario)),
+  );
+  const filtradas = estado ? compras.filter((compra) => compra.estado === estado) : compras;
+  res.status(200).json(paginar(filtradas, pagina, { cantidades: cantidadesPorEstado(compras) }));
 }
 
 export async function getById(req, res) {

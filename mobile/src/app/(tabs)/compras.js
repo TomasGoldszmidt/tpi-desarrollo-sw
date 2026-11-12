@@ -17,7 +17,7 @@ import { colors, fontSize, spacing } from '../../theme.js';
 // y los días que faltan para el evento si están confirmadas.
 // La compra trae solo el id del organizador: los nombres, para el aviso de mensajes, salen de los usuarios.
 async function pedirCompras() {
-  const [compras, usuarios] = await Promise.all([getMisCompras(), getUsuarios()]);
+  const [{ resultados: compras }, usuarios] = await Promise.all([getMisCompras({ limite: 50 }), getUsuarios()]);
   return { compras: ordenarPorImportancia(compras), usuarios: new Map(usuarios.map((u) => [u.id, u])) };
 }
 

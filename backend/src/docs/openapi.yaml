@@ -934,20 +934,62 @@ paths:
       tags: [Compras]
       summary: Listar mis compras
       description: >-
-        Las compras del usuario activo como comprador, de la más reciente a la más
-        vieja. Cada una trae `diasRestantes` si está CONFIRMADA.
+        Las compras del usuario activo como comprador, de la más importante a la menos:
+        primero por estado (PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA);
+        dentro de pendientes y confirmadas, el evento más próximo primero y al final las
+        de eventos que ya pasaron; en los demás estados, la más reciente primero (si
+        empatan, por id). Cada una trae `diasRestantes` si está CONFIRMADA. Van de a
+        páginas, con un filtro opcional por estado; `cantidades` cuenta todas las compras
+        del usuario por estado (solo los estados que tienen alguna).
       operationId: listCompras
       security:
         - usuarioActivo: []
+      parameters:
+        - name: estado
+          in: query
+          description: Sin estado trae todas
+          schema:
+            type: string
+            enum: [PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA]
+          example: CONFIRMADA
+        - $ref: '#/components/parameters/Pagina'
+        - $ref: '#/components/parameters/Limite'
       responses:
         '200':
-          description: Las compras del usuario activo (puede ser vacío)
+          description: Una página de las compras del usuario activo (puede ser vacía)
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/CompraDetalle'
+                allOf:
+                  - $ref: '#/components/schemas/Pagina'
+                  - type: object
+                    required: [resultados, cantidades]
+                    properties:
+                      resultados:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/CompraDetalle'
+                      cantidades:
+                        type: object
+                        description: >-
+                          `todas` y la cantidad de compras en cada estado, solo con los
+                          estados que tienen alguna (los números de los chips de la app)
+                        additionalProperties:
+                          type: integer
+                        example:
+                          todas: 14
+                          PENDIENTE: 3
+                          CONFIRMADA: 3
+                          UTILIZADA: 6
+                          CANCELADA: 2
+        '400':
+          description: El estado no es uno de los permitidos (o viene repetido), o pagina o limite no son enteros en rango
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: 'El campo estado tiene que ser uno de: PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA'
         '401':
           $ref: '#/components/responses/SinUsuarioActivo'
         '500':
@@ -1799,6 +1841,19 @@ components:
             organizadorId:
               type: integer
               example: 1
+            organizador:
+              type: object
+              description: El organizador del evento (Mis compras usa su nombre en el aviso de mensajes)
+              properties:
+                id:
+                  type: integer
+                  example: 1
+                nombre:
+                  type: string
+                  example: Lucía
+                apellido:
+                  type: string
+                  example: Fernández
         tipoEntrada:
           type: object
           properties:

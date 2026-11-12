@@ -12,6 +12,7 @@ import * as reseniaRepository from '../src/persistence/repositories/reseniaRepos
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
   actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+  ordenarPorImportancia, cantidadesPorEstado,
   mensajesNoLeidos, cantidadConMensajesNoLeidos, leerMensajes, rolEnCompra,
 } from '../src/domain/compra.js';
 import { requireString } from '../src/http/validation.js';
@@ -297,7 +298,10 @@ describe('comprar', () => {
     assert.equal(detalle.eventoId, undefined);
     assert.equal(detalle.compradorId, undefined);
     assert.equal(detalle.tipoEntradaId, undefined);
-    assert.deepEqual(detalle.evento, { id: rock.id, nombre: rock.nombre, fecha: rock.fecha, lugar: rock.lugar, organizadorId: lucia.id });
+    assert.deepEqual(detalle.evento, {
+      id: rock.id, nombre: rock.nombre, fecha: rock.fecha, lugar: rock.lugar, organizadorId: lucia.id,
+      organizador: { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández' },
+    });
     assert.deepEqual(detalle.tipoEntrada, { id: 1, nombre: 'Campo', precio: 45000 });
     assert.deepEqual(detalle.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
     assert.equal(detalle.mensajes.length, 2);
@@ -335,6 +339,29 @@ describe('días restantes y quién ve una compra', () => {
     assert.equal(puedeVer(sofiaRock, rock, lucia), true);
     assert.equal(puedeVer(sofiaRock, rock, juan), false);
     assert.equal(puedeVer(sofiaRock, rock, martin), false);
+  });
+
+  it('ordenarPorImportancia: por estado y, en pendientes y confirmadas, el evento más próximo primero', () => {
+    const dia = 24 * 60 * 60 * 1000;
+    const ahora = new Date('2026-11-12T12:00:00Z');
+    const compra = (id, estado, enDias) => ({ id, estado, evento: { fecha: new Date(ahora.getTime() + enDias * dia) } });
+    const lista = [
+      compra(1, 'UTILIZADA', -30),
+      compra(2, 'CONFIRMADA', 20),
+      compra(3, 'PENDIENTE', 10),
+      compra(4, 'CONFIRMADA', 5),
+      compra(5, 'CONFIRMADA', -2), // evento que ya pasó: al final de las confirmadas
+      compra(6, 'REEMBOLSADA', 15),
+      compra(7, 'UTILIZADA', -10), // historial: la más reciente primero
+      compra(8, 'CANCELADA', 3),
+    ];
+    assert.deepEqual(ordenarPorImportancia(lista, ahora).map((c) => c.id), [3, 4, 2, 5, 7, 1, 8, 6]);
+  });
+
+  it('cantidadesPorEstado cuenta todas y solo los estados que aparecen', () => {
+    assert.deepEqual(cantidadesPorEstado([{ estado: 'PENDIENTE' }, { estado: 'UTILIZADA' }, { estado: 'UTILIZADA' }]),
+      { todas: 3, PENDIENTE: 1, UTILIZADA: 2 });
+    assert.deepEqual(cantidadesPorEstado([]), { todas: 0 });
   });
 
   it('detalleCompra incluye diasRestantes', () => {
