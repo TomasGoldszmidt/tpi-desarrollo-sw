@@ -190,7 +190,7 @@ function ConversacionFila({ compra, usuario, elegida, onPress }) {
           {noLeida ? <View style={styles.punto} /> : null}
         </View>
         <View style={styles.compra}>
-          <EstadoBadge estado={compra.estado} />
+          <EstadoBadge estado={compra.estado} chico />
           <Text style={styles.detalle}>
             {compra.tipoEntrada.nombre} × {compra.cantidad}
           </Text>
@@ -214,7 +214,7 @@ function CabeceraChat({ compra }) {
         </Text>
       </View>
       <EstadoBadge estado={compra.estado} />
-      <Pressable onPress={() => router.push(`/compras/${compra.id}`)} hitSlop={8}>
+      <Pressable onPress={() => router.push(`/compras/${compra.id}`)} hitSlop={12} accessibilityRole="button">
         <Text style={styles.verCompra}>Ver compra</Text>
       </Pressable>
     </View>

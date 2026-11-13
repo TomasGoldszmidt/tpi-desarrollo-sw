@@ -5,7 +5,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { getEventosOrganizador } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
+import { useLayout } from '../../hooks/useLayout.js';
+import { Boton } from '../../components/Boton.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
+import { Etiqueta } from '../../components/EstadoBadge.js';
 import { FiltroChips } from '../../components/FiltroChips.js';
 import { PieLista } from '../../components/PieLista.js';
 import { Seccion } from '../../components/Seccion.js';
@@ -16,11 +19,12 @@ import { colors, fontSize, spacing } from '../../theme.js';
 // Eventos por página: las siguientes se piden con "Ver más".
 const LIMITE = 10;
 
-// Casos de uso 2 y 4: los eventos que organiza el usuario activo, para entrar a las
-// ventas de cada uno, y el botón para crear uno nuevo. Vienen de a páginas, primero los
-// próximos y después los realizados, con chips para filtrarlos (los cuenta el backend).
+// Casos de uso 2 y 4: los eventos que organiza el usuario activo, para entrar a las ventas
+// de cada uno, y "Crear" junto al título. Vienen de a páginas, primero los próximos y después
+// los realizados (con su etiqueta), con chips para filtrarlos. En tablet van en grilla.
 export default function Eventos() {
   const { usuario } = useUsuario();
+  const { columnas } = useLayout();
   // Chip elegido (null = Todos). Se mantiene al recargar y al volver a la pestaña.
   const [filtro, setFiltro] = useState(null);
   const pedirPagina = useCallback(async (pagina) => {
@@ -50,11 +54,10 @@ export default function Eventos() {
   );
 
   return (
-    <Seccion titulo="Mis eventos">
-      <Pressable style={styles.boton} onPress={() => router.push('/eventos/nuevo')}>
-        <Ionicons name="add" size={20} color="#FFFFFF" />
-        <Text style={styles.botonTexto}>Crear evento</Text>
-      </Pressable>
+    <Seccion
+      titulo="Mis eventos"
+      accion={<Boton titulo="Crear" icono="add" chico onPress={() => router.push('/eventos/nuevo')} accessibilityLabel="Crear evento" />}
+    >
       {extra.cantidades && extra.cantidades.todos > 0 ? (
         <FiltroChips opciones={opcionesFiltro(extra.cantidades, filtro)} elegido={filtro} onElegir={setFiltro} />
       ) : null}
@@ -62,14 +65,15 @@ export default function Eventos() {
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus eventos…" />
       ) : (
         <FlatList
+          key={`columnas-${columnas}`}
           data={eventos}
+          numColumns={columnas}
+          columnWrapperStyle={columnas > 1 ? styles.filaGrilla : undefined}
           keyExtractor={(evento) => String(evento.id)}
           renderItem={({ item }) => (
-            <EventoFila
-              evento={item}
-              realizado={item.realizado}
-              onPress={() => router.push(`/eventos/${item.id}/ventas`)}
-            />
+            <View style={columnas > 1 ? [styles.celda, { maxWidth: `${100 / columnas}%` }] : null}>
+              <EventoFila evento={item} onPress={() => router.push(`/eventos/${item.id}/ventas`)} />
+            </View>
           )}
           refreshControl={<RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />}
           ListFooterComponent={
@@ -87,13 +91,14 @@ export default function Eventos() {
             filtro ? (
               <View style={styles.vacio}>
                 <Text style={styles.vacioTexto}>No tenés eventos con este filtro.</Text>
-                <Pressable style={styles.botonVerTodos} onPress={() => setFiltro(null)}>
-                  <Text style={styles.botonVerTodosTexto}>Ver todos</Text>
-                </Pressable>
+                <Boton titulo="Ver todos" variante="secundario" chico onPress={() => setFiltro(null)} style={styles.centrado} />
               </View>
             ) : (
               <View style={styles.vacio}>
-                <Text style={styles.vacioTexto}>Todavía no organizaste ningún evento.</Text>
+                <Ionicons name="calendar-outline" size={40} color={colors.textMuted} />
+                <Text style={styles.vacioTitulo}>Todavía no organizaste ningún evento</Text>
+                <Text style={styles.vacioTexto}>Creá uno con sus tipos de entrada, precios y cupos.</Text>
+                <Boton titulo="Crear evento" icono="add" chico onPress={() => router.push('/eventos/nuevo')} style={styles.centrado} />
               </View>
             )
           }
@@ -109,192 +114,171 @@ function opcionesFiltro(cantidades, elegido) {
   const opciones = [
     { valor: null, texto: 'Todos', cantidad: cantidades.todos },
     { valor: 'proximos', texto: 'Próximos', cantidad: cantidades.proximos },
-    { valor: 'realizados', texto: 'Ya realizados', cantidad: cantidades.realizados },
+    { valor: 'realizados', texto: 'Realizados', cantidad: cantidades.realizados },
   ];
   if (cantidades.conMensajesNuevos > 0 || elegido === 'conMensajesNuevos') {
     opciones.push({
       valor: 'conMensajesNuevos',
       texto: 'Con mensajes nuevos',
       cantidad: cantidades.conMensajesNuevos,
-      punto: colors.danger,
+      punto: colors.primary,
       puntoActivo: '#FFFFFF',
     });
   }
   return opciones;
 }
 
-function EventoFila({ evento, realizado, onPress }) {
+function EventoFila({ evento, onPress }) {
   // Del lugar se muestra solo el nombre, sin la dirección.
   const lugar = evento.lugar.split(',')[0];
   // Compras del evento con mensajes que el organizador no leyó (lo calcula el backend).
-  const { conMensajesNoLeidos } = evento;
+  const { conMensajesNoLeidos, realizado } = evento;
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        conMensajesNoLeidos > 0 && estiloEsperando,
-        realizado && styles.realizado,
-        pressed && styles.presionada,
-      ]}
+      style={({ pressed }) => [styles.card, conMensajesNoLeidos > 0 && estiloEsperando, pressed && styles.presionada]}
       onPress={onPress}
+      accessibilityRole="button"
     >
-      {evento.imagen ? (
-        <Image source={{ uri: evento.imagen }} style={styles.imagen} />
-      ) : (
-        <View style={styles.imagen} />
-      )}
-      <View style={styles.info}>
-        <Text style={styles.categoria}>{evento.categoria.nombre}</Text>
-        <Text style={styles.nombre}>{evento.nombre}</Text>
-        <Text style={styles.meta}>
-          {formatFecha(evento.fecha)} · {lugar}
-        </Text>
-        {conMensajesNoLeidos > 0 ? (
-          <View style={styles.pendientes}>
-            <View style={styles.punto} />
-            <Text style={styles.pendientesTexto}>
-              {conMensajesNoLeidos === 1 ? '1 chat con mensajes nuevos' : `${conMensajesNoLeidos} chats con mensajes nuevos`}
-            </Text>
-          </View>
-        ) : null}
+      <View style={styles.fila}>
+        {evento.imagen ? (
+          <Image source={{ uri: evento.imagen }} style={[styles.imagen, realizado && styles.apagada]} />
+        ) : (
+          <View style={styles.imagen} />
+        )}
+        <View style={styles.info}>
+          {realizado ? (
+            <Etiqueta texto="Realizado" icono="checkmark-done" fondo="#F1EFE8" color="#444441" />
+          ) : (
+            <Text style={styles.categoria}>{evento.categoria.nombre}</Text>
+          )}
+          <Text style={styles.nombre}>{evento.nombre}</Text>
+          <Text style={styles.meta}>
+            {formatFecha(evento.fecha)} · {lugar}
+          </Text>
+        </View>
+        <Ionicons name="chevron-forward" size={20} color={colors.textMuted} />
       </View>
-      {/* Abre los mensajes del evento sin pasar por Ventas; el número es cuántos chats tienen mensajes nuevos. */}
-      <Pressable
-        style={styles.mensajes}
-        onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}
-        hitSlop={6}
-        accessibilityLabel={conMensajesNoLeidos > 0 ? `Mensajes, ${conMensajesNoLeidos} con mensajes nuevos` : 'Mensajes'}
-      >
-        <Ionicons name="chatbubbles-outline" size={20} color={colors.primary} />
-        {conMensajesNoLeidos > 0 ? (
-          <View style={styles.numero}>
-            <Text style={styles.numeroTexto}>{conMensajesNoLeidos}</Text>
-          </View>
-        ) : null}
-      </Pressable>
+      {/* Abre los mensajes del evento sin pasar por Ventas. */}
+      {conMensajesNoLeidos > 0 ? (
+        <Pressable
+          style={({ pressed }) => [styles.mensajes, pressed && styles.mensajesPresionado]}
+          onPress={() => router.push(`/eventos/${evento.id}/mensajes`)}
+          accessibilityRole="button"
+        >
+          <View style={styles.punto} />
+          <Text style={styles.mensajesTexto}>
+            <Text style={styles.negrita}>{conMensajesNoLeidos === 1 ? '1 chat' : `${conMensajesNoLeidos} chats`}</Text> con mensajes nuevos
+          </Text>
+          <Text style={styles.verMensajes}>Ver mensajes</Text>
+        </Pressable>
+      ) : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  boton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.md,
-    marginBottom: spacing.md,
+  filaGrilla: {
+    gap: spacing.md,
   },
-  botonTexto: {
-    color: '#FFFFFF',
-    fontSize: fontSize.body,
-    fontWeight: 'bold',
+  celda: {
+    flex: 1,
   },
   card: {
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 14,
+    marginBottom: spacing.md,
+    overflow: 'hidden',
+    backgroundColor: colors.background,
+  },
+  presionada: {
+    backgroundColor: colors.primarySofter,
+  },
+  fila: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  realizado: {
-    opacity: 0.75,
-  },
-  mensajes: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: spacing.sm,
-  },
-  numero: {
-    position: 'absolute',
-    top: -7,
-    right: -7,
-    minWidth: 17,
-    height: 17,
-    borderRadius: 9,
-    paddingHorizontal: 4,
-    backgroundColor: '#E24B4A',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  numeroTexto: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  presionada: {
-    backgroundColor: colors.primarySoft,
+    padding: spacing.md,
   },
   imagen: {
-    width: 56,
-    height: 56,
-    borderRadius: 8,
-    backgroundColor: colors.primarySoft,
+    width: 72,
+    height: 72,
+    borderRadius: 12,
+    backgroundColor: colors.borderSoft,
+  },
+  apagada: {
+    opacity: 0.55,
   },
   info: {
     flex: 1,
-    gap: 1,
+    gap: 2,
   },
   categoria: {
-    color: colors.primaryText,
+    color: colors.primary,
     fontSize: 11,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   nombre: {
     color: colors.text,
-    fontSize: 15,
+    fontSize: fontSize.large,
     fontWeight: 'bold',
   },
   meta: {
     color: colors.textSecondary,
     fontSize: fontSize.small,
   },
-  pendientes: {
+  mensajes: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginTop: 3,
+    gap: spacing.sm,
+    minHeight: 44,
+    paddingHorizontal: spacing.md,
+    backgroundColor: colors.primarySofter,
+    borderTopWidth: 1,
+    borderTopColor: '#DCE9CC',
+  },
+  mensajesPresionado: {
+    backgroundColor: colors.primarySoft,
   },
   punto: {
-    width: 7,
-    height: 7,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: colors.primary,
   },
-  pendientesTexto: {
+  mensajesTexto: {
+    flex: 1,
+    color: colors.text,
+    fontSize: fontSize.small,
+  },
+  negrita: {
+    fontWeight: 'bold',
+  },
+  verMensajes: {
     color: colors.primaryText,
-    fontSize: 11,
+    fontSize: fontSize.small,
     fontWeight: 'bold',
   },
   vacio: {
-    marginTop: spacing.lg,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.lg,
     alignItems: 'center',
+    paddingTop: 60,
+    gap: spacing.xs,
+  },
+  vacioTitulo: {
+    color: colors.text,
+    fontSize: fontSize.large,
+    fontWeight: 'bold',
+    marginTop: spacing.sm,
   },
   vacioTexto: {
     color: colors.textSecondary,
     fontSize: fontSize.body,
+    textAlign: 'center',
   },
-  botonVerTodos: {
+  centrado: {
+    alignSelf: 'center',
     marginTop: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  botonVerTodosTexto: {
-    color: colors.primaryText,
-    fontSize: fontSize.body,
   },
 });

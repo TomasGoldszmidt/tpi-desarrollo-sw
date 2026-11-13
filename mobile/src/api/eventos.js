@@ -32,6 +32,8 @@ export function crearEvento(datos) {
 // Vienen de a páginas: { resultados, pagina, limite, total, hayMas }.
 // Con conMensajes es la bandeja de mensajes: solo las compras con chat, primero las que
 // tienen mensajes sin leer, y la página suma noLeidas (conversaciones sin leer en total).
-export function getVentasEvento(id, { conMensajes, pagina = 1, limite = 10 } = {}) {
-  return request(`/eventos/${id}/compras${queryString({ conMensajes, pagina, limite })}`);
+// Sin conMensajes la página suma resumen ({ vendidas, recaudado }) y cantidades por estado,
+// y estado filtra la lista.
+export function getVentasEvento(id, { conMensajes, estado, pagina = 1, limite = 10 } = {}) {
+  return request(`/eventos/${id}/compras${queryString({ conMensajes, estado, pagina, limite })}`);
 }
