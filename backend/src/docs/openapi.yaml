@@ -887,7 +887,9 @@ paths:
       description: >-
         Todas las compras del evento, en cualquier estado, de la más reciente a la
         más vieja (si empatan, por id), de a páginas. Solo para el organizador. Las
-        entradas disponibles por tipo salen de GET /eventos/{id}.
+        entradas disponibles por tipo salen de GET /eventos/{id}. Con estado= se ven
+        solo las de ese estado. La respuesta suma el resumen de ventas (vendidas y
+        recaudado) y cuántas compras hay en cada estado, siempre sobre todas las compras.
 
         Con conMensajes=true es la bandeja de mensajes del evento: solo las compras
         que tienen chat, primero las que tienen mensajes que el organizador no leyó y,
@@ -911,6 +913,14 @@ paths:
             type: string
             enum: ['true', 'false']
           example: 'true'
+        - name: estado
+          in: query
+          required: false
+          description: Solo las compras en este estado (sin conMensajes). Vacío, todas.
+          schema:
+            type: string
+            enum: [PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA]
+          example: CONFIRMADA
         - $ref: '#/components/parameters/Pagina'
         - $ref: '#/components/parameters/Limite'
       responses:
@@ -934,10 +944,36 @@ paths:
                           Solo con conMensajes=true. Cuántas conversaciones tienen mensajes
                           que el organizador no leyó, contando todas las páginas.
                         example: 1
+                      resumen:
+                        type: object
+                        description: >-
+                          Sin conMensajes. vendidas: entradas que ocupan cupo (pendientes,
+                          confirmadas y utilizadas). recaudado: total de las compras pagadas
+                          (confirmadas y utilizadas).
+                        properties:
+                          vendidas:
+                            type: integer
+                            example: 19
+                          recaudado:
+                            type: number
+                            example: 825000
+                      cantidades:
+                        type: object
+                        description: >-
+                          Sin conMensajes. Cuántas compras hay en total (todas) y en cada
+                          estado que tiene alguna.
+                        additionalProperties:
+                          type: integer
+                        example:
+                          todas: 13
+                          PENDIENTE: 2
+                          CONFIRMADA: 7
+                          CANCELADA: 2
+                          REEMBOLSADA: 2
         '400':
           description: >-
-            El id no es válido, conMensajes no es true ni false, o pagina o limite no son
-            enteros en rango (o vienen repetidos)
+            El id no es válido, conMensajes no es true ni false, estado no es un EstadoCompra,
+            o pagina o limite no son enteros en rango (o vienen repetidos)
           content:
             application/json:
               schema:

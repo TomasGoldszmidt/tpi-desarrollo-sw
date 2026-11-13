@@ -11,7 +11,7 @@ import { calcularPuntajes, crearResenia, perfilUsuario, puntajeDe, reseniaDeComp
 import * as reseniaRepository from '../src/persistence/repositories/reseniaRepository.js';
 import * as eventoRepository from '../src/persistence/repositories/eventoRepository.js';
 import {
-  actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, enviarMensaje, mensajesConAutor,
+  actualizarEstado, estadoAlCancelar, comprar, detalleCompra, diasRestantes, puedeVer, masRecientesPrimero, resumenVentas, enviarMensaje, mensajesConAutor,
   ordenarPorImportancia, cantidadesPorEstado,
   mensajesNoLeidos, cantidadConMensajesNoLeidos, leerMensajes, rolEnCompra, conversaciones,
 } from '../src/domain/compra.js';
@@ -405,6 +405,20 @@ describe('ventas del organizador', () => {
     assert.doesNotThrow(() => verificarOrganizador(rock, tomas));
     assert.throws(() => verificarOrganizador(rock, dilollo),
       (err) => err instanceof ForbiddenError && err.message === 'Solo el organizador puede ver las ventas de este evento');
+  });
+
+  it('resumenVentas cuenta las entradas que ocupan cupo y suma lo cobrado', () => {
+    const { PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
+    const compras = [
+      { estado: PENDIENTE, cantidad: 2, total: 200 },
+      { estado: CONFIRMADA, cantidad: 1, total: 100 },
+      { estado: UTILIZADA, cantidad: 3, total: 300 },
+      { estado: CANCELADA, cantidad: 5, total: 500 },
+      { estado: REEMBOLSADA, cantidad: 4, total: 400 },
+    ];
+    // Vendidas: pendiente, confirmada y utilizada (2 + 1 + 3). Cobrado: confirmada y utilizada.
+    assert.deepEqual(resumenVentas(compras), { vendidas: 6, recaudado: 400 });
+    assert.deepEqual(resumenVentas([]), { vendidas: 0, recaudado: 0 });
   });
 
   it('masRecientesPrimero ordena por la fecha de compra, sin modificar la lista', () => {

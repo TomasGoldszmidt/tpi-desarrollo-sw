@@ -176,6 +176,19 @@ export function cantidadesPorEstado(compras) {
   return cantidades;
 }
 
+// Resumen de las ventas de un evento para su organizador (caso de uso 2):
+// - vendidas: entradas que ocupan cupo (pendientes, confirmadas y utilizadas);
+// - recaudado: lo cobrado, o sea el total de las compras pagadas (confirmadas y utilizadas).
+//   Las pendientes todavía no se pagaron y las reembolsadas se devolvieron.
+/** @param {Compra[]} compras Las compras del evento. @returns {{ vendidas: number, recaudado: number }} */
+export function resumenVentas(compras) {
+  const pagadas = [CONFIRMADA, UTILIZADA];
+  return {
+    vendidas: compras.filter(ocupaCupo).reduce((total, compra) => total + compra.cantidad, 0),
+    recaudado: compras.filter((compra) => pagadas.includes(compra.estado)).reduce((total, compra) => total + compra.total, 0),
+  };
+}
+
 // La compra la ven el comprador y el organizador del evento, que también usa su chat.
 /** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @returns {boolean} */
 export function puedeVer(compra, evento, usuario) {

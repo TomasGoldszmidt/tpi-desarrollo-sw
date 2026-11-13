@@ -4,7 +4,9 @@ import * as categoriaRepository from '../persistence/repositories/categoriaRepos
 import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador,
   FILTROS_ORGANIZADOR, filtroOrganizador, cantidadesOrganizador } from '../domain/evento.js';
-import { cantidadConMensajesNoLeidos, conversaciones, detalleCompra, masRecientesPrimero } from '../domain/compra.js';
+import {
+  cantidadConMensajesNoLeidos, cantidadesPorEstado, conversaciones, detalleCompra, masRecientesPrimero, ORDEN_ESTADOS, resumenVentas,
+} from '../domain/compra.js';
 import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
 import { NotFoundError, ValidationError } from '../http/errors.js';
 import { paginar, parsePagina } from '../http/pagination.js';
@@ -128,11 +130,20 @@ export async function listCompras(req, res) {
     if (v !== 'true' && v !== 'false') throw new ValidationError('El campo conMensajes tiene que ser true o false');
     return v === 'true';
   });
+  const estado = optional(req.query.estado, (v) => {
+    if (!ORDEN_ESTADOS.includes(v)) throw new ValidationError(`El campo estado tiene que ser uno de: ${ORDEN_ESTADOS.join(', ')}`);
+    return v;
+  });
   const pagina = parsePagina(req.query);
 
   const compras = compraRepository.findByEvento(evento.id);
-  const lista = conMensajes ? conversaciones(compras, evento, req.usuario) : masRecientesPrimero(compras);
-  const extra = conMensajes ? { noLeidas: cantidadConMensajesNoLeidos(compras, evento, req.usuario) } : {};
+  // Las ventas suman el resumen (vendidas y recaudado) y cuántas hay en cada estado (los chips);
+  // ?estado= filtra la lista, pero el resumen y las cantidades cuentan todas.
+  const delEstado = estado ? compras.filter((compra) => compra.estado === estado) : compras;
+  const lista = conMensajes ? conversaciones(compras, evento, req.usuario) : masRecientesPrimero(delEstado);
+  const extra = conMensajes
+    ? { noLeidas: cantidadConMensajesNoLeidos(compras, evento, req.usuario) }
+    : { resumen: resumenVentas(compras), cantidades: cantidadesPorEstado(compras) };
   // Se arma el detalle solo de las compras de la página pedida.
   const { resultados, ...datosPagina } = paginar(lista, pagina, extra);
   res.status(200).json({
