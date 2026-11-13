@@ -1,21 +1,48 @@
-import { useCallback, useRef } from 'react';
-import { Pressable, RefreshControl, SectionList, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useRef, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getFavoritos } from '../../api/favoritos.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { useFavoritos } from '../../context/FavoritosContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
+import { useLayout } from '../../hooks/useLayout.js';
+import { Boton } from '../../components/Boton.js';
+import { Etiqueta } from '../../components/EstadoBadge.js';
 import { EventoCard } from '../../components/EventoCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { Seccion } from '../../components/Seccion.js';
+import { formatDiasRestantes } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
-// Los eventos favoritos del usuario: los próximos por fecha y, al final, los ya realizados.
+const UN_DIA = 24 * 60 * 60 * 1000;
+
+// Días de calendario hasta el evento (hoy es 0).
+function diasHasta(fecha, ahora) {
+  const dia = (valor) => {
+    const d = new Date(valor);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  };
+  return Math.round((dia(fecha) - dia(ahora)) / UN_DIA);
+}
+
+// Los eventos favoritos del usuario: los próximos por fecha, con los días que faltan, y los
+// ya realizados plegados al final. En tablet van en grilla.
 export default function Favoritos() {
   const { usuario } = useUsuario();
   const { esFavorito } = useFavoritos();
-  const pedir = useCallback(() => getFavoritos(usuario.id), [usuario.id]);
+  const { columnas } = useLayout();
+  const [verRealizados, setVerRealizados] = useState(false);
+  const pedir = useCallback(async () => {
+    const eventos = await getFavoritos(usuario.id);
+    // Se calcula al pedir y no al dibujar, que tiene que dar siempre lo mismo.
+    const ahora = Date.now();
+    return eventos.map((evento) => {
+      const realizado = new Date(evento.fecha).getTime() < ahora;
+      return { ...evento, realizado, dias: realizado ? null : diasHasta(evento.fecha, ahora) };
+    });
+  }, [usuario.id]);
   const { data: eventos, loading, error, recargar } = useCarga(pedir);
 
   // Se vuelve a pedir al volver a la pestaña, así aparecen los que se marcaron en el
@@ -31,60 +58,117 @@ export default function Favoritos() {
     }, [recargar]),
   );
 
+  if (error || !eventos) {
+    return (
+      <Seccion titulo="Favoritos">
+        <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus favoritos…" />
+      </Seccion>
+    );
+  }
+
   // Al quitar el corazón acá, el evento sale de la lista sin esperar a volver a pedirla.
-  const vigentes = eventos ? eventos.filter((evento) => esFavorito(evento.id)) : [];
+  const vigentes = eventos.filter((evento) => esFavorito(evento.id));
+  const proximos = vigentes.filter((evento) => !evento.realizado);
+  const realizados = vigentes.filter((evento) => evento.realizado);
+
+  const grilla = (lista, realizado) => (
+    <View style={columnas > 1 ? styles.grilla : null}>
+      {lista.map((evento) => (
+        <View key={evento.id} style={columnas > 1 ? { width: `${100 / columnas}%`, padding: spacing.sm } : null}>
+          <EventoCard
+            evento={evento}
+            realizado={realizado}
+            variante={columnas > 1 ? 'tarjeta' : 'fila'}
+            onPress={() => router.push(`/eventos/${evento.id}`)}
+            extra={
+              evento.dias !== null ? (
+                <Etiqueta texto={formatDiasRestantes(evento.dias)} fondo={colors.primarySofter} color={colors.primaryText} />
+              ) : null
+            }
+          />
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <Seccion titulo="Favoritos">
-      {error || !eventos ? (
-        <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus favoritos…" />
-      ) : (
-        <SectionList
-          sections={separarPorFecha(vigentes)}
-          keyExtractor={(evento) => String(evento.id)}
-          renderSectionHeader={({ section }) => <Text style={styles.seccion}>{section.titulo}</Text>}
-          renderItem={({ item, section }) => (
-            <EventoCard
-              evento={item}
-              realizado={section.realizados}
-              onPress={() => router.push(`/eventos/${item.id}`)}
-            />
-          )}
-          stickySectionHeadersEnabled={false}
-          refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
-          ListEmptyComponent={
-            <View style={styles.vacio}>
-              <Ionicons name="heart-outline" size={36} color={colors.textMuted} />
-              <Text style={styles.vacioTitulo}>Todavía no guardaste eventos</Text>
-              <Text style={styles.vacioTexto}>Tocá el corazón de un evento para encontrarlo acá.</Text>
-              <Pressable style={styles.boton} onPress={() => router.navigate('/catalogo')}>
-                <Text style={styles.botonTexto}>Explorar eventos</Text>
-              </Pressable>
-            </View>
-          }
-        />
-      )}
+      <ScrollView
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={recargar} colors={[colors.primary]} />}
+        contentContainerStyle={styles.contenido}
+      >
+        {vigentes.length === 0 ? (
+          <View style={styles.vacio}>
+            <Ionicons name="heart-outline" size={40} color={colors.textMuted} />
+            <Text style={styles.vacioTitulo}>Todavía no guardaste eventos</Text>
+            <Text style={styles.vacioTexto}>Tocá el corazón de un evento para encontrarlo acá.</Text>
+            <Boton titulo="Explorar eventos" variante="secundario" chico onPress={() => router.navigate('/catalogo')} style={styles.centrado} />
+          </View>
+        ) : null}
+
+        {proximos.length > 0 ? (
+          <>
+            <Text style={styles.seccion}>Próximos · {proximos.length}</Text>
+            {grilla(proximos, false)}
+          </>
+        ) : null}
+
+        {realizados.length > 0 ? (
+          <>
+            <Pressable
+              style={styles.plegable}
+              onPress={() => setVerRealizados(!verRealizados)}
+              accessibilityRole="button"
+              accessibilityState={{ expanded: verRealizados }}
+            >
+              <Text style={styles.plegableTexto}>
+                <Text style={styles.negrita}>Ya realizados</Text> · {realizados.length}
+              </Text>
+              <Ionicons name={verRealizados ? 'chevron-up' : 'chevron-down'} size={20} color={colors.textSecondary} />
+            </Pressable>
+            {verRealizados ? grilla(realizados, true) : null}
+          </>
+        ) : null}
+      </ScrollView>
     </Seccion>
   );
 }
 
-// La API los devuelve ordenados por fecha: primero los próximos y al final los ya realizados.
-function separarPorFecha(eventos) {
-  const ahora = Date.now();
-  const proximos = eventos.filter((evento) => new Date(evento.fecha).getTime() >= ahora);
-  const realizados = eventos.filter((evento) => new Date(evento.fecha).getTime() < ahora);
-  return [
-    { titulo: 'Próximos', realizados: false, data: proximos },
-    { titulo: 'Ya realizados', realizados: true, data: realizados },
-  ].filter((seccion) => seccion.data.length > 0);
-}
-
 const styles = StyleSheet.create({
+  contenido: {
+    paddingBottom: spacing.xxl,
+  },
+  grilla: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginHorizontal: -spacing.sm,
+  },
   seccion: {
-    color: colors.text,
-    fontSize: 15,
+    color: colors.textSecondary,
+    fontSize: fontSize.small,
     fontWeight: 'bold',
-    marginTop: spacing.sm,
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginBottom: spacing.xs,
+  },
+  plegable: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    minHeight: 52,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+    paddingHorizontal: spacing.md + 2,
+    borderRadius: 12,
+    backgroundColor: colors.surface,
+  },
+  plegableTexto: {
+    color: colors.textSecondary,
+    fontSize: fontSize.body,
+  },
+  negrita: {
+    color: colors.text,
+    fontWeight: 'bold',
   },
   vacio: {
     alignItems: 'center',
@@ -93,7 +177,7 @@ const styles = StyleSheet.create({
   },
   vacioTitulo: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: fontSize.large,
     fontWeight: 'bold',
     marginTop: spacing.sm,
   },
@@ -102,16 +186,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     textAlign: 'center',
   },
-  boton: {
+  centrado: {
+    alignSelf: 'center',
     marginTop: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  botonTexto: {
-    color: colors.primaryText,
-    fontSize: fontSize.body,
   },
 });

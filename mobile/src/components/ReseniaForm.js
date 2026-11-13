@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Boton } from './Boton.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
 const COLOR_ESTRELLA = '#BA7517';
@@ -35,10 +36,12 @@ export function ReseniaForm({ onPublicar }) {
               setPuntuacion(valor);
               setAviso(null);
             }}
-            hitSlop={4}
+            hitSlop={6}
+            accessibilityRole="button"
+            accessibilityState={{ selected: valor <= puntuacion }}
             accessibilityLabel={`${valor} estrellas`}
           >
-            <Ionicons name={valor <= puntuacion ? 'star' : 'star-outline'} size={32} color={COLOR_ESTRELLA} />
+            <Ionicons name={valor <= puntuacion ? 'star' : 'star-outline'} size={36} color={COLOR_ESTRELLA} />
           </Pressable>
         ))}
       </View>
@@ -55,9 +58,7 @@ export function ReseniaForm({ onPublicar }) {
         maxLength={500}
       />
       {aviso ? <Text style={styles.aviso}>{aviso}</Text> : null}
-      <Pressable style={styles.boton} onPress={publicar}>
-        <Text style={styles.botonTexto}>Publicar reseña</Text>
-      </Pressable>
+      <Boton titulo="Publicar reseña" onPress={publicar} />
     </View>
   );
 }

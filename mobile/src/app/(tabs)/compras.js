@@ -1,16 +1,21 @@
 import { useCallback, useRef, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
+import { Alert, FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { router, useFocusEffect } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { getMisCompras } from '../../api/compras.js';
+import { getMisCompras, pagarCompra } from '../../api/compras.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
+import { useAvisos } from '../../context/AvisosContext.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
+import { useLayout } from '../../hooks/useLayout.js';
+import { Boton } from '../../components/Boton.js';
+import { CargaEncima } from '../../components/Carga.js';
 import { CompraCard } from '../../components/CompraCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { FiltroEstados } from '../../components/FiltroEstados.js';
 import { PieLista } from '../../components/PieLista.js';
 import { estiloEstado } from '../../components/EstadoBadge.js';
 import { Seccion } from '../../components/Seccion.js';
+import { formatPrecio } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
 // Compras por página: las siguientes se piden con "Ver más".
@@ -29,14 +34,17 @@ function abrirChat(compra) {
   });
 }
 
-// Caso de uso 1: las compras del usuario activo, con el estado bien diferenciado
-// y los días que faltan para el evento si están confirmadas. Vienen de a páginas y ya
-// ordenadas por importancia (primero por estado; lo resuelve el backend), con cuántas hay
-// en cada estado para los chips. Cada compra trae al organizador, para el aviso de mensajes.
+// Caso de uso 1: las compras del usuario activo, con el estado bien diferenciado (ícono y
+// color) y los días que faltan para el evento si están confirmadas. Vienen de a páginas y ya
+// ordenadas por importancia, con cuántas hay en cada estado para los chips. Las pendientes
+// se pagan desde la tarjeta. En tablet van en dos o tres columnas.
 export default function MisCompras() {
   const { usuario } = useUsuario();
+  const avisos = useAvisos();
+  const { columnas } = useLayout();
   // Estado elegido en los chips (null = Todas). Se mantiene al recargar y al volver a la pestaña.
   const [estado, setEstado] = useState(null);
+  const [pagando, setPagando] = useState(false);
   const pedirPagina = useCallback(
     (pagina) => getMisCompras({ estado, pagina, limite: LIMITE }),
     [estado],
@@ -59,6 +67,31 @@ export default function MisCompras() {
     }, [recargar]),
   );
 
+  function confirmarPago(compra) {
+    Alert.alert(
+      `¿Pagar ${formatPrecio(compra.total)}?`,
+      `${compra.tipoEntrada.nombre} × ${compra.cantidad} para ${compra.evento.nombre}. La compra queda confirmada.`,
+      [
+        { text: 'Volver', style: 'cancel' },
+        {
+          text: 'Pagar',
+          onPress: async () => {
+            setPagando(true);
+            try {
+              await pagarCompra(compra.id);
+              avisos.mostrar('Pagaste tu compra. ¡Que lo disfrutes!');
+              recargar();
+            } catch (e) {
+              Alert.alert('No pudimos procesar el pago', e.message);
+            } finally {
+              setPagando(false);
+            }
+          },
+        },
+      ],
+    );
+  }
+
   return (
     <Seccion titulo="Mis compras">
       {extra.cantidades && extra.cantidades.todas > 0 ? (
@@ -68,16 +101,22 @@ export default function MisCompras() {
         <EstadoCarga loading={loading} error={error} onRetry={recargar} mensaje="Cargando tus compras…" />
       ) : (
         <FlatList
+          key={`columnas-${columnas}`}
           data={compras}
+          numColumns={columnas}
+          columnWrapperStyle={columnas > 1 ? styles.filaGrilla : undefined}
           keyExtractor={(compra) => String(compra.id)}
           renderItem={({ item }) => (
-            <CompraCard
-              compra={item}
-              usuario={usuario}
-              organizador={item.evento.organizador}
-              onPress={() => router.push(`/compras/${item.id}`)}
-              onChat={() => abrirChat(item)}
-            />
+            <View style={columnas > 1 ? [styles.celda, { maxWidth: `${100 / columnas}%` }] : null}>
+              <CompraCard
+                compra={item}
+                usuario={usuario}
+                organizador={item.evento.organizador}
+                onPress={() => router.push(`/compras/${item.id}`)}
+                onChat={() => abrirChat(item)}
+                onPagar={() => confirmarPago(item)}
+              />
+            </View>
           )}
           refreshControl={
             <RefreshControl refreshing={recargando} onRefresh={recargar} colors={[colors.primary]} />
@@ -101,28 +140,31 @@ export default function MisCompras() {
               <View style={styles.vacio}>
                 <Text style={styles.vacioTitulo}>No tenés compras {estiloEstado(estado).enPlural}</Text>
                 <Text style={styles.vacioTexto}>Cambiá el filtro para ver las demás.</Text>
-                <Pressable style={styles.boton} onPress={() => setEstado(null)}>
-                  <Text style={styles.botonTexto}>Ver todas</Text>
-                </Pressable>
+                <Boton titulo="Ver todas" variante="secundario" chico onPress={() => setEstado(null)} style={styles.centrado} />
               </View>
             ) : (
               <View style={styles.vacio}>
-                <Ionicons name="ticket-outline" size={36} color={colors.textMuted} />
+                <Ionicons name="ticket-outline" size={40} color={colors.textMuted} />
                 <Text style={styles.vacioTitulo}>Todavía no compraste entradas</Text>
                 <Text style={styles.vacioTexto}>Cuando compres, vas a ver acá el estado de cada compra.</Text>
-                <Pressable style={styles.boton} onPress={() => router.navigate('/catalogo')}>
-                  <Text style={styles.botonTexto}>Explorar eventos</Text>
-                </Pressable>
+                <Boton titulo="Explorar eventos" variante="secundario" chico onPress={() => router.navigate('/catalogo')} style={styles.centrado} />
               </View>
             )
           }
         />
       )}
+      {pagando ? <CargaEncima mensaje="Procesando el pago…" /> : null}
     </Seccion>
   );
 }
 
 const styles = StyleSheet.create({
+  filaGrilla: {
+    gap: spacing.md,
+  },
+  celda: {
+    flex: 1,
+  },
   vacio: {
     alignItems: 'center',
     paddingTop: 80,
@@ -130,7 +172,7 @@ const styles = StyleSheet.create({
   },
   vacioTitulo: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: fontSize.large,
     fontWeight: 'bold',
     marginTop: spacing.sm,
   },
@@ -139,16 +181,8 @@ const styles = StyleSheet.create({
     fontSize: fontSize.body,
     textAlign: 'center',
   },
-  boton: {
+  centrado: {
+    alignSelf: 'center',
     marginTop: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.lg,
-  },
-  botonTexto: {
-    color: colors.primaryText,
-    fontSize: fontSize.body,
   },
 });

@@ -1,40 +1,57 @@
-import { StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Stack, router, useLocalSearchParams } from 'expo-router';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Conversacion } from '../../../components/Conversacion.js';
-import { colors, fontSize, spacing } from '../../../theme.js';
+import { colors, fontSize, TOQUE_MINIMO } from '../../../theme.js';
 
-// Casos de uso 5 y 6: el chat de una compra, a pantalla completa. Recibe el nombre del
-// evento y de con quién se chatea desde quien lo abre (detalle de la compra, mensajes
-// del evento o una notificación).
+// Casos de uso 5 y 6: el chat de una compra, a pantalla completa. Con quién se habla y el
+// evento van en la barra de arriba, con un acceso a la compra.
 export default function Chat() {
   const { id, evento, con } = useLocalSearchParams();
   return (
-    <Conversacion
-      compraId={id}
-      encabezado={
-        <View style={styles.cabecera}>
-          <Text style={styles.evento}>{evento}</Text>
-          <Text style={styles.con}>Chat con {con}</Text>
-        </View>
-      }
-    />
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <View style={styles.titulo}>
+              <Text style={styles.con} numberOfLines={1}>{con}</Text>
+              <Text style={styles.evento} numberOfLines={1}>{evento}</Text>
+            </View>
+          ),
+          headerRight: () => (
+            <Pressable
+              style={styles.verCompra}
+              onPress={() => router.push(`/compras/${id}`)}
+              accessibilityRole="button"
+              accessibilityLabel="Ver la compra"
+            >
+              <Ionicons name="ticket-outline" size={22} color={colors.primary} />
+            </Pressable>
+          ),
+        }}
+      />
+      <Conversacion compraId={id} />
+    </>
   );
 }
 
 const styles = StyleSheet.create({
-  cabecera: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  evento: {
-    color: colors.text,
-    fontSize: fontSize.body,
-    fontWeight: 'bold',
+  titulo: {
+    maxWidth: 260,
   },
   con: {
+    color: colors.text,
+    fontSize: fontSize.large,
+    fontWeight: 'bold',
+  },
+  evento: {
     color: colors.textSecondary,
-    fontSize: fontSize.small,
+    fontSize: fontSize.caption,
+  },
+  verCompra: {
+    width: TOQUE_MINIMO,
+    height: TOQUE_MINIMO,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

@@ -1,27 +1,46 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Contenedor de cada pestaña: el header muestra el logo, así que el nombre
-// de la sección va como título dentro de la pantalla.
-export function Seccion({ titulo, children }) {
+// Pantalla de una pestaña: título grande y el contenido abajo. accion: un botón a la
+// derecha del título (ej: "Crear" en Mis eventos). En tablet el contenido no pasa de
+// 1200 de ancho.
+export function Seccion({ titulo, accion = null, children }) {
   return (
-    <View style={styles.contenedor}>
-      <Text style={styles.titulo}>{titulo}</Text>
-      {children}
+    <View style={styles.fondo}>
+      <View style={styles.contenedor}>
+        <View style={styles.encabezado}>
+          <Text style={styles.titulo} accessibilityRole="header">{titulo}</Text>
+          {accion}
+        </View>
+        {children}
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  contenedor: {
+  fondo: {
     flex: 1,
     backgroundColor: colors.background,
-    padding: spacing.lg,
+  },
+  contenedor: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 1200,
+    alignSelf: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.lg,
+  },
+  encabezado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+    marginBottom: spacing.md,
   },
   titulo: {
     color: colors.text,
-    fontSize: fontSize.title,
+    fontSize: fontSize.headline,
     fontWeight: 'bold',
-    marginBottom: spacing.md,
   },
 });

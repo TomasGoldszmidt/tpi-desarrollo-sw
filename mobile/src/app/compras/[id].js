@@ -1,42 +1,53 @@
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { cancelarCompra, getCompra, marcarUtilizada, pagarCompra } from '../../api/compras.js';
+import { getEvento } from '../../api/eventos.js';
 import { crearResenia } from '../../api/resenias.js';
-import { getUsuario } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
+import { useAvisos } from '../../context/AvisosContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
+import { useLayout } from '../../hooks/useLayout.js';
+import { Avatar } from '../../components/Avatar.js';
+import { Boton } from '../../components/Boton.js';
 import { CargaEncima, PantallaCarga } from '../../components/Carga.js';
-import { EstadoBadge } from '../../components/EstadoBadge.js';
+import { Conversacion } from '../../components/Conversacion.js';
+import { EstadoBadge, Etiqueta } from '../../components/EstadoBadge.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { Estrellas } from '../../components/Estrellas.js';
+import { Aviso } from '../../components/Formulario.js';
 import { ReseniaForm } from '../../components/ReseniaForm.js';
 import { formatDia, formatDiasRestantes, formatFecha, formatPrecio } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
-// Cómo se cuenta cada cambio de estado en el historial.
+// Cómo se cuenta cada cambio de estado en el historial, con su ícono y colores.
 const HISTORIAL = {
-  PENDIENTE: 'Comprada',
-  CONFIRMADA: 'Pagada',
-  UTILIZADA: 'Utilizada',
-  CANCELADA: 'Cancelada',
-  REEMBOLSADA: 'Reembolsada',
+  PENDIENTE: { texto: 'Reservada', icono: 'ticket-outline', fondo: '#FAEEDA', color: '#633806' },
+  CONFIRMADA: { texto: 'Pagada', icono: 'checkmark', fondo: '#EAF3DE', color: '#27500A' },
+  UTILIZADA: { texto: 'Utilizada', icono: 'checkmark-done', fondo: '#F1EFE8', color: '#444441' },
+  CANCELADA: { texto: 'Cancelada', icono: 'close', fondo: '#FCEBEB', color: '#791F1F' },
+  REEMBOLSADA: { texto: 'Reembolsada', icono: 'arrow-undo-outline', fondo: '#EEEDFE', color: '#3C3489' },
 };
 
-// Detalle de una compra (casos de uso 5 a 9): estado, entradas, acciones del comprador
-// (pagar, cancelar, reseñar) y del organizador (marcar como utilizada), la vista previa
-// del chat y el historial.
+// Detalle de una compra (casos de uso 5 a 9): una tarjeta con forma de entrada (estado,
+// evento, entradas y total), la acción que corresponde (una sola principal; cancelar va en
+// rojo y pide confirmación), la reseña, el chat y el historial con quién hizo cada cambio.
+// En tablet horizontal el chat queda abierto a la derecha.
 export default function DetalleCompra() {
   const { id } = useLocalSearchParams();
   const { usuario } = useUsuario();
+  const avisos = useAvisos();
+  const { esAncho } = useLayout();
   const insets = useSafeAreaInsets();
   const pedir = useCallback(async () => {
     const compra = await getCompra(id);
-    // La compra trae solo el id del organizador: su nombre va en el chat.
-    const organizador = await getUsuario(compra.evento.organizadorId);
-    return { compra, organizador };
+    // La imagen del evento va arriba de la tarjeta.
+    const evento = await getEvento(compra.evento.id);
+    // Se calcula al pedirla y no al dibujar, que tiene que dar siempre lo mismo.
+    const realizado = new Date(compra.evento.fecha).getTime() <= Date.now();
+    return { compra, imagen: evento.multimedia[0] ?? null, realizado };
   }, [id]);
   const { data, loading, error, recargar } = useCarga(pedir);
   const [procesando, setProcesando] = useState(null);
@@ -65,18 +76,20 @@ export default function DetalleCompra() {
     );
   }
 
-  const { compra, organizador } = data;
+  const { compra, imagen, realizado } = data;
+  const { organizador } = compra.evento;
   const esComprador = usuario?.id === compra.comprador.id;
   const esOrganizador = usuario?.id === compra.evento.organizadorId;
   // Con quién se chatea: el comprador habla con el organizador y viceversa.
   const otro = esComprador ? organizador : compra.comprador;
 
-  // Corre una acción con el velo de carga y después vuelve a pedir la compra.
-  async function ejecutar(mensaje, accion) {
+  // Corre una acción con el velo de carga, avisa abajo si salió bien y vuelve a pedir la compra.
+  async function ejecutar(mensaje, accion, exito) {
     setProcesando(mensaje);
     setErrorAccion(null);
     try {
       await accion();
+      avisos.mostrar(exito);
       recargar();
     } catch (e) {
       setErrorAccion(e.message);
@@ -85,13 +98,30 @@ export default function DetalleCompra() {
     }
   }
 
+  function confirmarPago() {
+    const { tipoEntrada, cantidad } = compra;
+    Alert.alert(
+      `¿Pagar ${formatPrecio(compra.total)}?`,
+      `${tipoEntrada.nombre} × ${cantidad} para ${compra.evento.nombre}. La compra queda confirmada.`,
+      [
+        { text: 'Volver', style: 'cancel' },
+        { text: 'Pagar', onPress: () => ejecutar('Procesando el pago…', () => pagarCompra(compra.id), 'Pagaste tu compra. ¡Que lo disfrutes!') },
+      ],
+    );
+  }
+
   function confirmarCancelacion(pagada) {
     Alert.alert(
       pagada ? '¿Cancelar y pedir el reembolso?' : '¿Cancelar la compra?',
       pagada ? `Se te devuelven ${formatPrecio(compra.total)} y se liberan las entradas.` : 'Se liberan las entradas.',
       [
         { text: 'Volver', style: 'cancel' },
-        { text: 'Cancelar compra', style: 'destructive', onPress: () => ejecutar('Cancelando la compra…', () => cancelarCompra(compra.id)) },
+        {
+          text: 'Cancelar compra',
+          style: 'destructive',
+          onPress: () =>
+            ejecutar('Cancelando la compra…', () => cancelarCompra(compra.id), pagada ? 'Cancelaste la compra. Te devolvemos el total.' : 'Cancelaste la compra.'),
+        },
       ],
     );
   }
@@ -103,28 +133,32 @@ export default function DetalleCompra() {
       `${comprador.nombre} ${comprador.apellido} ya usó sus entradas (${tipoEntrada.nombre} × ${cantidad}). Después no se puede cancelar y ${comprador.nombre} va a poder dejar su reseña.`,
       [
         { text: 'Volver', style: 'cancel' },
-        { text: 'Marcar', onPress: () => ejecutar('Marcando la entrada…', () => marcarUtilizada(compra.id)) },
+        { text: 'Marcar', onPress: () => ejecutar('Marcando la entrada…', () => marcarUtilizada(compra.id), 'Marcaste la entrada como utilizada.') },
       ],
     );
   }
 
-  // Acciones del comprador según el estado. Una compra pagada solo se cancela antes del evento
-  // (diasRestantes es null si ya pasó); el backend igual valida cada regla.
-  const acciones = [];
-  if (esComprador && compra.estado === 'PENDIENTE') {
-    acciones.push({ texto: `Pagar ${formatPrecio(compra.total)}`, onPress: () => ejecutar('Procesando el pago…', () => pagarCompra(compra.id)) });
-    acciones.push({ texto: 'Cancelar compra', peligro: true, onPress: () => confirmarCancelacion(false) });
+  // Acciones según el estado y quién mira. Solo se paga o se cancela antes del evento; si ya
+  // pasó, un aviso explica por qué no hay botones. El backend igual valida cada regla.
+  let principal = null;
+  let peligro = null;
+  let aviso = null;
+  if (esComprador && realizado && compra.estado === 'PENDIENTE') {
+    aviso = 'El evento ya se realizó: esta compra ya no se puede pagar ni cancelar.';
+  } else if (esComprador && realizado && compra.estado === 'CONFIRMADA') {
+    aviso = 'El evento ya se realizó: esta compra ya no se puede cancelar.';
+  } else if (esComprador && compra.estado === 'PENDIENTE') {
+    principal = { titulo: `Pagar ${formatPrecio(compra.total)}`, onPress: confirmarPago };
+    peligro = { titulo: 'Cancelar compra', onPress: () => confirmarCancelacion(false) };
+  } else if (esComprador && compra.estado === 'CONFIRMADA') {
+    peligro = { titulo: 'Cancelar y pedir reembolso', onPress: () => confirmarCancelacion(true) };
+    aviso = `Si cancelás, se te devuelven ${formatPrecio(compra.total)}. Podés hacerlo hasta el día del evento.`;
   }
-  if (esComprador && compra.estado === 'CONFIRMADA' && compra.diasRestantes !== null) {
-    acciones.push({ texto: 'Cancelar y pedir reembolso', peligro: true, onPress: () => confirmarCancelacion(true) });
-  }
-
   // El organizador marca la entrada como utilizada desde el día del evento: diasRestantes
   // es 0 el mismo día y null si ya pasó. Antes, el pie explica desde cuándo se va a poder.
-  let aviso = null;
   if (esOrganizador && compra.estado === 'CONFIRMADA') {
     if (compra.diasRestantes === 0 || compra.diasRestantes === null) {
-      acciones.push({ texto: 'Marcar como utilizada', onPress: confirmarUtilizacion });
+      principal = { titulo: 'Marcar como utilizada', onPress: confirmarUtilizacion };
     } else {
       aviso = 'Vas a poder marcarla como utilizada desde el día del evento.';
     }
@@ -132,33 +166,49 @@ export default function DetalleCompra() {
 
   const ultimo = compra.mensajes.at(-1);
   const autorUltimo = ultimo && (ultimo.usuarioId === organizador.id ? organizador : compra.comprador);
+  const quien = (usuarioId) => {
+    if (usuarioId === usuario?.id) return 'por vos';
+    const persona = usuarioId === compra.comprador.id ? compra.comprador : organizador;
+    return `por ${persona.nombre} ${persona.apellido}`;
+  };
 
-  return (
-    <View style={styles.pantalla}>
+  const abrirChat = () =>
+    router.push({
+      pathname: '/compras/[id]/chat',
+      params: { id: compra.id, evento: compra.evento.nombre, con: `${otro.nombre} ${otro.apellido}` },
+    });
+
+  const detalle = (
+    <View style={[styles.pantalla, esAncho && styles.panelDetalle]}>
       <ScrollView contentContainerStyle={styles.contenido}>
-        <View style={styles.arriba}>
-          <EstadoBadge estado={compra.estado} />
-          {compra.estado === 'CONFIRMADA' ? <Text style={styles.dias}>{formatDiasRestantes(compra.diasRestantes)}</Text> : null}
-        </View>
-        <Text style={styles.nombre}>{compra.evento.nombre}</Text>
-        <Text style={styles.meta}>{formatFecha(compra.evento.fecha)}</Text>
-        <Text style={styles.meta}>{compra.evento.lugar}</Text>
-        {!esComprador ? (
-          <Text style={styles.meta}>
-            Comprador: {compra.comprador.nombre} {compra.comprador.apellido}
-          </Text>
-        ) : null}
-
-        <View style={styles.caja}>
-          <View style={styles.linea}>
-            <Text style={styles.texto}>
-              {compra.tipoEntrada.nombre} × {compra.cantidad}
-            </Text>
-            <Text style={styles.texto}>{formatPrecio(compra.tipoEntrada.precio * compra.cantidad)}</Text>
+        <View style={styles.entrada}>
+          {imagen ? <Image source={{ uri: imagen }} style={styles.imagen} /> : <View style={styles.imagen} />}
+          <View style={styles.entradaArriba}>
+            <View style={styles.estadoFila}>
+              <EstadoBadge estado={compra.estado} />
+              {compra.estado === 'CONFIRMADA' && compra.diasRestantes !== null ? (
+                <Etiqueta texto={formatDiasRestantes(compra.diasRestantes)} fondo={colors.primarySofter} color={colors.primaryText} />
+              ) : null}
+            </View>
+            <Text style={styles.nombre}>{compra.evento.nombre}</Text>
+            <Text style={styles.meta}>{formatFecha(compra.evento.fecha)} · {compra.evento.lugar}</Text>
+            {!esComprador ? (
+              <Text style={styles.meta}>
+                Comprador: {compra.comprador.nombre} {compra.comprador.apellido}
+              </Text>
+            ) : null}
           </View>
-          <View style={[styles.linea, styles.lineaTotal]}>
-            <Text style={styles.total}>Total</Text>
-            <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
+          <View style={styles.entradaAbajo}>
+            <View>
+              <Text style={styles.cap}>Entradas</Text>
+              <Text style={styles.fuerte}>
+                {compra.tipoEntrada.nombre} × {compra.cantidad}
+              </Text>
+            </View>
+            <View style={styles.derecha}>
+              <Text style={styles.cap}>{compra.estado === 'PENDIENTE' ? 'Total a pagar' : 'Total'}</Text>
+              <Text style={styles.total}>{formatPrecio(compra.total)}</Text>
+            </View>
           </View>
         </View>
 
@@ -168,85 +218,135 @@ export default function DetalleCompra() {
             {compra.resenia ? (
               <View style={styles.caja}>
                 <Estrellas valor={compra.resenia.puntuacion} size={18} />
-                <Text style={[styles.texto, styles.reseniaTexto]}>{compra.resenia.detalle}</Text>
+                <Text style={styles.reseniaTexto}>{compra.resenia.detalle}</Text>
               </View>
             ) : (
               <ReseniaForm
                 onPublicar={(resenia) =>
-                  ejecutar('Publicando tu reseña…', () => crearResenia({ eventoId: compra.evento.id, ...resenia }))
+                  ejecutar('Publicando tu reseña…', () => crearResenia({ eventoId: compra.evento.id, ...resenia }), 'Publicaste tu reseña. ¡Gracias!')
                 }
               />
             )}
           </>
         ) : null}
 
-        <Text style={styles.seccion}>
-          Chat con {otro.nombre} {otro.apellido}
-        </Text>
-        <Pressable
-          style={({ pressed }) => [styles.chat, pressed && styles.presionado]}
-          onPress={() =>
-            router.push({
-              pathname: '/compras/[id]/chat',
-              params: { id: compra.id, evento: compra.evento.nombre, con: `${otro.nombre} ${otro.apellido}` },
-            })
-          }
-        >
-          <View style={styles.chatInfo}>
-            {ultimo ? (
-              <>
-                <Text style={styles.texto} numberOfLines={1}>
-                  <Text style={styles.autor}>{autorUltimo.nombre}:</Text> {ultimo.mensaje}
-                </Text>
-                <Text style={styles.meta}>
-                  {compra.mensajes.length} {compra.mensajes.length === 1 ? 'mensaje' : 'mensajes'} · {formatDia(ultimo.enviado)}
-                </Text>
-              </>
-            ) : (
-              <Text style={styles.meta}>Todavía no hay mensajes. Escribí si tenés alguna consulta.</Text>
-            )}
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.primary} />
-        </Pressable>
+        {!esAncho ? (
+          <>
+            <Text style={styles.seccion}>
+              Chat con {otro.nombre} {otro.apellido}
+            </Text>
+            <Pressable style={({ pressed }) => [styles.caja, styles.chat, pressed && styles.presionado]} onPress={abrirChat} accessibilityRole="button">
+              <Avatar usuario={otro} size={36} />
+              <View style={styles.chatInfo}>
+                {ultimo ? (
+                  <>
+                    <Text style={styles.texto} numberOfLines={1}>
+                      <Text style={styles.fuerte}>{autorUltimo.id === usuario?.id ? 'Vos' : autorUltimo.nombre}:</Text> {ultimo.mensaje}
+                    </Text>
+                    <Text style={styles.cap}>{formatDia(ultimo.enviado)}</Text>
+                  </>
+                ) : (
+                  <Text style={styles.meta}>Todavía no hay mensajes. Escribí si tenés alguna consulta.</Text>
+                )}
+              </View>
+              {compra.mensajesNoLeidos > 0 ? (
+                <View style={styles.contador}>
+                  <Text style={styles.contadorTexto}>{compra.mensajesNoLeidos}</Text>
+                </View>
+              ) : (
+                <Ionicons name="chevron-forward" size={20} color={colors.primary} />
+              )}
+            </Pressable>
+          </>
+        ) : null}
 
         <Text style={styles.seccion}>Historial</Text>
-        {compra.historial.map((cambio) => (
-          <View key={`${cambio.estado}-${cambio.fechaHora}`} style={styles.cambio}>
-            <View style={styles.punto} />
-            <Text style={styles.meta}>
-              {HISTORIAL[cambio.estado]} · {formatFecha(cambio.fechaHora)}
-            </Text>
-          </View>
-        ))}
+        <View style={styles.caja}>
+          {[...compra.historial].reverse().map((cambio, i) => {
+            const estilo = HISTORIAL[cambio.estado];
+            return (
+              <View key={`${cambio.estado}-${cambio.fechaHora}`} style={[styles.cambio, i > 0 && styles.cambioSeparado]}>
+                <View style={[styles.cambioIcono, { backgroundColor: estilo.fondo }]}>
+                  <Ionicons name={estilo.icono} size={14} color={estilo.color} />
+                </View>
+                <View>
+                  <Text style={styles.texto}>
+                    <Text style={styles.fuerte}>{estilo.texto}</Text> {quien(cambio.usuarioId)}
+                  </Text>
+                  <Text style={styles.cap}>{formatFecha(cambio.fechaHora)}</Text>
+                </View>
+              </View>
+            );
+          })}
+        </View>
       </ScrollView>
 
-      {acciones.length > 0 || errorAccion || aviso ? (
-        <View style={[styles.pie, { paddingBottom: spacing.md + insets.bottom }]}>
-          {errorAccion ? <Text style={styles.error}>{errorAccion}</Text> : null}
+      {principal || peligro || aviso || errorAccion ? (
+        <View style={[styles.pie, { paddingBottom: spacing.md + (esAncho ? 0 : insets.bottom) }]}>
+          <Aviso>{errorAccion}</Aviso>
+          {principal ? <Boton titulo={principal.titulo} onPress={principal.onPress} /> : null}
+          {peligro ? <Boton titulo={peligro.titulo} variante="peligro" onPress={peligro.onPress} /> : null}
           {aviso ? <Text style={styles.aviso}>{aviso}</Text> : null}
-          {acciones.map((accion) => (
-            <Pressable
-              key={accion.texto}
-              style={[styles.boton, accion.peligro && styles.botonPeligro]}
-              onPress={accion.onPress}
-            >
-              <Text style={[styles.botonTexto, accion.peligro && styles.botonTextoPeligro]}>{accion.texto}</Text>
-            </Pressable>
-          ))}
         </View>
       ) : null}
+    </View>
+  );
 
+  return (
+    <View style={[styles.pantalla, esAncho && styles.fila]}>
+      {detalle}
+      {esAncho ? (
+        <View style={styles.panelChat}>
+          <Conversacion
+            key={compra.id}
+            compraId={compra.id}
+            onEnviado={recargar}
+            encabezado={
+              <View style={styles.chatEncabezado}>
+                <Avatar usuario={otro} size={36} />
+                <View>
+                  <Text style={styles.fuerte}>
+                    {otro.nombre} {otro.apellido}
+                  </Text>
+                  <Text style={styles.cap}>{esComprador ? 'Organizador' : 'Comprador'}</Text>
+                </View>
+              </View>
+            }
+          />
+        </View>
+      ) : null}
       {/* El velo sigue hasta que llega la compra actualizada, para no mostrar el estado viejo. */}
       {procesando || loading ? <CargaEncima mensaje={procesando ?? 'Actualizando tu compra…'} /> : null}
     </View>
   );
 }
 
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
+    backgroundColor: colors.surface,
+  },
+  fila: {
+    flexDirection: 'row',
+  },
+  panelDetalle: {
+    flex: 0,
+    width: 480,
+    borderRightWidth: 1,
+    borderRightColor: colors.borderSoft,
+  },
+  panelChat: {
+    flex: 1,
     backgroundColor: colors.background,
+  },
+  chatEncabezado: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.borderSoft,
   },
   centrado: {
     flex: 1,
@@ -255,101 +355,142 @@ const styles = StyleSheet.create({
   },
   contenido: {
     padding: spacing.lg,
+    width: '100%',
+    maxWidth: 640,
+    alignSelf: 'center',
   },
-  arriba: {
+  entrada: {
+    backgroundColor: colors.background,
+    borderRadius: 16,
+    overflow: 'hidden',
+    elevation: 2,
+  },
+  imagen: {
+    width: '100%',
+    height: 96,
+    backgroundColor: colors.borderSoft,
+  },
+  entradaArriba: {
+    padding: spacing.lg,
+    gap: 2,
+  },
+  estadoFila: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  entradaAbajo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    borderTopWidth: 2,
+    borderTopColor: colors.borderSoft,
+    borderStyle: 'dashed',
   },
-  dias: {
-    color: colors.primaryText,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
+  derecha: {
+    alignItems: 'flex-end',
   },
   nombre: {
     color: colors.text,
-    fontSize: 20,
+    fontSize: fontSize.title,
     fontWeight: 'bold',
-    marginTop: spacing.sm,
-    marginBottom: spacing.xs,
   },
   meta: {
     color: colors.textSecondary,
     fontSize: fontSize.small,
   },
+  cap: {
+    color: colors.textMuted,
+    fontSize: fontSize.caption,
+  },
   texto: {
     color: colors.text,
     fontSize: fontSize.body,
   },
-  caja: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginTop: spacing.md,
-    gap: spacing.xs,
-  },
-  linea: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  lineaTotal: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
-    paddingTop: spacing.sm,
-    marginTop: spacing.xs,
+  fuerte: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    fontWeight: 'bold',
   },
   total: {
     color: colors.text,
-    fontSize: 16,
+    fontSize: fontSize.title,
     fontWeight: 'bold',
-  },
-  reseniaTexto: {
-    lineHeight: 20,
   },
   seccion: {
-    color: colors.text,
-    fontSize: 16,
+    color: colors.textSecondary,
+    fontSize: fontSize.small,
     fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
     marginTop: spacing.xl,
     marginBottom: spacing.sm,
+  },
+  caja: {
+    backgroundColor: colors.background,
+    borderWidth: 1,
+    borderColor: colors.borderSoft,
+    borderRadius: 14,
+    padding: spacing.md + 2,
+    gap: spacing.xs,
+  },
+  reseniaTexto: {
+    color: colors.text,
+    fontSize: fontSize.body,
+    lineHeight: 21,
   },
   chat: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: spacing.md,
+    gap: spacing.md,
+    minHeight: 64,
   },
   presionado: {
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.primarySofter,
   },
   chatInfo: {
     flex: 1,
     gap: 2,
   },
-  autor: {
+  contador: {
+    minWidth: 22,
+    borderRadius: 11,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    backgroundColor: colors.primary,
+    alignItems: 'center',
+  },
+  contadorTexto: {
+    color: '#FFFFFF',
+    fontSize: 12,
     fontWeight: 'bold',
   },
   cambio: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginBottom: spacing.xs,
+    alignItems: 'flex-start',
+    gap: spacing.md,
   },
-  punto: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.brand,
+  cambioSeparado: {
+    marginTop: spacing.md,
+  },
+  cambioIcono: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pie: {
-    padding: spacing.md,
-    gap: spacing.sm,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.border,
+    paddingHorizontal: spacing.lg,
+    paddingTop: spacing.md,
+    gap: spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: colors.borderSoft,
     backgroundColor: colors.background,
   },
   aviso: {
@@ -357,32 +498,6 @@ const styles = StyleSheet.create({
     fontSize: fontSize.small,
     textAlign: 'center',
     paddingHorizontal: spacing.lg,
-  },
-  error: {
-    backgroundColor: '#FCEBEB',
-    color: '#791F1F',
-    borderRadius: 8,
-    padding: spacing.md,
-    fontSize: fontSize.body,
-    overflow: 'hidden',
-  },
-  boton: {
-    backgroundColor: colors.primary,
-    borderRadius: 8,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  botonPeligro: {
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.danger,
-  },
-  botonTexto: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  botonTextoPeligro: {
-    color: '#791F1F',
+    lineHeight: 18,
   },
 });

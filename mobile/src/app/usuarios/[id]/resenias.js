@@ -82,10 +82,13 @@ export default function ReseniasOrganizador() {
           {organizador.puntaje !== null ? (
             <View style={styles.promedio}>
               <Text style={styles.promedioNumero}>{formatPuntaje(organizador.puntaje)}</Text>
-              <Estrellas valor={organizador.puntaje} size={18} />
-              <Text style={styles.subtitulo}>
-                {organizador.cantidadResenias} {organizador.cantidadResenias === 1 ? 'reseña' : 'reseñas'}
-              </Text>
+              <View style={styles.promedioTextos}>
+                <Estrellas valor={organizador.puntaje} size={22} />
+                <Text style={styles.subtitulo}>
+                  Promedio de {organizador.cantidadResenias}{' '}
+                  {organizador.cantidadResenias === 1 ? 'reseña' : 'reseñas'} de eventos anteriores
+                </Text>
+              </View>
             </View>
           ) : null}
         </View>
@@ -102,6 +105,9 @@ const styles = StyleSheet.create({
   },
   contenido: {
     padding: spacing.lg,
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
   },
   centrado: {
     flex: 1,
@@ -109,10 +115,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.background,
   },
   cabecera: {
-    gap: spacing.md,
-    paddingBottom: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    gap: spacing.lg,
+    paddingBottom: spacing.sm,
   },
   persona: {
     flexDirection: 'row',
@@ -121,7 +125,7 @@ const styles = StyleSheet.create({
   },
   nombre: {
     color: colors.text,
-    fontSize: 18,
+    fontSize: fontSize.title,
     fontWeight: 'bold',
   },
   subtitulo: {
@@ -131,11 +135,18 @@ const styles = StyleSheet.create({
   promedio: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.sm,
+    gap: spacing.lg,
+    backgroundColor: colors.surface,
+    borderRadius: 14,
+    padding: spacing.lg,
+  },
+  promedioTextos: {
+    flex: 1,
+    gap: spacing.xs,
   },
   promedioNumero: {
     color: colors.text,
-    fontSize: 32,
+    fontSize: 44,
     fontWeight: 'bold',
   },
   vacio: {

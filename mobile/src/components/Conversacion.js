@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useFocusEffect } from 'expo-router';
@@ -16,6 +16,9 @@ import { colors, fontSize, spacing } from '../theme.js';
 // Cada cuánto se vuelven a pedir los mensajes mientras el chat está abierto. El backend
 // no tiene tiempo real (websockets): la app pregunta cada tanto si hay mensajes nuevos.
 const INTERVALO_MS = 5000;
+// Largo máximo de un mensaje (lo valida también el backend) y desde cuándo se muestra el contador.
+const LARGO_MAXIMO = 500;
+const LARGO_AVISO = 400;
 
 // Casos de uso 5 y 6: el chat de una compra entre el comprador y el organizador del evento.
 // Lo usan la pantalla de chat y, en pantallas anchas, el panel derecho de los mensajes
@@ -29,19 +32,55 @@ export function Conversacion({ compraId, encabezado, onEnviado, onLeido }) {
   const insets = useSafeAreaInsets();
   const alturaTeclado = useAlturaTeclado();
   const pedir = useCallback(() => getMensajes(compraId), [compraId]);
-  const { data: mensajes, loading, error, recargar } = useCarga(pedir);
+  // La primera carga va con useCarga (spinner, error y reintentar). Las consultas
+  // automáticas van aparte y solo tocan el estado si llegó algo nuevo: una consulta sin
+  // novedades no redibuja nada, así no le quita tiempo al teclado mientras se escribe.
+  const { data: cargados, loading, error, recargar } = useCarga(pedir);
+  const [actualizados, setActualizados] = useState(null);
+  const [sinConexion, setSinConexion] = useState(false);
+  const mensajes = actualizados ?? cargados;
   const [texto, setTexto] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [errorEnvio, setErrorEnvio] = useState(null);
   const lista = useRef(null);
 
+  // Los últimos mensajes mostrados, para comparar sin volver a crear actualizar.
+  const mostrados = useRef(null);
+  useEffect(() => {
+    mostrados.current = mensajes;
+  }, [mensajes]);
+
+  const actualizar = useCallback(() => {
+    getMensajes(compraId).then(
+      (data) => {
+        setSinConexion(false);
+        if (!mismosMensajes(mostrados.current, data)) setActualizados(data);
+      },
+      () => setSinConexion(true),
+    );
+  }, [compraId]);
+
   // Solo mientras la pantalla está visible: al salir se corta el intervalo.
   useFocusEffect(
     useCallback(() => {
-      const intervalo = setInterval(recargar, INTERVALO_MS);
+      const intervalo = setInterval(actualizar, INTERVALO_MS);
       return () => clearInterval(intervalo);
-    }, [recargar]),
+    }, [actualizar]),
   );
+
+  // Memorizados para que tipear (que redibuja el componente) no redibuje toda la lista.
+  const items = useMemo(() => (mensajes ? conSeparadores(mensajes) : []), [mensajes]);
+  const usuarioId = usuario?.id;
+  const renderItem = useCallback(
+    ({ item }) =>
+      item.dia ? (
+        <Text style={styles.dia}>{item.dia}</Text>
+      ) : (
+        <Burbuja mensaje={item.mensaje} propio={item.mensaje.autor.id === usuarioId} />
+      ),
+    [usuarioId],
+  );
+  const bajarAlFinal = useCallback(() => lista.current?.scrollToEnd({ animated: false }), []);
 
   // Abrir el chat lo deja leído. Mientras está abierto, cada vez que llega un mensaje del
   // otro se vuelve a marcar. Después se actualizan la campana y la pantalla que lo contiene.
@@ -68,7 +107,7 @@ export function Conversacion({ compraId, encabezado, onEnviado, onLeido }) {
     try {
       await enviarMensaje(compraId, mensaje);
       setTexto('');
-      recargar();
+      actualizar();
       onEnviado?.();
     } catch (e) {
       setErrorEnvio(e.message);
@@ -93,28 +132,24 @@ export function Conversacion({ compraId, encabezado, onEnviado, onLeido }) {
     <View style={[styles.pantalla, { paddingBottom: alturaTeclado }]}>
       {encabezado}
       {/* Si falla un pedido de los automáticos se sigue mostrando lo último que llegó. */}
-      {error ? <Text style={styles.sinConexion}>Sin conexión. Reintentando…</Text> : null}
+      {sinConexion ? <Text style={styles.sinConexion}>Sin conexión. Reintentando…</Text> : null}
 
       <FlatList
         ref={lista}
         style={styles.lista}
         contentContainerStyle={styles.listaContenido}
-        data={conSeparadores(mensajes)}
-        keyExtractor={(item) => item.clave}
-        renderItem={({ item }) =>
-          item.dia ? (
-            <Text style={styles.dia}>{item.dia}</Text>
-          ) : (
-            <Burbuja mensaje={item.mensaje} propio={item.mensaje.autor.id === usuario?.id} />
-          )
-        }
+        data={items}
+        keyExtractor={claveDe}
+        renderItem={renderItem}
         // Al abrir y cada vez que llega un mensaje, se baja hasta el último.
-        onContentSizeChange={() => lista.current?.scrollToEnd({ animated: false })}
+        onContentSizeChange={bajarAlFinal}
         ListEmptyComponent={<Text style={styles.vacio}>Todavía no hay mensajes. Escribí el primero.</Text>}
       />
 
       <View style={[styles.entrada, { paddingBottom: spacing.sm + (alturaTeclado > 0 ? 0 : insets.bottom) }]}>
         {errorEnvio ? <Text style={styles.errorEnvio}>{errorEnvio}</Text> : null}
+        {/* Cerca del límite se ve cuánto queda. */}
+        {texto.length > LARGO_AVISO ? <Text style={styles.contador}>{texto.length}/{LARGO_MAXIMO}</Text> : null}
         <View style={styles.fila}>
           <TextInput
             style={styles.input}
@@ -123,21 +158,41 @@ export function Conversacion({ compraId, encabezado, onEnviado, onLeido }) {
             placeholder="Escribí un mensaje…"
             placeholderTextColor={colors.textMuted}
             multiline
-            maxLength={500}
+            maxLength={LARGO_MAXIMO}
+            accessibilityLabel="Mensaje"
           />
           <Pressable
             style={[styles.enviar, (!texto.trim() || enviando) && styles.enviarApagado]}
             onPress={enviar}
             disabled={!texto.trim() || enviando}
+            accessibilityRole="button"
             accessibilityLabel="Enviar mensaje"
+            accessibilityState={{ disabled: !texto.trim() || enviando }}
           >
-            {enviando ? <ActivityIndicator color="#FFFFFF" size="small" /> : <Ionicons name="send" size={18} color="#FFFFFF" />}
+            {enviando ? (
+              <ActivityIndicator color="#FFFFFF" size="small" />
+            ) : (
+              <Ionicons name="send" size={20} color={texto.trim() ? '#FFFFFF' : colors.textMuted} />
+            )}
           </Pressable>
         </View>
       </View>
       {enviando ? <CargaEncima mensaje="Enviando tu mensaje…" /> : null}
     </View>
   );
+}
+
+// Los mensajes solo se agregan al final: alcanza con comparar cuántos hay y el último.
+function mismosMensajes(antes, ahora) {
+  if (!antes || antes.length !== ahora.length) return false;
+  if (ahora.length === 0) return true;
+  const a = antes[antes.length - 1];
+  const b = ahora[ahora.length - 1];
+  return a.enviado === b.enviado && a.autor.id === b.autor.id && a.mensaje === b.mensaje;
+}
+
+function claveDe(item) {
+  return item.clave;
 }
 
 // Intercala el día ("vie 30 oct") cada vez que cambia entre un mensaje y el siguiente.
@@ -184,7 +239,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xs,
   },
   lista: {
-    backgroundColor: '#FAFAF7',
+    backgroundColor: colors.background,
   },
   listaContenido: {
     padding: spacing.md,
@@ -192,8 +247,13 @@ const styles = StyleSheet.create({
   },
   dia: {
     alignSelf: 'center',
-    color: colors.textMuted,
-    fontSize: 11,
+    color: colors.textSecondary,
+    fontSize: fontSize.caption,
+    backgroundColor: colors.surface,
+    borderRadius: 10,
+    overflow: 'hidden',
+    paddingHorizontal: spacing.md,
+    paddingVertical: 3,
     marginVertical: spacing.xs,
   },
   burbuja: {
@@ -229,7 +289,7 @@ const styles = StyleSheet.create({
   hora: {
     alignSelf: 'flex-end',
     color: colors.textMuted,
-    fontSize: 10,
+    fontSize: 11,
     marginTop: 2,
   },
   vacio: {
@@ -257,24 +317,31 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
+    minHeight: 48,
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 20,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    maxHeight: 100,
+    borderRadius: 24,
+    paddingHorizontal: spacing.lg,
+    paddingVertical: spacing.md,
+    maxHeight: 120,
     color: colors.text,
     fontSize: fontSize.body,
+    backgroundColor: colors.surface,
   },
   enviar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   enviarApagado: {
-    opacity: 0.5,
+    backgroundColor: colors.disabled,
+  },
+  contador: {
+    alignSelf: 'flex-end',
+    color: colors.textMuted,
+    fontSize: fontSize.caption,
   },
 });

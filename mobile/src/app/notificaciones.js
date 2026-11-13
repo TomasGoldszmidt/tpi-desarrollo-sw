@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react';
 import { Pressable, RefreshControl, SectionList, StyleSheet, Text, View } from 'react-native';
-import { router, useFocusEffect } from 'expo-router';
+import { Stack, router, useFocusEffect } from 'expo-router';
+import { Boton } from '../components/Boton.js';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { getNotificaciones, marcarNotificacionLeida, marcarNotificacionesLeidas } from '../api/notificaciones.js';
 import { useUsuario } from '../context/UsuarioContext.js';
@@ -98,17 +99,25 @@ export default function Notificaciones() {
         keyExtractor={(notificacion) => notificacion.id}
         ListHeaderComponent={
           <View>
+            <Stack.Screen
+              options={{
+                // "Marcar todas" es una acción chica de la barra de arriba: no empuja la lista.
+                headerRight: hayNuevas
+                  ? () => (
+                    <Boton
+                      titulo="Marcar todas"
+                      variante="texto"
+                      chico
+                      icono="checkmark-done"
+                      onPress={marcarTodas}
+                      disabled={marcandoTodas}
+                      accessibilityLabel="Marcar todas como leídas"
+                    />
+                  )
+                  : undefined,
+              }}
+            />
             <Text style={styles.titulo}>Notificaciones</Text>
-            {hayNuevas ? (
-              <Pressable
-                style={({ pressed }) => [styles.marcarTodas, pressed && styles.presionada]}
-                onPress={marcarTodas}
-                disabled={marcandoTodas}
-              >
-                <Ionicons name="checkmark-done" size={18} color={colors.primaryText} />
-                <Text style={styles.marcarTodasTexto}>Marcar todas como leídas</Text>
-              </Pressable>
-            ) : null}
             {errorMarcar ? <Text style={styles.error}>{errorMarcar}</Text> : null}
           </View>
         }
@@ -200,7 +209,7 @@ function NotificacionFila({ notificacion, onPress }) {
       onPress={onPress}
     >
       <View style={[styles.icono, { backgroundColor: icono.fondo }]}>
-        <Ionicons name={icono.nombre} size={16} color={icono.color} />
+        <Ionicons name={icono.nombre} size={18} color={icono.color} />
       </View>
       <View style={styles.info}>
         <Text style={styles.texto}>
@@ -224,6 +233,9 @@ const styles = StyleSheet.create({
   },
   contenido: {
     padding: spacing.lg,
+    width: '100%',
+    maxWidth: 720,
+    alignSelf: 'center',
   },
   centrado: {
     flex: 1,
@@ -232,7 +244,7 @@ const styles = StyleSheet.create({
   },
   titulo: {
     color: colors.text,
-    fontSize: fontSize.title,
+    fontSize: fontSize.headline,
     fontWeight: 'bold',
   },
   marcarTodas: {
@@ -261,30 +273,32 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   seccion: {
-    color: colors.textMuted,
+    color: colors.textSecondary,
     fontSize: fontSize.small,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
     marginTop: spacing.lg,
-    marginBottom: spacing.xs,
+    marginBottom: spacing.sm,
   },
   fila: {
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    padding: spacing.sm,
-    borderRadius: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
+    padding: spacing.md,
+    marginBottom: spacing.xs,
+    borderRadius: 12,
   },
   nueva: {
-    backgroundColor: colors.primarySoft,
+    backgroundColor: colors.primarySofter,
   },
   presionada: {
-    opacity: 0.7,
+    backgroundColor: colors.primarySoft,
   },
   icono: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -304,7 +318,7 @@ const styles = StyleSheet.create({
   },
   cuando: {
     color: colors.textMuted,
-    fontSize: 11,
+    fontSize: 12,
     marginTop: 2,
   },
   punto: {
