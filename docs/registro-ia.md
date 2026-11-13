@@ -1106,3 +1106,49 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Hubo que proteger "Teatro San Martín" y "Av. Tristán Achával Rodríguez" para que el reemplazo no los tocara, y corregir a mano dos textos que quedaron en femenino ("organizadora", el ejemplo "SP" del avatar).
   - Quedan dos usuarios que se llaman Lautaro: donde la app muestra solo el nombre ("Lautaro te escribió") no se distingue cuál es. Por ahora no se cambió.
 - **Aprendizaje:** antes de cambiar datos de ejemplo conviene ver qué casos de prueba dependen de ellos; reemplazar solo los nombres y mantener los roles evita romper todo lo que ya estaba probado.
+
+### 2026-11-13 · Prueba de todas las funcionalidades
+- **Tarea:** Pruebas y rediseño: probar todo contra la consigna
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "Eres un experto en testing. Quiero que testees todas las funcionalidades de la aplicacion y fijarte que funcione bien y que este bien hecho el UX, fijate que cumpla todo lo que pide la consigna".
+- **Resultado:**
+  - Los 96 tests del backend pasaron. La IA levantó una copia del backend en el puerto 3100 (para no tocar el del usuario) y corrió 132 pruebas de la API: casos felices, errores, permisos, cupo con compras simultáneas, transiciones de estado y paginación. Pasaron 131.
+  - Falla encontrada: los textos del evento (nombre, descripción, lugar, tipos) no tienen largo máximo en el backend.
+  - Revisión del código de las pantallas: 6 detalles de UX (hora pasada al crear evento, compra confirmada de un evento pasado sin explicación, pagar sin confirmación, detalle del evento sin recargar, un pedido de más, pedidos sin tiempo límite). También quedaron desactualizados `prueba-integral.md` (usuarios viejos del seed) y 5 casillas de `TAREAS.md`.
+- **Bien:** probar contra un servidor aparte dejó el seed del usuario intacto y permitió repetir las pruebas.
+- **Corregido / problemas:** no se probó en el emulador; las pantallas se revisaron leyendo el código.
+- **Aprendizaje:** una prueba automatizada de la API encuentra rápido lo que falta validar, pero el UX se ve mejor recorriendo las pantallas.
+
+### 2026-11-13 · Confirmación de pago y aviso de evento pasado
+- **Tarea:** Pruebas y rediseño: detalle de la compra
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** sobre los detalles de UX: "2. me parece bien, 3. agrega confirmacion".
+- **Resultado:** el pago pide confirmación con el total, y si el evento ya pasó el pie explica por qué no hay botones (antes una pendiente de un evento pasado mostraba Pagar y Cancelar y el backend los rechazaba).
+- **Bien:** el cambio fue chico y quedó en el mismo archivo.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** las acciones que mueven plata tienen que pedir confirmación igual que las que cancelan.
+
+### 2026-11-13 · Bocetos del rediseño responsive
+- **Tarea:** Pruebas y rediseño: bocetos de todas las pantallas
+- **Herramienta / skill:** Claude Code con un artefacto de diseño (canvas)
+- **Pedido (prompt):** "analices el diseno de toda la app y lo mejores para que sea mas responsive, podes crear un artefacto claude con los bocetos"; después "Realiza un analisis profundo de todas las pantallas y mejora su UX/UI".
+- **Resultado:** un canvas con 26 bocetos (todas las pantallas en teléfono, 2 en tablet vertical y 4 en tablet horizontal), con datos del seed, una nota de análisis por pantalla (antes y cambios) y una nota de criterios generales: escala de letra, tres tipos de botón, 44 px para tocar, mejor contraste, estados con ícono, avisos después de cada acción y tres tamaños de pantalla.
+- **Bien:** separar el análisis en notas al lado de cada boceto hizo que el usuario aprobara todo de una vez.
+- **Corregido / problemas:** la primera tanda tenía inconsistencias de la propia IA (chips de 32 px cuando la nota decía 44, nombres de pestañas cambiados con letra grande, el nombre del evento repetido) que se detectaron al pedir un análisis de UX/UI y se corrigieron en la segunda versión.
+- **Aprendizaje:** conviene pedirle a la IA que critique su propio boceto antes de aprobarlo: encuentra cosas que no vio al hacerlo.
+
+### 2026-11-13 · Implementación del rediseño
+- **Tarea:** Pruebas y rediseño: tema, cuenta, catálogo y compra, compras y chat, organizador, backend de ventas
+- **Herramienta / skill:** Claude Code, `/swagger`, `/registrar-ia`
+- **Pedido (prompt):** "si, implementalos todos".
+- **Resultado:**
+  - Base: `theme.js` con una escala de letra, `Boton` (principal, secundario, texto y peligro), `EstadoBadge` con ícono y sin alto fijo, `AvisosContext` para los avisos de abajo, `useLayout` para teléfono, tablet y tablet horizontal, y la galería que mide su contenedor.
+  - Pantallas: todas las del boceto, en 5 commits. Lo nuevo para el usuario: categorías y filtro por precio en el catálogo, compra en pasos (Reservar y después Pagar), Pagar desde Mis compras, Deshacer al quitar un favorito, chat al lado del detalle en tablet horizontal, pestañas en barra lateral, crear evento en bloques con miniaturas y validación de hora pasada y tipos repetidos.
+  - Backend: `GET /eventos/:id/compras` suma `resumen` (vendidas y recaudado) y `cantidades`, y acepta `?estado=`. Función `resumenVentas` con test (97 tests) y swagger.
+  - El lint pasa. La app levanta en el emulador; el recorrido completo queda para el usuario.
+- **Bien:** con los componentes comunes primero, las pantallas se rehicieron sin repetir estilos.
+- **Corregido / problemas:**
+  - Las cantidades por categoría del panel del catálogo en tablet necesitan backend: se dejaron afuera.
+  - El panel lateral muestra el catálogo con barra de pestañas propia de React Navigation, no exactamente como el boceto (la campana y la cuenta siguen arriba).
+  - Se commiteó junto con el chat un cambio pendiente de `Conversacion.js` de una sesión anterior.
+- **Aprendizaje:** un rediseño grande conviene hacerlo por capas (tema, componentes, pantallas) y commitear cada una, así se puede volver atrás por partes.

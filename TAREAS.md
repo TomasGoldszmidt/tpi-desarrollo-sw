@@ -68,3 +68,16 @@
 - [x] Ventas de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras`)
 - [x] Bandeja de mensajes de un evento de a páginas, con "Ver más" (`GET /eventos/:id/compras?conMensajes=true`)
 - [x] "Ver más" en todas las listas, en lugar del scroll infinito (Catálogo, Reseñas, Notificaciones, Mis eventos y Mis compras)
+
+## 6. Pruebas y rediseño
+- [x] Prueba de todas las funcionalidades contra la consigna (132 pruebas de API) y análisis de UX
+- [x] Confirmación al pagar y aviso cuando el evento ya pasó, en el detalle de la compra
+- [x] Bocetos del rediseño de todas las pantallas, responsive (artefacto "AI Ticket It responsive")
+- [x] Tema y componentes comunes: escala de letra, botones, estados con ícono, avisos y tamaños de pantalla
+- [x] Rediseño de la cuenta: inicio de sesión, registro, perfil, menú y pestañas (barra lateral en tablet horizontal)
+- [x] Rediseño del catálogo, filtros (con precio), detalle del evento, compra en pasos y reserva
+- [x] Rediseño de favoritos, reseñas, Mis compras, detalle de compra, chat y notificaciones
+- [x] Resumen de ventas y filtro por estado en `GET /eventos/:id/compras`
+- [x] Rediseño de Mis eventos, ventas, mensajes y crear evento
+- [ ] Prueba del rediseño en el emulador (teléfono y tablet)
+- [ ] Límite de largo de los textos del evento en el backend
