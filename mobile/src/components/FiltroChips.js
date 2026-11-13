@@ -29,11 +29,12 @@ export function FiltroChips({ opciones, elegido, onElegir }) {
 const ACTIVO_POR_DEFECTO = { backgroundColor: colors.primary, color: '#FFFFFF' };
 
 function Chip({ texto, cantidad, punto, puntoActivo, activo, estiloActivo, onPress }) {
-  const colorTexto = activo ? estiloActivo.color : colors.textSecondary;
+  const colorTexto = activo ? estiloActivo.color : colors.text;
   return (
     <Pressable
       style={[styles.chip, activo && { backgroundColor: estiloActivo.backgroundColor, borderColor: 'transparent' }]}
       onPress={onPress}
+      hitSlop={4}
       accessibilityRole="button"
       accessibilityState={{ selected: activo }}
       accessibilityLabel={`${texto}: ${cantidad}`}
@@ -60,8 +61,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: spacing.md,
+    minHeight: 36,
+    paddingVertical: 4,
+    paddingHorizontal: 14,
   },
   punto: {
     width: 8,

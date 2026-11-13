@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
-import { colors, spacing } from '../theme.js';
+import { colors, fontSize, spacing } from '../theme.js';
 
 // El chat de una compra tiene mensajes nuevos cuando la otra persona (comprador ↔
 // organizador) escribió después de la última vez que el usuario lo abrió. Lo calcula el
@@ -14,14 +14,15 @@ export function mensajeNoLeido(compra, usuario) {
   return [...compra.mensajes].reverse().find((mensaje) => mensaje.usuarioId !== usuario.id) ?? null;
 }
 
-// Pie de las tarjetas de Mis compras y Ventas: quién escribió y el comienzo del mensaje.
+// Pie de las tarjetas de Mis compras y Ventas: quién escribió y el comienzo del mensaje,
+// sobre un fondo verde claro con el punto de "nuevo".
 export function AvisoMensaje({ texto, mensaje }) {
   return (
     <View style={styles.aviso}>
       <View style={styles.punto} />
-      <Text style={styles.texto} numberOfLines={1}>
-        {texto}
-        {mensaje ? <Text style={styles.mensaje}> · {mensaje}</Text> : null}
+      <Text style={styles.texto} numberOfLines={2}>
+        <Text style={styles.quien}>{texto}</Text>
+        {mensaje ? `: ${mensaje}` : null}
       </Text>
     </View>
   );
@@ -36,27 +37,28 @@ export const estiloEsperando = {
 const styles = StyleSheet.create({
   aviso: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginTop: spacing.xs,
-    paddingTop: spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginTop: spacing.sm,
+    padding: spacing.sm + 2,
+    borderRadius: 10,
+    backgroundColor: colors.primarySofter,
   },
   punto: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.danger,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    marginTop: 5,
+    backgroundColor: colors.primary,
   },
   texto: {
     flex: 1,
-    color: colors.primaryText,
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  mensaje: {
     color: colors.textSecondary,
-    fontWeight: 'normal',
+    fontSize: fontSize.small,
+    lineHeight: 19,
+  },
+  quien: {
+    color: colors.text,
+    fontWeight: 'bold',
   },
 });

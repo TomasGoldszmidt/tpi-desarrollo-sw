@@ -1,4 +1,5 @@
-import { StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 // Texto y colores de cada EstadoCompra, para que se distingan de un vistazo.
 // plural: el nombre del filtro en Mis compras; enPlural: para "No tenés compras …"; borde: el color fuerte del estado
@@ -21,19 +22,58 @@ export function estiloEstado(estado) {
   return ESTADOS[estado];
 }
 
-export function EstadoBadge({ estado }) {
+// Cada estado lleva su ícono: así se distinguen también sin ver los colores.
+const ICONOS = {
+  PENDIENTE: 'time-outline',
+  CONFIRMADA: 'checkmark',
+  UTILIZADA: 'checkmark-done',
+  CANCELADA: 'close',
+  REEMBOLSADA: 'arrow-undo-outline',
+};
+
+// chico: dentro de una fila de lista (bandeja de mensajes). Sin alto fijo: con la letra
+// grande del celular crece en lugar de cortarse.
+export function EstadoBadge({ estado, chico = false }) {
   const { texto, fondo, color } = ESTADOS[estado];
-  return <Text style={[styles.badge, { backgroundColor: fondo, color }]}>{texto}</Text>;
+  return (
+    <View style={[styles.badge, chico && styles.chico, { backgroundColor: fondo }]}>
+      <Ionicons name={ICONOS[estado]} size={chico ? 11 : 13} color={color} />
+      <Text style={[styles.texto, chico && styles.textoChico, { color }]}>{texto}</Text>
+    </View>
+  );
+}
+
+// Etiqueta con la misma forma que el estado, para otras marcas ("Realizado", "Agotado").
+export function Etiqueta({ texto, fondo, color, icono }) {
+  return (
+    <View style={[styles.badge, { backgroundColor: fondo }]}>
+      {icono ? <Ionicons name={icono} size={13} color={color} /> : null}
+      <Text style={[styles.texto, { color }]}>{texto}</Text>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     borderRadius: 999,
-    paddingVertical: 2,
-    paddingHorizontal: 10,
-    fontSize: 11,
+    paddingVertical: 3,
+    paddingLeft: 8,
+    paddingRight: 10,
+  },
+  chico: {
+    paddingVertical: 1,
+    paddingLeft: 6,
+    paddingRight: 8,
+  },
+  texto: {
+    fontSize: 12,
     fontWeight: 'bold',
-    overflow: 'hidden',
+  },
+  textoChico: {
+    fontSize: 11,
   },
 });

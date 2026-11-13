@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { UsuarioProvider, useUsuario } from '../context/UsuarioContext.js';
 import { FavoritosProvider } from '../context/FavoritosContext.js';
 import { NotificacionesProvider } from '../context/NotificacionesContext.js';
+import { AvisosProvider } from '../context/AvisosContext.js';
 import { Logo, Marca } from '../components/Logo.js';
 import { colors, spacing } from '../theme.js';
 
@@ -36,6 +37,7 @@ function ConFavoritos({ children }) {
 export default function RootLayout() {
   return (
     <UsuarioProvider>
+      <AvisosProvider>
       <ConFavoritos>
         <Stack screenOptions={{ headerShown: false }}>
           <Stack.Screen name="registro" options={conHeader} />
@@ -51,6 +53,7 @@ export default function RootLayout() {
           <Stack.Screen name="compras/[id]/chat" options={conHeader} />
         </Stack>
       </ConFavoritos>
+      </AvisosProvider>
       <StatusBar style="dark" />
     </UsuarioProvider>
   );
