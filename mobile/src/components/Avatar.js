@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View } from 'react-native';
 import { colors } from '../theme.js';
 
-// Círculo con las iniciales del usuario (ej: "SP" para Sofía Pérez).
+// Círculo con las iniciales del usuario (ej: "LP" para Leandro Paredes).
 export function Avatar({ usuario, size = 32 }) {
   const iniciales = `${usuario.nombre[0]}${usuario.apellido[0]}`.toUpperCase();
   return (

@@ -40,7 +40,7 @@ describe('cupo disponible', () => {
   });
 
   // Solo las dos compras del Rock que importan acá (el seed le suma más ventas en otros estados).
-  const comprasDelRock = () => [seed.compras.sofiaRock, seed.compras.juanRockReembolsada];
+  const comprasDelRock = () => [seed.compras.paredesRock, seed.compras.blancoRockReembolsada];
 
   it('una REEMBOLSADA libera el cupo', () => {
     const compras = comprasDelRock();
@@ -86,12 +86,12 @@ describe('tuPrecioEstaEntre', () => {
 
 describe('transiciones de estado', () => {
   const { PENDIENTE, CONFIRMADA, UTILIZADA, CANCELADA, REEMBOLSADA } = EstadoCompra;
-  const { sofia, juan, martin } = seed.usuarios;
+  const { paredes, blanco, dilollo } = seed.usuarios;
   const { partido, standup, rock } = seed.eventos;
 
-  // Las compras que se modifican se crean acá, en el partido (futuro, de Martín),
+  // Las compras que se modifican se crean acá, en el partido (futuro, de Dilollo),
   // para no tocar las del seed que usan los tests de cupo.
-  function compraPendiente(comprador = sofia, evento = partido) {
+  function compraPendiente(comprador = paredes, evento = partido) {
     return compraRepository.create({ compradorId: comprador.id, eventoId: evento.id, tipoEntradaId: 1, cantidad: 1, total: 15000 });
   }
 
@@ -101,67 +101,67 @@ describe('transiciones de estado', () => {
 
   it('pagar: PENDIENTE → CONFIRMADA y suma el cambio al historial', () => {
     const ahora = new Date();
-    const compra = actualizarEstado(compraPendiente(), partido, CONFIRMADA, sofia, ahora);
+    const compra = actualizarEstado(compraPendiente(), partido, CONFIRMADA, paredes, ahora);
     assert.equal(compra.estado, CONFIRMADA);
     assert.deepEqual(compra.historial.map((c) => c.estado), [PENDIENTE, CONFIRMADA]);
-    assert.deepEqual(compra.historial.at(-1), { estado: CONFIRMADA, usuarioId: sofia.id, fechaHora: ahora });
+    assert.deepEqual(compra.historial.at(-1), { estado: CONFIRMADA, usuarioId: paredes.id, fechaHora: ahora });
     assert.equal(compraRepository.findById(compra.id).estado, CONFIRMADA);
   });
 
   it('cancelar una PENDIENTE la deja CANCELADA', () => {
     const pendiente = compraPendiente();
-    const compra = actualizarEstado(pendiente, partido, estadoAlCancelar(pendiente), sofia);
+    const compra = actualizarEstado(pendiente, partido, estadoAlCancelar(pendiente), paredes);
     assert.equal(compra.estado, CANCELADA);
   });
 
   it('cancelar una CONFIRMADA la deja REEMBOLSADA', () => {
-    const confirmada = actualizarEstado(compraPendiente(), partido, CONFIRMADA, sofia);
-    const compra = actualizarEstado(confirmada, partido, estadoAlCancelar(confirmada), sofia);
+    const confirmada = actualizarEstado(compraPendiente(), partido, CONFIRMADA, paredes);
+    const compra = actualizarEstado(confirmada, partido, estadoAlCancelar(confirmada), paredes);
     assert.equal(compra.estado, REEMBOLSADA);
     assert.deepEqual(compra.historial.map((c) => c.estado), [PENDIENTE, CONFIRMADA, REEMBOLSADA]);
   });
 
   it('no se puede cancelar una UTILIZADA', () => {
-    rechaza(() => estadoAlCancelar(seed.compras.sofiaAcustico), BusinessRuleError, 'No se puede cancelar una compra UTILIZADA');
-    rechaza(() => actualizarEstado(seed.compras.sofiaAcustico, seed.eventos.acustico, CANCELADA, sofia),
+    rechaza(() => estadoAlCancelar(seed.compras.paredesAcustico), BusinessRuleError, 'No se puede cancelar una compra UTILIZADA');
+    rechaza(() => actualizarEstado(seed.compras.paredesAcustico, seed.eventos.acustico, CANCELADA, paredes),
       BusinessRuleError, 'No se puede pasar de UTILIZADA a CANCELADA');
   });
 
   it('no se puede cancelar ni pagar si el evento ya se realizó', () => {
-    rechaza(() => actualizarEstado(seed.compras.juanStandup, standup, REEMBOLSADA, juan), BusinessRuleError, 'El evento ya se realizó');
-    rechaza(() => actualizarEstado(compraPendiente(juan, standup), standup, CONFIRMADA, juan), BusinessRuleError, 'El evento ya se realizó');
+    rechaza(() => actualizarEstado(seed.compras.blancoStandup, standup, REEMBOLSADA, blanco), BusinessRuleError, 'El evento ya se realizó');
+    rechaza(() => actualizarEstado(compraPendiente(blanco, standup), standup, CONFIRMADA, blanco), BusinessRuleError, 'El evento ya se realizó');
   });
 
   it('solo el comprador paga o cancela', () => {
-    rechaza(() => actualizarEstado(compraPendiente(), partido, CONFIRMADA, juan), ForbiddenError, 'No podés pasar esta compra a CONFIRMADA');
-    rechaza(() => actualizarEstado(compraPendiente(), partido, CANCELADA, martin), ForbiddenError, 'No podés pasar esta compra a CANCELADA');
+    rechaza(() => actualizarEstado(compraPendiente(), partido, CONFIRMADA, blanco), ForbiddenError, 'No podés pasar esta compra a CONFIRMADA');
+    rechaza(() => actualizarEstado(compraPendiente(), partido, CANCELADA, dilollo), ForbiddenError, 'No podés pasar esta compra a CANCELADA');
   });
 
   it('marcar UTILIZADA: solo el organizador y desde las 00:00 del día del evento', () => {
-    const confirmada = actualizarEstado(compraPendiente(), partido, CONFIRMADA, sofia);
-    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, sofia), ForbiddenError, 'No podés pasar esta compra a UTILIZADA');
-    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, martin), BusinessRuleError, 'Todavía no es el día del evento');
+    const confirmada = actualizarEstado(compraPendiente(), partido, CONFIRMADA, paredes);
+    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, paredes), ForbiddenError, 'No podés pasar esta compra a UTILIZADA');
+    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, dilollo), BusinessRuleError, 'Todavía no es el día del evento');
 
     const inicioDelDia = new Date(partido.fecha);
     inicioDelDia.setHours(0, 0, 0, 0);
     const antes = new Date(inicioDelDia.getTime() - 1);
-    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, martin, antes), BusinessRuleError, 'Todavía no es el día del evento');
+    rechaza(() => actualizarEstado(confirmada, partido, UTILIZADA, dilollo, antes), BusinessRuleError, 'Todavía no es el día del evento');
 
-    const compra = actualizarEstado(confirmada, partido, UTILIZADA, martin, inicioDelDia);
+    const compra = actualizarEstado(confirmada, partido, UTILIZADA, dilollo, inicioDelDia);
     assert.equal(compra.estado, UTILIZADA);
-    assert.equal(compra.historial.at(-1).usuarioId, martin.id);
+    assert.equal(compra.historial.at(-1).usuarioId, dilollo.id);
   });
 
   it('rechaza las transiciones que no están en la tabla', () => {
-    rechaza(() => actualizarEstado(compraPendiente(), partido, UTILIZADA, martin), BusinessRuleError, 'No se puede pasar de PENDIENTE a UTILIZADA');
-    rechaza(() => actualizarEstado(seed.compras.sofiaRock, rock, CONFIRMADA, sofia), BusinessRuleError, 'No se puede pasar de CONFIRMADA a CONFIRMADA');
-    rechaza(() => actualizarEstado(seed.compras.juanRockReembolsada, rock, CONFIRMADA, juan), BusinessRuleError, 'No se puede pasar de REEMBOLSADA a CONFIRMADA');
-    rechaza(() => actualizarEstado(seed.compras.juanPartidoCancelada, partido, CONFIRMADA, juan), BusinessRuleError, 'No se puede pasar de CANCELADA a CONFIRMADA');
+    rechaza(() => actualizarEstado(compraPendiente(), partido, UTILIZADA, dilollo), BusinessRuleError, 'No se puede pasar de PENDIENTE a UTILIZADA');
+    rechaza(() => actualizarEstado(seed.compras.paredesRock, rock, CONFIRMADA, paredes), BusinessRuleError, 'No se puede pasar de CONFIRMADA a CONFIRMADA');
+    rechaza(() => actualizarEstado(seed.compras.blancoRockReembolsada, rock, CONFIRMADA, blanco), BusinessRuleError, 'No se puede pasar de REEMBOLSADA a CONFIRMADA');
+    rechaza(() => actualizarEstado(seed.compras.blancoPartidoCancelada, partido, CONFIRMADA, blanco), BusinessRuleError, 'No se puede pasar de CANCELADA a CONFIRMADA');
   });
 });
 
 describe('crear evento', () => {
-  const { martin } = seed.usuarios;
+  const { dilollo } = seed.usuarios;
   const ahora = new Date();
   const enUnMes = new Date(ahora.getTime() + 30 * 24 * 60 * 60 * 1000);
   const datos = (cambios = {}) => ({
@@ -172,19 +172,19 @@ describe('crear evento', () => {
   });
 
   it('guarda el evento con el usuario activo como organizador', () => {
-    const evento = crearEvento(datos(), martin, ahora);
-    assert.equal(evento.organizadorId, martin.id);
+    const evento = crearEvento(datos(), dilollo, ahora);
+    assert.equal(evento.organizadorId, dilollo.id);
     assert.equal(eventoRepository.findById(evento.id).nombre, 'Charla de prueba');
     assert.deepEqual(evento.tiposEntrada.map((t) => t.id), [1]);
   });
 
   it('rechaza una categoría inexistente', () => {
-    assert.throws(() => crearEvento(datos({ categoriaId: 99 }), martin, ahora),
+    assert.throws(() => crearEvento(datos({ categoriaId: 99 }), dilollo, ahora),
       (err) => err.status === 400 && err.message === 'No existe la categoría 99');
   });
 
   it('rechaza una fecha que no es futura', () => {
-    assert.throws(() => crearEvento(datos({ fecha: ahora }), martin, ahora),
+    assert.throws(() => crearEvento(datos({ fecha: ahora }), dilollo, ahora),
       (err) => err instanceof BusinessRuleError && err.message === 'La fecha del evento tiene que ser futura');
   });
 
@@ -193,7 +193,7 @@ describe('crear evento', () => {
       { nombre: 'Platea', descripcion: 'a', precio: 10, cupo: 1 },
       { nombre: 'platea ', descripcion: 'b', precio: 20, cupo: 1 },
     ];
-    assert.throws(() => crearEvento(datos({ tiposEntrada }), martin, ahora),
+    assert.throws(() => crearEvento(datos({ tiposEntrada }), dilollo, ahora),
       (err) => err instanceof BusinessRuleError && err.message === 'Hay tipos de entrada con el nombre repetido');
   });
 });
@@ -201,12 +201,12 @@ describe('crear evento', () => {
 describe('detalle de evento', () => {
   it('reemplaza los ids por resúmenes y calcula las disponibles por tipo', () => {
     const { festival } = seed.eventos;
-    const { lucia } = seed.usuarios;
-    const detalle = detalleEvento(festival, compraRepository.findByEvento(festival.id), seed.categorias.festivales, lucia, puntajeDe(lucia));
+    const { tomas } = seed.usuarios;
+    const detalle = detalleEvento(festival, compraRepository.findByEvento(festival.id), seed.categorias.festivales, tomas, puntajeDe(tomas));
     assert.equal(detalle.categoriaId, undefined);
     assert.equal(detalle.organizadorId, undefined);
     assert.deepEqual(detalle.categoria, { id: seed.categorias.festivales.id, nombre: 'Festivales' });
-    assert.deepEqual(detalle.organizador, { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 14 });
+    assert.deepEqual(detalle.organizador, { id: tomas.id, nombre: 'Tomas', apellido: 'Goldszmidt', puntaje: 4.5, cantidadResenias: 14 });
     assert.deepEqual(detalle.tiposEntrada.map((t) => [t.nombre, t.disponibles]), [['General', 1000], ['VIP', 100], ['Backstage', 0]]);
   });
 });
@@ -214,15 +214,15 @@ describe('detalle de evento', () => {
 describe('puntaje del organizador', () => {
   it('promedia las reseñas de los eventos de cada organizador', () => {
     const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
-    assert.deepEqual(puntajes.get(seed.usuarios.lucia.id), { puntaje: 4.5, cantidadResenias: 14 });
-    assert.equal(puntajes.has(seed.usuarios.martin.id), false); // sin reseñas
+    assert.deepEqual(puntajes.get(seed.usuarios.tomas.id), { puntaje: 4.5, cantidadResenias: 14 });
+    assert.equal(puntajes.has(seed.usuarios.dilollo.id), false); // sin reseñas
   });
 
   it('puntajeDe y perfilUsuario dan null y 0 a quien no tiene reseñas', () => {
-    const { lucia, martin } = seed.usuarios;
-    assert.deepEqual(puntajeDe(lucia), { puntaje: 4.5, cantidadResenias: 14 });
-    assert.deepEqual(puntajeDe(martin), { puntaje: null, cantidadResenias: 0 });
-    assert.deepEqual(perfilUsuario(martin), { ...martin, puntaje: null, cantidadResenias: 0 });
+    const { tomas, dilollo } = seed.usuarios;
+    assert.deepEqual(puntajeDe(tomas), { puntaje: 4.5, cantidadResenias: 14 });
+    assert.deepEqual(puntajeDe(dilollo), { puntaje: null, cantidadResenias: 0 });
+    assert.deepEqual(perfilUsuario(dilollo), { ...dilollo, puntaje: null, cantidadResenias: 0 });
   });
 });
 
@@ -256,7 +256,7 @@ describe('búsqueda de eventos', () => {
 
   it('cada resultado es un resumen con imagen, precio y puntaje', () => {
     const [primero] = buscarEventos({ texto: 'Bernarda' });
-    assert.deepEqual(primero.organizador, { id: seed.usuarios.lucia.id, nombre: 'Lucía', apellido: 'Fernández', puntaje: 4.5, cantidadResenias: 14 });
+    assert.deepEqual(primero.organizador, { id: seed.usuarios.tomas.id, nombre: 'Tomas', apellido: 'Goldszmidt', puntaje: 4.5, cantidadResenias: 14 });
     assert.equal(primero.precioDesde, 20000);
     assert.equal(primero.imagen, 'https://picsum.photos/seed/bernarda/800/400');
     assert.equal(primero.tiposEntrada, undefined);
@@ -264,7 +264,7 @@ describe('búsqueda de eventos', () => {
 });
 
 describe('comprar', () => {
-  const { sofia, juan, lucia } = seed.usuarios;
+  const { paredes, blanco, tomas } = seed.usuarios;
   const { rock, festival, acustico } = seed.eventos;
 
   function rechaza(fn, status, mensaje) {
@@ -274,51 +274,51 @@ describe('comprar', () => {
   it('crea la compra PENDIENTE con el total calculado y ocupa cupo', () => {
     const platea = tipo(rock, 'Platea');
     const antes = calcularDisponibles(platea, compraRepository.findByEvento(rock.id));
-    const compra = comprar({ eventoId: rock.id, tipoEntradaId: platea.id, cantidad: 2 }, sofia);
+    const compra = comprar({ eventoId: rock.id, tipoEntradaId: platea.id, cantidad: 2 }, paredes);
     assert.equal(compra.estado, EstadoCompra.PENDIENTE);
-    assert.equal(compra.compradorId, sofia.id);
+    assert.equal(compra.compradorId, paredes.id);
     assert.equal(compra.total, 160000);
     assert.equal(calcularDisponibles(platea, compraRepository.findByEvento(rock.id)), antes - 2);
   });
 
   it('rechaza si no hay cupo, diciendo cuántas quedan', () => {
-    rechaza(() => comprar({ eventoId: festival.id, tipoEntradaId: tipo(festival, 'Backstage').id, cantidad: 1 }, sofia),
+    rechaza(() => comprar({ eventoId: festival.id, tipoEntradaId: tipo(festival, 'Backstage').id, cantidad: 1 }, paredes),
       409, 'No hay cupo suficiente: quedan 0 entradas');
   });
 
   it('rechaza un evento o tipo de entrada inexistente', () => {
-    rechaza(() => comprar({ eventoId: 99, tipoEntradaId: 1, cantidad: 1 }, sofia), 400, 'No existe el evento 99');
-    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 9, cantidad: 1 }, sofia), 400, 'El evento no tiene el tipo de entrada 9');
+    rechaza(() => comprar({ eventoId: 99, tipoEntradaId: 1, cantidad: 1 }, paredes), 400, 'No existe el evento 99');
+    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 9, cantidad: 1 }, paredes), 400, 'El evento no tiene el tipo de entrada 9');
   });
 
   it('rechaza un evento pasado y que el organizador compre en su evento', () => {
-    rechaza(() => comprar({ eventoId: acustico.id, tipoEntradaId: 1, cantidad: 1 }, juan), 409, 'El evento ya se realizó');
-    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 1, cantidad: 1 }, lucia), 409, 'No podés comprar entradas de un evento que organizás');
+    rechaza(() => comprar({ eventoId: acustico.id, tipoEntradaId: 1, cantidad: 1 }, blanco), 409, 'El evento ya se realizó');
+    rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 1, cantidad: 1 }, tomas), 409, 'No podés comprar entradas de un evento que organizás');
   });
 
   it('detalleCompra reemplaza los ids por resúmenes', () => {
-    const detalle = detalleCompra(seed.compras.sofiaRock, rock, sofia);
+    const detalle = detalleCompra(seed.compras.paredesRock, rock, paredes);
     assert.equal(detalle.eventoId, undefined);
     assert.equal(detalle.compradorId, undefined);
     assert.equal(detalle.tipoEntradaId, undefined);
     assert.deepEqual(detalle.evento, {
-      id: rock.id, nombre: rock.nombre, fecha: rock.fecha, lugar: rock.lugar, organizadorId: lucia.id,
-      organizador: { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández' },
+      id: rock.id, nombre: rock.nombre, fecha: rock.fecha, lugar: rock.lugar, organizadorId: tomas.id,
+      organizador: { id: tomas.id, nombre: 'Tomas', apellido: 'Goldszmidt' },
     });
     assert.deepEqual(detalle.tipoEntrada, { id: 1, nombre: 'Campo', precio: 45000 });
-    assert.deepEqual(detalle.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
+    assert.deepEqual(detalle.comprador, { id: paredes.id, nombre: 'Leandro', apellido: 'Paredes' });
     assert.equal(detalle.mensajes.length, 2);
   });
 });
 
 describe('días restantes y quién ve una compra', () => {
-  const { sofiaRock, sofiaObra, sofiaAcustico, juanStandup } = seed.compras;
+  const { paredesRock, paredesObra, paredesAcustico, blancoStandup } = seed.compras;
   const { rock, obra, acustico, standup } = seed.eventos;
 
   it('cuenta días de calendario solo para las CONFIRMADAS', () => {
-    assert.equal(diasRestantes(sofiaRock, rock), 20);
-    assert.equal(diasRestantes(sofiaObra, obra), null); // PENDIENTE
-    assert.equal(diasRestantes(sofiaAcustico, acustico), null); // UTILIZADA
+    assert.equal(diasRestantes(paredesRock, rock), 20);
+    assert.equal(diasRestantes(paredesObra, obra), null); // PENDIENTE
+    assert.equal(diasRestantes(paredesAcustico, acustico), null); // UTILIZADA
   });
 
   it('el mismo día es 0 y el día anterior es 1, aunque falten pocas horas', () => {
@@ -328,20 +328,20 @@ describe('días restantes y quién ve una compra', () => {
     const laNocheAnterior = new Date(rock.fecha);
     laNocheAnterior.setDate(laNocheAnterior.getDate() - 1);
     laNocheAnterior.setHours(23, 59);
-    assert.equal(diasRestantes(sofiaRock, rock, tempranoElDia), 0);
-    assert.equal(diasRestantes(sofiaRock, rock, laNocheAnterior), 1);
+    assert.equal(diasRestantes(paredesRock, rock, tempranoElDia), 0);
+    assert.equal(diasRestantes(paredesRock, rock, laNocheAnterior), 1);
   });
 
   it('es null si el evento ya se realizó, aunque esté CONFIRMADA', () => {
-    assert.equal(diasRestantes(juanStandup, standup), null);
+    assert.equal(diasRestantes(blancoStandup, standup), null);
   });
 
   it('la ven el comprador y el organizador, nadie más', () => {
-    const { sofia, lucia, juan, martin } = seed.usuarios;
-    assert.equal(puedeVer(sofiaRock, rock, sofia), true);
-    assert.equal(puedeVer(sofiaRock, rock, lucia), true);
-    assert.equal(puedeVer(sofiaRock, rock, juan), false);
-    assert.equal(puedeVer(sofiaRock, rock, martin), false);
+    const { paredes, tomas, blanco, dilollo } = seed.usuarios;
+    assert.equal(puedeVer(paredesRock, rock, paredes), true);
+    assert.equal(puedeVer(paredesRock, rock, tomas), true);
+    assert.equal(puedeVer(paredesRock, rock, blanco), false);
+    assert.equal(puedeVer(paredesRock, rock, dilollo), false);
   });
 
   it('ordenarPorImportancia: por estado y, en pendientes y confirmadas, el evento más próximo primero', () => {
@@ -368,20 +368,20 @@ describe('días restantes y quién ve una compra', () => {
   });
 
   it('detalleCompra incluye diasRestantes', () => {
-    assert.equal(detalleCompra(sofiaRock, rock, seed.usuarios.sofia).diasRestantes, 20);
+    assert.equal(detalleCompra(paredesRock, rock, seed.usuarios.paredes).diasRestantes, 20);
   });
 });
 
 describe('ventas del organizador', () => {
-  const { lucia, martin } = seed.usuarios;
+  const { tomas, dilollo } = seed.usuarios;
   const { rock, obra, festival, acustico } = seed.eventos;
   const delSeed = new Set(Object.values(seed.eventos).map((e) => e.id));
 
   it('eventosOrganizados trae solo los suyos: primero los próximos y después los realizados', () => {
-    const lista = eventosOrganizados(lucia);
+    const lista = eventosOrganizados(tomas);
     const ids = lista.map((e) => e.id).filter((id) => delSeed.has(id));
     assert.deepEqual(ids, [obra.id, rock.id, festival.id, acustico.id]);
-    assert.equal(lista.every((e) => e.organizador.id === lucia.id), true);
+    assert.equal(lista.every((e) => e.organizador.id === tomas.id), true);
     // Los realizados, del más reciente al más viejo: el acústico (hace 15 días) es el primero.
     const realizados = lista.filter((e) => e.fecha <= new Date());
     assert.equal(realizados[0].id, acustico.id);
@@ -390,7 +390,7 @@ describe('ventas del organizador', () => {
   });
 
   it('filtroOrganizador y cantidadesOrganizador separan próximos, realizados y con mensajes nuevos', () => {
-    const lista = eventosOrganizados(lucia).map((e) => ({ ...e, conMensajesNoLeidos: e.id === rock.id ? 1 : 0 }));
+    const lista = eventosOrganizados(tomas).map((e) => ({ ...e, conMensajesNoLeidos: e.id === rock.id ? 1 : 0 }));
     assert.deepEqual(lista.filter((e) => filtroOrganizador(e, 'conMensajesNuevos')).map((e) => e.id), [rock.id]);
     assert.ok(lista.filter((e) => filtroOrganizador(e, 'realizados')).some((e) => e.id === acustico.id));
     assert.ok(!lista.filter((e) => filtroOrganizador(e, 'proximos')).some((e) => e.id === acustico.id));
@@ -402,120 +402,120 @@ describe('ventas del organizador', () => {
   });
 
   it('solo el organizador ve las ventas de su evento', () => {
-    assert.doesNotThrow(() => verificarOrganizador(rock, lucia));
-    assert.throws(() => verificarOrganizador(rock, martin),
+    assert.doesNotThrow(() => verificarOrganizador(rock, tomas));
+    assert.throws(() => verificarOrganizador(rock, dilollo),
       (err) => err instanceof ForbiddenError && err.message === 'Solo el organizador puede ver las ventas de este evento');
   });
 
   it('masRecientesPrimero ordena por la fecha de compra, sin modificar la lista', () => {
-    const { sofiaRock, juanRockReembolsada } = seed.compras;
-    const compras = [juanRockReembolsada, sofiaRock]; // −8 y −5 días
-    assert.deepEqual(masRecientesPrimero(compras).map((c) => c.id), [sofiaRock.id, juanRockReembolsada.id]);
-    assert.deepEqual(compras.map((c) => c.id), [juanRockReembolsada.id, sofiaRock.id]);
+    const { paredesRock, blancoRockReembolsada } = seed.compras;
+    const compras = [blancoRockReembolsada, paredesRock]; // −8 y −5 días
+    assert.deepEqual(masRecientesPrimero(compras).map((c) => c.id), [paredesRock.id, blancoRockReembolsada.id]);
+    assert.deepEqual(compras.map((c) => c.id), [blancoRockReembolsada.id, paredesRock.id]);
   });
 });
 
 describe('chat de la compra', () => {
-  const { sofia, lucia, martin } = seed.usuarios;
+  const { paredes, tomas, dilollo } = seed.usuarios;
   const { acustico } = seed.eventos;
 
   it('mensajesConAutor agrega el nombre de quien escribió cada mensaje', () => {
-    const mensajes = mensajesConAutor(seed.compras.sofiaRock.mensajes);
+    const mensajes = mensajesConAutor(seed.compras.paredesRock.mensajes);
     assert.deepEqual(mensajes.map((m) => [m.autor.nombre, m.mensaje]), [
-      ['Sofía', '¿Se puede entrar con mochila?'],
-      ['Lucía', 'Sí, chica, la revisan en la puerta.'],
+      ['Leandro', '¿Se puede entrar con mochila?'],
+      ['Tomas', 'Sí, la revisan en la puerta.'],
     ]);
     assert.equal(mensajes[0].usuarioId, undefined);
   });
 
   it('comprador y organizador escriben en cualquier estado, incluso con el evento pasado', () => {
-    const compra = seed.compras.sofiaAcustico; // UTILIZADA, evento pasado
+    const compra = seed.compras.paredesAcustico; // UTILIZADA, evento pasado
     const ahora = new Date();
-    const mensaje = enviarMensaje(compra, acustico, lucia, '¡Gracias por venir!', ahora);
-    assert.deepEqual(mensaje, { autor: { id: lucia.id, nombre: 'Lucía', apellido: 'Fernández' }, mensaje: '¡Gracias por venir!', enviado: ahora });
-    enviarMensaje(compra, acustico, sofia, 'A ustedes');
+    const mensaje = enviarMensaje(compra, acustico, tomas, '¡Gracias por venir!', ahora);
+    assert.deepEqual(mensaje, { autor: { id: tomas.id, nombre: 'Tomas', apellido: 'Goldszmidt' }, mensaje: '¡Gracias por venir!', enviado: ahora });
+    enviarMensaje(compra, acustico, paredes, 'A ustedes');
     assert.deepEqual(compraRepository.findById(compra.id).mensajes.map((m) => m.mensaje), ['¡Gracias por venir!', 'A ustedes']);
   });
 
   it('nadie más puede escribir', () => {
-    assert.throws(() => enviarMensaje(seed.compras.sofiaAcustico, acustico, martin, 'hola'),
+    assert.throws(() => enviarMensaje(seed.compras.paredesAcustico, acustico, dilollo, 'hola'),
       (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden escribir en este chat');
   });
 
   it('rolEnCompra distingue al comprador del organizador', () => {
-    const { sofiaRock } = seed.compras;
+    const { paredesRock } = seed.compras;
     const { rock } = seed.eventos;
-    assert.equal(rolEnCompra(sofiaRock, rock, sofia), 'comprador');
-    assert.equal(rolEnCompra(sofiaRock, rock, lucia), 'organizador');
-    assert.equal(rolEnCompra(sofiaRock, rock, martin), null);
+    assert.equal(rolEnCompra(paredesRock, rock, paredes), 'comprador');
+    assert.equal(rolEnCompra(paredesRock, rock, tomas), 'organizador');
+    assert.equal(rolEnCompra(paredesRock, rock, dilollo), null);
   });
 
   it('conversaciones: solo las compras con chat, primero las sin leer y después por el último mensaje', () => {
     const { rock } = seed.eventos;
-    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    const { paredesRock, blancoRockReembolsada } = seed.compras;
     const compras = compraRepository.findByEvento(rock.id);
-    const lista = conversaciones(compras, rock, lucia);
+    const lista = conversaciones(compras, rock, tomas);
     // Las ventas del Rock sin mensajes quedan afuera (en el seed, 12 de 13 tienen chat).
     assert.equal(lista.length, 12);
     assert.ok(compras.length > lista.length);
     assert.ok(lista.every((compra) => compra.mensajes.length > 0));
-    // La de Juan (sin leer, hace 3 días) primero; después la de Sofía (leída, hace 4).
-    assert.deepEqual(lista.slice(0, 2).map((c) => c.id), [juanRockReembolsada.id, sofiaRock.id]);
+    // La de Blanco (sin leer, hace 3 días) primero; después la de Paredes (leída, hace 4).
+    assert.deepEqual(lista.slice(0, 2).map((c) => c.id), [blancoRockReembolsada.id, paredesRock.id]);
     const ultimos = lista.slice(1).map((c) => c.mensajes.at(-1).enviado.getTime());
     assert.deepEqual(ultimos, [...ultimos].sort((a, b) => b - a));
   });
 
   it('conversaciones: una sin leer va arriba aunque su último mensaje sea más viejo', () => {
     const { rock } = seed.eventos;
-    const { sofiaRock, juanRockReembolsada } = seed.compras;
-    // Lucía abre el chat de Juan y Sofía le escribe de nuevo (antes que la pregunta de Juan, hace 3 días):
-    // ahora la de Sofía es la sin leer y va primero.
-    const leida = { ...juanRockReembolsada, mensajesLeidosHasta: { ...juanRockReembolsada.mensajesLeidosHasta, organizador: new Date() } };
-    const nueva = { ...sofiaRock, mensajes: [...sofiaRock.mensajes, { usuarioId: sofia.id, mensaje: 'Gracias', enviado: new Date(sofiaRock.mensajesLeidosHasta.organizador.getTime() + 3600e3) }] };
-    const lista = conversaciones([leida, nueva], rock, lucia);
-    assert.deepEqual(lista.map((c) => c.id), [sofiaRock.id, juanRockReembolsada.id]);
+    const { paredesRock, blancoRockReembolsada } = seed.compras;
+    // Tomas abre el chat de Blanco y Paredes le escribe de nuevo (antes que la pregunta de Blanco, hace 3 días):
+    // ahora la de Paredes es la sin leer y va primero.
+    const leida = { ...blancoRockReembolsada, mensajesLeidosHasta: { ...blancoRockReembolsada.mensajesLeidosHasta, organizador: new Date() } };
+    const nueva = { ...paredesRock, mensajes: [...paredesRock.mensajes, { usuarioId: paredes.id, mensaje: 'Gracias', enviado: new Date(paredesRock.mensajesLeidosHasta.organizador.getTime() + 3600e3) }] };
+    const lista = conversaciones([leida, nueva], rock, tomas);
+    assert.deepEqual(lista.map((c) => c.id), [paredesRock.id, blancoRockReembolsada.id]);
   });
 
   it('mensajesNoLeidos: los del otro posteriores a la última vez que abrió el chat', () => {
-    // En el seed Sofía no abrió la respuesta de Lucía, y Lucía no abrió la pregunta de Juan.
-    const { sofiaRock, juanRockReembolsada } = seed.compras;
+    // En el seed Paredes no abrió la respuesta de Tomas, y Tomas no abrió la pregunta de Blanco.
+    const { paredesRock, blancoRockReembolsada } = seed.compras;
     const { rock } = seed.eventos;
-    assert.equal(mensajesNoLeidos(sofiaRock, rock, sofia), 1);
-    assert.equal(mensajesNoLeidos(sofiaRock, rock, lucia), 0);
-    assert.equal(mensajesNoLeidos(juanRockReembolsada, rock, lucia), 1);
-    assert.equal(mensajesNoLeidos(juanRockReembolsada, rock, seed.usuarios.juan), 0);
-    assert.equal(mensajesNoLeidos(sofiaRock, rock, martin), 0);
+    assert.equal(mensajesNoLeidos(paredesRock, rock, paredes), 1);
+    assert.equal(mensajesNoLeidos(paredesRock, rock, tomas), 0);
+    assert.equal(mensajesNoLeidos(blancoRockReembolsada, rock, tomas), 1);
+    assert.equal(mensajesNoLeidos(blancoRockReembolsada, rock, seed.usuarios.blanco), 0);
+    assert.equal(mensajesNoLeidos(paredesRock, rock, dilollo), 0);
   });
 
   it('cantidadConMensajesNoLeidos cuenta las compras con mensajes nuevos para el organizador', () => {
     const { rock } = seed.eventos;
-    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, lucia), 1);
+    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, tomas), 1);
   });
 
   it('leerMensajes deja el chat leído solo para quien lo abre', () => {
     const { rock } = seed.eventos;
-    const compra = leerMensajes(compraRepository.findById(seed.compras.juanRockReembolsada.id), rock, lucia);
-    assert.equal(mensajesNoLeidos(compra, rock, lucia), 0);
-    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, lucia), 0);
-    assert.throws(() => leerMensajes(compra, rock, martin),
+    const compra = leerMensajes(compraRepository.findById(seed.compras.blancoRockReembolsada.id), rock, tomas);
+    assert.equal(mensajesNoLeidos(compra, rock, tomas), 0);
+    assert.equal(cantidadConMensajesNoLeidos(compraRepository.findByEvento(rock.id), rock, tomas), 0);
+    assert.throws(() => leerMensajes(compra, rock, dilollo),
       (err) => err instanceof ForbiddenError && err.message === 'Solo el comprador y el organizador pueden leer este chat');
   });
 
   it('quien escribe ya leyó su chat; el otro tiene un mensaje nuevo', () => {
     const { obra } = seed.eventos;
-    const compra = seed.compras.sofiaObra; // sin mensajes
-    enviarMensaje(compra, obra, sofia, '¿Hay estacionamiento?');
+    const compra = seed.compras.paredesObra; // sin mensajes
+    enviarMensaje(compra, obra, paredes, '¿Hay estacionamiento?');
     const actualizada = compraRepository.findById(compra.id);
-    assert.equal(mensajesNoLeidos(actualizada, obra, sofia), 0);
-    assert.equal(mensajesNoLeidos(actualizada, obra, lucia), 1);
+    assert.equal(mensajesNoLeidos(actualizada, obra, paredes), 0);
+    assert.equal(mensajesNoLeidos(actualizada, obra, tomas), 1);
   });
 
   it('detalleCompra suma mensajesNoLeidos para quien pide y no muestra hasta cuándo leyó cada uno', () => {
-    const { sofiaRock } = seed.compras;
-    const detalle = detalleCompra(sofiaRock, seed.eventos.rock, sofia, sofia);
+    const { paredesRock } = seed.compras;
+    const detalle = detalleCompra(paredesRock, seed.eventos.rock, paredes, paredes);
     assert.equal(detalle.mensajesNoLeidos, 1);
     assert.equal(detalle.mensajesLeidosHasta, undefined);
-    assert.equal(detalleCompra(sofiaRock, seed.eventos.rock, sofia).mensajesNoLeidos, undefined);
+    assert.equal(detalleCompra(paredesRock, seed.eventos.rock, paredes).mensajesNoLeidos, undefined);
   });
 
   it('requireString respeta maxLength', () => {
@@ -526,7 +526,7 @@ describe('chat de la compra', () => {
 });
 
 describe('reseñas', () => {
-  const { sofia, juan, lucia, martin } = seed.usuarios;
+  const { paredes, blanco, tomas, dilollo } = seed.usuarios;
   const { standup, acustico } = seed.eventos;
 
   function rechaza(fn, status, mensaje) {
@@ -535,36 +535,36 @@ describe('reseñas', () => {
 
   it('reseniasDeOrganizador trae las de sus eventos con comprador y evento', () => {
     // Del evento más reciente al más viejo: primero el acústico y después los eventos viejos del seed.
-    const resenias = reseniasDeOrganizador(lucia);
+    const resenias = reseniasDeOrganizador(tomas);
     assert.equal(resenias.length, 14);
     assert.deepEqual(resenias.slice(0, 3).map((r) => [r.comprador.nombre, r.evento.nombre, r.puntuacion]), [
-      ['Juan', 'Acústico en el Gran Rex', 4],
-      ['Sofía', 'Acústico en el Gran Rex', 5],
-      ['Martín', 'Recital de Cuarteto', 5],
+      ['Lautaro', 'Acústico en el Gran Rex', 4],
+      ['Leandro', 'Acústico en el Gran Rex', 5],
+      ['Lautaro', 'Recital de Cuarteto', 5],
     ]);
   });
 
   it('reseniaDeCompra trae la reseña del comprador para ese evento, o null', () => {
-    assert.deepEqual(reseniaDeCompra(seed.compras.sofiaAcustico),
-      { id: seed.resenias.sofiaAcustico.id, puntuacion: 5, detalle: seed.resenias.sofiaAcustico.detalle });
-    assert.equal(reseniaDeCompra(seed.compras.sofiaStandup), null);
+    assert.deepEqual(reseniaDeCompra(seed.compras.paredesAcustico),
+      { id: seed.resenias.paredesAcustico.id, puntuacion: 5, detalle: seed.resenias.paredesAcustico.detalle });
+    assert.equal(reseniaDeCompra(seed.compras.paredesStandup), null);
   });
 
   it('quien usó su entrada puede reseñar, una sola vez', () => {
-    const resenia = crearResenia({ eventoId: standup.id, puntuacion: 4, detalle: 'Muy divertido' }, sofia);
-    assert.equal(reseniaDeCompra(seed.compras.sofiaStandup).id, resenia.id);
-    assert.deepEqual(resenia.comprador, { id: sofia.id, nombre: 'Sofía', apellido: 'Pérez' });
+    const resenia = crearResenia({ eventoId: standup.id, puntuacion: 4, detalle: 'Muy divertido' }, paredes);
+    assert.equal(reseniaDeCompra(seed.compras.paredesStandup).id, resenia.id);
+    assert.deepEqual(resenia.comprador, { id: paredes.id, nombre: 'Leandro', apellido: 'Paredes' });
     assert.deepEqual(resenia.evento, { id: standup.id, nombre: standup.nombre, fecha: standup.fecha });
-    assert.equal(reseniasDeOrganizador(martin).some((r) => r.id === resenia.id), true);
-    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 5, detalle: 'Otra vez' }, sofia), 409, 'Ya reseñaste este evento');
+    assert.equal(reseniasDeOrganizador(dilollo).some((r) => r.id === resenia.id), true);
+    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 5, detalle: 'Otra vez' }, paredes), 409, 'Ya reseñaste este evento');
   });
 
   it('no puede reseñar quien no tiene la compra UTILIZADA', () => {
-    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 3, detalle: 'x' }, juan), 409, 'Solo podés reseñar eventos a los que asististe'); // CONFIRMADA
-    rechaza(() => crearResenia({ eventoId: acustico.id, puntuacion: 3, detalle: 'x' }, martin), 409, 'Solo podés reseñar eventos a los que asististe'); // sin compra
+    rechaza(() => crearResenia({ eventoId: standup.id, puntuacion: 3, detalle: 'x' }, blanco), 409, 'Solo podés reseñar eventos a los que asististe'); // CONFIRMADA
+    rechaza(() => crearResenia({ eventoId: acustico.id, puntuacion: 3, detalle: 'x' }, dilollo), 409, 'Solo podés reseñar eventos a los que asististe'); // sin compra
   });
 
   it('rechaza un evento inexistente', () => {
-    rechaza(() => crearResenia({ eventoId: 99, puntuacion: 3, detalle: 'x' }, sofia), 400, 'No existe el evento 99');
+    rechaza(() => crearResenia({ eventoId: 99, puntuacion: 3, detalle: 'x' }, paredes), 400, 'No existe el evento 99');
   });
 });

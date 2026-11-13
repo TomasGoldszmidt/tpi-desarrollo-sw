@@ -19,29 +19,29 @@ describe('contraseñas', () => {
   });
 
   it('las consultas comunes no devuelven ni el email ni el hash', () => {
-    const { sofia } = seed.usuarios;
-    assert.deepEqual(Object.keys(usuarioRepository.findById(sofia.id)).sort(), ['apellido', 'favoritos', 'id', 'nombre']);
+    const { paredes } = seed.usuarios;
+    assert.deepEqual(Object.keys(usuarioRepository.findById(paredes.id)).sort(), ['apellido', 'favoritos', 'id', 'nombre']);
     assert.ok(usuarioRepository.findAll().every((u) => !('email' in u) && !('contraseniaHash' in u)));
-    assert.equal(usuarioRepository.findCuentaById(sofia.id).email, 'sofia@aiticketit.com');
-    assert.equal('contraseniaHash' in usuarioRepository.findCuentaById(sofia.id), false);
+    assert.equal(usuarioRepository.findCuentaById(paredes.id).email, 'paredes@gmail.com');
+    assert.equal('contraseniaHash' in usuarioRepository.findCuentaById(paredes.id), false);
   });
 });
 
 describe('inicio de sesión', () => {
   it('con los datos del seed devuelve la cuenta, sin el hash', () => {
-    const cuenta = iniciarSesion('sofia@aiticketit.com', 'sofia1234');
-    assert.equal(cuenta.id, seed.usuarios.sofia.id);
-    assert.equal(cuenta.email, 'sofia@aiticketit.com');
+    const cuenta = iniciarSesion('paredes@gmail.com', 'paredes1234');
+    assert.equal(cuenta.id, seed.usuarios.paredes.id);
+    assert.equal(cuenta.email, 'paredes@gmail.com');
     assert.equal('contraseniaHash' in cuenta, false);
   });
 
   it('no distingue mayúsculas en el email', () => {
-    assert.equal(iniciarSesion('Sofia@AITicketIt.com', 'sofia1234').id, seed.usuarios.sofia.id);
+    assert.equal(iniciarSesion('Paredes@GMail.com', 'paredes1234').id, seed.usuarios.paredes.id);
   });
 
   it('da el mismo error con contraseña incorrecta o email inexistente', () => {
-    assert.throws(() => iniciarSesion('sofia@aiticketit.com', 'sofia'), { name: 'UnauthorizedError', message: 'El email o la contraseña no son correctos.' });
-    assert.throws(() => iniciarSesion('nadie@aiticketit.com', 'sofia1234'), { name: 'UnauthorizedError', message: 'El email o la contraseña no son correctos.' });
+    assert.throws(() => iniciarSesion('paredes@gmail.com', 'paredes'), { name: 'UnauthorizedError', message: 'El email o la contraseña no son correctos.' });
+    assert.throws(() => iniciarSesion('nadie@gmail.com', 'paredes1234'), { name: 'UnauthorizedError', message: 'El email o la contraseña no son correctos.' });
   });
 });
 
@@ -54,40 +54,40 @@ describe('registro', () => {
 
   it('rechaza un email que ya tiene cuenta, aunque cambien las mayúsculas', () => {
     assert.throws(
-      () => registrar({ nombre: 'Lucía', apellido: 'X', email: 'LUCIA@aiticketit.com', contrasenia: 'lucia1234' }),
+      () => registrar({ nombre: 'Tomas', apellido: 'X', email: 'TOMAS@gmail.com', contrasenia: 'tomas1234' }),
       BusinessRuleError,
     );
   });
 });
 
 describe('edición del perfil', () => {
-  const { martin, juan } = seed.usuarios;
+  const { dilollo, blanco } = seed.usuarios;
 
   it('cambia nombre y apellido sin tocar la contraseña', () => {
-    const cuenta = actualizarPerfil(martin, martin.id, { apellido: 'Gómez Paz' });
+    const cuenta = actualizarPerfil(dilollo, dilollo.id, { apellido: 'Gómez Paz' });
     assert.equal(cuenta.apellido, 'Gómez Paz');
-    assert.equal(cuenta.nombre, 'Martín');
-    assert.equal(iniciarSesion('martin@aiticketit.com', 'martin1234').id, martin.id);
+    assert.equal(cuenta.nombre, 'Lautaro');
+    assert.equal(iniciarSesion('dilollo@gmail.com', 'dilollo1234').id, dilollo.id);
   });
 
   it('solo el propio usuario', () => {
-    assert.throws(() => actualizarPerfil(juan, martin.id, { nombre: 'X' }), ForbiddenError);
+    assert.throws(() => actualizarPerfil(blanco, dilollo.id, { nombre: 'X' }), ForbiddenError);
   });
 
   it('no deja usar el email de otra cuenta, pero sí repetir el propio', () => {
-    assert.throws(() => actualizarPerfil(martin, martin.id, { email: 'juan@aiticketit.com' }), BusinessRuleError);
-    assert.equal(actualizarPerfil(martin, martin.id, { email: 'martin@aiticketit.com' }).email, 'martin@aiticketit.com');
+    assert.throws(() => actualizarPerfil(dilollo, dilollo.id, { email: 'blanco@gmail.com' }), BusinessRuleError);
+    assert.equal(actualizarPerfil(dilollo, dilollo.id, { email: 'dilollo@gmail.com' }).email, 'dilollo@gmail.com');
   });
 
   it('para cambiar la contraseña pide la actual y la verifica', () => {
-    assert.throws(() => actualizarPerfil(juan, juan.id, { contraseniaNueva: 'nueva12345' }), ValidationError);
+    assert.throws(() => actualizarPerfil(blanco, blanco.id, { contraseniaNueva: 'nueva12345' }), ValidationError);
     assert.throws(
-      () => actualizarPerfil(juan, juan.id, { contraseniaActual: 'mal', contraseniaNueva: 'nueva12345' }),
+      () => actualizarPerfil(blanco, blanco.id, { contraseniaActual: 'mal', contraseniaNueva: 'nueva12345' }),
       { name: 'UnauthorizedError', message: 'La contraseña actual no es correcta.' },
     );
-    actualizarPerfil(juan, juan.id, { contraseniaActual: 'juan1234', contraseniaNueva: 'nueva12345' });
-    assert.equal(iniciarSesion('juan@aiticketit.com', 'nueva12345').id, juan.id);
-    assert.throws(() => iniciarSesion('juan@aiticketit.com', 'juan1234'), UnauthorizedError);
+    actualizarPerfil(blanco, blanco.id, { contraseniaActual: 'blanco1234', contraseniaNueva: 'nueva12345' });
+    assert.equal(iniciarSesion('blanco@gmail.com', 'nueva12345').id, blanco.id);
+    assert.throws(() => iniciarSesion('blanco@gmail.com', 'blanco1234'), UnauthorizedError);
   });
 });
 

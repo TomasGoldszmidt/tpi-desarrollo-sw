@@ -67,10 +67,10 @@ Al abrir la app se inicia sesión con email y contraseña, o se crea una cuenta.
 
 | Usuario | Email | Contraseña | Para probar |
 |---|---|---|---|
-| **Lucía Fernández** | `lucia@aiticketit.com` | `lucia1234` | Organizadora de Noche de Rock, Bernarda Alba, Festival de Verano y el Acústico (pasado, con reseñas: 4.5 de promedio). Tiene ventas en varios estados y el Backstage del Festival agotado. Arranca con 4 notificaciones nuevas y dos preguntas de Juan sin responder (Noche de Rock y Festival), para probar los mensajes de cada evento |
-| **Martín Gómez** | `martin@aiticketit.com` | `martin1234` | Organizador del Amistoso y del Stand-up (pasado, sin reseñas). Puede marcar como utilizada la compra de Juan para el Stand-up. Arranca con 2 notificaciones nuevas |
-| **Sofía Pérez** | `sofia@aiticketit.com` | `sofia1234` | Compradora con una compra de cada tipo: pendiente de pago, confirmada (con chat), utilizada con reseña y utilizada sin reseña. Tiene tres favoritos: el Amistoso, el Festival de Verano y el Acústico (pasado). Arranca con 1 notificación nueva |
-| **Juan Rodríguez** | `juan@aiticketit.com` | `juan1234` | Comprador con compras confirmada, reembolsada, cancelada y utilizada |
+| **Tomas Goldszmidt** | `tomas@gmail.com` | `tomas1234` | Organizador de Noche de Rock, Bernarda Alba, Festival de Verano y el Acústico (pasado, con reseñas: 4.5 de promedio). Tiene ventas en varios estados y el Backstage del Festival agotado. Arranca con 4 notificaciones nuevas y dos preguntas de Blanco sin responder (Noche de Rock y Festival), para probar los mensajes de cada evento |
+| **Lautaro Dilollo** | `dilollo@gmail.com` | `dilollo1234` | Organizador del Amistoso y del Stand-up (pasado, sin reseñas). Puede marcar como utilizada la compra de Blanco para el Stand-up. Arranca con 2 notificaciones nuevas |
+| **Leandro Paredes** | `paredes@gmail.com` | `paredes1234` | Comprador con una compra de cada tipo: pendiente de pago, confirmada (con chat), utilizada con reseña y utilizada sin reseña. Tiene tres favoritos: el Amistoso, el Festival de Verano y el Acústico (pasado). Arranca con 1 notificación nueva |
+| **Lautaro Blanco** | `blanco@gmail.com` | `blanco1234` | Comprador con compras confirmada, reembolsada, cancelada y utilizada |
 
 Las fechas del seed son relativas al momento en que arranca el backend, así que siempre hay eventos próximos y pasados. **Como la persistencia es en memoria, al reiniciar el backend todo vuelve a estos datos.**
 

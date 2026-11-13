@@ -192,7 +192,7 @@ export function puedeVer(compra, evento, usuario) {
 export function detalleCompra(compra, evento, comprador, lector = null, ahora = new Date()) {
   const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, mensajesLeidosHasta: _leidos, ...resto } = compra;
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
-  // El nombre del organizador lo usa Mis compras para el aviso de mensajes ("Lucía te escribió").
+  // El nombre del organizador lo usa Mis compras para el aviso de mensajes ("Tomas te escribió").
   const organizador = usuarioRepository.findById(evento.organizadorId);
   return {
     id: compra.id,

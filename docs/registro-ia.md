@@ -1090,3 +1090,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** se probó por fin el error de "Ver más" sin conexión (wifi y datos apagados con adb): aparece "No pudimos conectarnos…" arriba del botón y, al volver la conexión, el mismo botón trae la página.
 - **Corregido / problemas:** el script de cambios calculó mal la sangría de los props en la primera pasada y no encontró el texto; como escribía recién al final, no dejó archivos a medias.
 - **Aprendizaje:** con el botón desaparece el problema del umbral de `onEndReached` (las listas de filas cortas pedían la segunda página solas al abrir): la carga depende de una acción del usuario.
+
+### 2026-11-13 · Usuarios nuevos en el seed
+- **Tarea:** Datos de ejemplo: reemplazar los usuarios del seed
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "antes de probar quiero modificar la seed, dame la info que necesitas para armarla"; después pasé los 4 usuarios nuevos (nombre, email y contraseña) y "lo demas dejalo como esta".
+- **Resultado:**
+  - La IA listó qué datos necesitaba por entidad y qué casos de prueba deja armados el seed, y propuso que cada usuario nuevo tome el lugar de uno viejo en el orden en que los pasé: Lucía → Tomas Goldszmidt, Martín → Lautaro Dilollo, Sofía → Leandro Paredes y Juan → Lautaro Blanco. Así no cambian los eventos, compras, chats, reseñas, favoritos ni los ids.
+  - Reemplazo con un script de `sed`: claves y variables del seed (`usuarios.tomas`, `compras.paredesRock`), emails `@gmail.com`, contraseñas, nombres en los tests y comentarios. El mensaje "Sí, chica, la revisan en la puerta." pasó a "Sí, la revisan en la puerta.".
+  - Actualizados los tests, la tabla de cuentas del README, `docs/persistencia.md`, los ejemplos del swagger y dos comentarios. Los bocetos y este registro no se tocaron, porque muestran los datos de su momento.
+  - Pasan los 96 tests. El login con `tomas@gmail.com` anda y el de la cuenta vieja da 401.
+- **Bien:** mantener los roles hizo que el cambio fuera mecánico y que todos los tests siguieran pasando sin reescribir casos.
+- **Corregido / problemas:**
+  - En el primer intento la IA dejó un `cat` sin entrada en el comando, que se quedó esperando hasta el timeout; no llegó a modificar nada.
+  - Hubo que proteger "Teatro San Martín" y "Av. Tristán Achával Rodríguez" para que el reemplazo no los tocara, y corregir a mano dos textos que quedaron en femenino ("organizadora", el ejemplo "SP" del avatar).
+  - Quedan dos usuarios que se llaman Lautaro: donde la app muestra solo el nombre ("Lautaro te escribió") no se distingue cuál es. Por ahora no se cambió.
+- **Aprendizaje:** antes de cambiar datos de ejemplo conviene ver qué casos de prueba dependen de ellos; reemplazar solo los nombres y mantener los roles evita romper todo lo que ya estaba probado.

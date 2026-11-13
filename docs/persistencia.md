@@ -38,7 +38,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 
 **Documento:**
 ```json
-{ "id": 1, "nombre": "Lucía", "apellido": "Fernández", "email": "lucia@aiticketit.com", "contraseniaHash": "<sal>:<hash>", "favoritos": [3, 7] }
+{ "id": 1, "nombre": "Tomas", "apellido": "Goldszmidt", "email": "tomas@gmail.com", "contraseniaHash": "<sal>:<hash>", "favoritos": [3, 7] }
 ```
 
 **Email y contraseña** (agregados con el inicio de sesión): se guardan en el mismo documento, porque son de la cuenta y no los referencia nadie más. La contraseña se guarda con hash (`scrypt` de Node, con sal propia). El repositorio devuelve tres vistas:
@@ -63,12 +63,12 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 **Decisiones aprobadas:**
 - Sin campo `rol`: un usuario es organizador si tiene eventos creados.
 - ~~Sin login: en la app se elige el usuario activo de una lista.~~ Reemplazado por inicio de sesión con email y contraseña (`POST /sesiones`). Después de entrar, el usuario activo sigue viajando en `X-User-Id`.
-- Los favoritos se guardan aunque ningún caso de uso los pida. Se usan desde `GET /usuarios/:id/favoritos` y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, solo para el propio usuario. En el seed, Sofía tiene tres (dos próximos y uno ya realizado).
+- Los favoritos se guardan aunque ningún caso de uso los pida. Se usan desde `GET /usuarios/:id/favoritos` y `PUT`/`DELETE /usuarios/:id/favoritos/:eventoId`, solo para el propio usuario. En el seed, Paredes tiene tres (dos próximos y uno ya realizado).
 - **Notificaciones calculadas, no guardadas:** son lo que hizo otra persona en una compra en la que participa el usuario (cambios del historial y mensajes) y las reseñas de sus eventos. Del usuario solo se guarda qué leyó: `notificacionesLeidasHasta` (null si nunca), que se actualiza al marcar todas, y `notificacionesLeidas`, los ids de las que abrió una por una (los ids se arman con lo que las origina y no cambian, porque historial y mensajes solo crecen). Las de mensajes también cuentan como leídas si el chat se abrió después (`Compra.mensajesLeidosHasta`). Se descartó una colección `notificaciones`: habría que escribirla en cada acción y podría quedar desincronizada de las compras. En el seed todos las leyeron hace 4 días.
 - Ids numéricos incrementales.
 - **Se descartó Mongoose:** necesita un servidor MongoDB y el enunciado pide persistencia en memoria. `mongodb-memory-server` lo habría hecho posible, pero una colección propia con `Map` alcanza y no suma dependencias.
 
-**Seed:** Lucía Fernández y Martín Gómez como organizadores; Sofía Pérez y Juan Rodríguez como compradores.
+**Seed:** Tomas Goldszmidt y Lautaro Dilollo como organizadores; Leandro Paredes y Lautaro Blanco como compradores.
 
 **Ids:** se evaluó cambiar a UUID y se mantuvieron numéricos.
 - El choque de ids entre colecciones (el usuario 1 y el evento 1) solo pasaría por un bug de programación: cada repositorio busca en su propia colección y las referencias se validan antes de usarse.
@@ -154,8 +154,8 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - No hay `update` ni `delete`: ningún caso de uso los pide.
 
 **Seed:** 6 eventos con fechas relativas al arranque.
-- Lucía: rock (+20 días), teatro (+5), festival (+60, con un tipo Backstage de cupo 2 para agotar con el seed de Compra) y acústico (−15 días, pasado).
-- Martín: partido (+10) y stand-up (−30 días, pasado).
+- Tomas: rock (+20 días), teatro (+5), festival (+60, con un tipo Backstage de cupo 2 para agotar con el seed de Compra) y acústico (−15 días, pasado).
+- Dilollo: partido (+10) y stand-up (−30 días, pasado).
 - Conferencias queda sin eventos.
 
 ### Compra · colección `compras`
@@ -181,7 +181,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
   ],
   mensajes: [
     { usuarioId: 3, mensaje: "¿Se puede entrar con mochila?", enviado: new Date("2026-10-29T13:00:00Z") },
-    { usuarioId: 1, mensaje: "Sí, chica, la revisan en la puerta.", enviado: new Date("2026-10-29T14:00:00Z") }
+    { usuarioId: 1, mensaje: "Sí, la revisan en la puerta.", enviado: new Date("2026-10-29T14:00:00Z") }
   ],
   mensajesLeidosHasta: { comprador: new Date("2026-10-29T13:00:00Z"), organizador: new Date("2026-10-29T14:00:00Z") }
 }
@@ -216,9 +216,9 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - Quedan para el dominio (sección 2): si una PENDIENTE reserva cupo, las transiciones válidas y cuándo una cancelación queda CANCELADA o REEMBOLSADA.
 
 **Seed:** 9 compras, con historiales de fechas coherentes relativas al arranque y el `total` calculado con el precio del tipo de entrada.
-- Sofía: rock CONFIRMADA con chat (no abrió la respuesta de Lucía); obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Lucía y a Martín).
-- Juan: Backstage × 2 CONFIRMADA (agota el cupo de 2); rock REEMBOLSADA y partido CANCELADA (no cuentan para el cupo); acústico UTILIZADA; stand-up CONFIRMADA de un evento pasado (no se puede cancelar).
-- Chats: Juan preguntó en rock y en Backstage y Lucía no abrió ninguno de los dos, así que tiene 2 compras con mensajes sin leer.
+- Paredes: rock CONFIRMADA con chat (no abrió la respuesta de Tomas); obra PENDIENTE; acústico y stand-up UTILIZADAS (puede reseñar a Tomas y a Dilollo).
+- Blanco: Backstage × 2 CONFIRMADA (agota el cupo de 2); rock REEMBOLSADA y partido CANCELADA (no cuentan para el cupo); acústico UTILIZADA; stand-up CONFIRMADA de un evento pasado (no se puede cancelar).
+- Chats: Blanco preguntó en rock y en Backstage y Tomas no abrió ninguno de los dos, así que tiene 2 compras con mensajes sin leer.
 - La compra REEMBOLSADA pasa directo de CONFIRMADA a REEMBOLSADA. Si el dominio decide otro flujo, hay que ajustar el seed.
 
 ### Resenia · colección `resenias`
@@ -252,7 +252,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - ~~Sin `fecha`: el enunciado no la menciona; alcanza con la fecha del evento.~~ Se agregó `fecha` para ordenar las reseñas entre las notificaciones del organizador.
 - El dominio (sección 2) valida que haya una compra UTILIZADA y el rango de la puntuación.
 
-**Seed:** 2 reseñas del acústico (Sofía 5 y Juan 4), así Lucía queda con 4.5 de promedio.
-- Sofía no reseñó el stand-up, que tiene UTILIZADA: queda libre para probar crear una reseña.
-- Juan no puede reseñar el stand-up, porque su compra está CONFIRMADA.
-- Martín queda sin reseñas, para probar el orden por puntaje con un organizador sin puntaje.
+**Seed:** 2 reseñas del acústico (Paredes 5 y Blanco 4), así Tomas queda con 4.5 de promedio.
+- Paredes no reseñó el stand-up, que tiene UTILIZADA: queda libre para probar crear una reseña.
+- Blanco no puede reseñar el stand-up, porque su compra está CONFIRMADA.
+- Dilollo queda sin reseñas, para probar el orden por puntaje con un organizador sin puntaje.

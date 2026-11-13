@@ -204,8 +204,8 @@ paths:
                   maxLength: 100
             example:
               apellido: Ramírez
-              contraseniaActual: sofia1234
-              contraseniaNueva: sofia5678
+              contraseniaActual: paredes1234
+              contraseniaNueva: paredes5678
       responses:
         '200':
           description: La cuenta actualizada
@@ -665,7 +665,7 @@ paths:
         Verifica email y contraseña y devuelve la cuenta. No guarda una sesión:
         después la app manda el id en el header X-User-Id. Si el email no existe
         o la contraseña no coincide, el error es el mismo. Cuentas del seed:
-        <nombre>@aiticketit.com con contraseña <nombre>1234 (lucia, martin, sofia, juan).
+        <usuario>@gmail.com con contraseña <usuario>1234 (tomas, dilollo, paredes, blanco).
       operationId: createSesion
       requestBody:
         required: true
@@ -681,8 +681,8 @@ paths:
                 contrasenia:
                   type: string
             example:
-              email: sofia@aiticketit.com
-              contrasenia: sofia1234
+              email: paredes@gmail.com
+              contrasenia: paredes1234
       responses:
         '200':
           description: La cuenta del usuario que inició sesión
@@ -1459,8 +1459,8 @@ components:
       in: header
       name: X-User-Id
       description: >-
-        Id del usuario activo, el que devuelve POST /sesiones. Ej. 1 = Lucía,
-        2 = Martín, 3 = Sofía, 4 = Juan.
+        Id del usuario activo, el que devuelve POST /sesiones. Ej. 1 = Tomas,
+        2 = Dilollo, 3 = Paredes, 4 = Blanco.
   schemas:
     Error:
       type: object
@@ -1497,10 +1497,10 @@ components:
           example: 3
         nombre:
           type: string
-          example: Sofía
+          example: Leandro
         apellido:
           type: string
-          example: Pérez
+          example: Paredes
         favoritos:
           type: array
           description: Ids de los eventos favoritos
@@ -1515,7 +1515,7 @@ components:
           properties:
             email:
               type: string
-              example: sofia@aiticketit.com
+              example: paredes@gmail.com
             notificacionesLeidasHasta:
               type: string
               format: date-time
@@ -1557,10 +1557,10 @@ components:
               example: 4
             nombre:
               type: string
-              example: Juan
+              example: Lautaro
             apellido:
               type: string
-              example: Rodríguez
+              example: Blanco
         evento:
           type: object
           properties:
@@ -1688,10 +1688,10 @@ components:
               example: 1
             nombre:
               type: string
-              example: Lucía
+              example: Tomas
             apellido:
               type: string
-              example: Fernández
+              example: Goldszmidt
             puntaje:
               type: number
               nullable: true
@@ -1743,10 +1743,10 @@ components:
               example: 1
             nombre:
               type: string
-              example: Lucía
+              example: Tomas
             apellido:
               type: string
-              example: Fernández
+              example: Goldszmidt
             puntaje:
               type: number
               nullable: true
@@ -1807,10 +1807,10 @@ components:
               example: 3
             nombre:
               type: string
-              example: Sofía
+              example: Leandro
             apellido:
               type: string
-              example: Pérez
+              example: Paredes
         evento:
           type: object
           properties:
@@ -1842,10 +1842,10 @@ components:
               example: 3
             nombre:
               type: string
-              example: Sofía
+              example: Leandro
             apellido:
               type: string
-              example: Pérez
+              example: Paredes
         mensaje:
           type: string
           example: ¿Se puede entrar con mochila?
@@ -1885,10 +1885,10 @@ components:
                   example: 1
                 nombre:
                   type: string
-                  example: Lucía
+                  example: Tomas
                 apellido:
                   type: string
-                  example: Fernández
+                  example: Goldszmidt
         tipoEntrada:
           type: object
           properties:
@@ -1909,10 +1909,10 @@ components:
               example: 3
             nombre:
               type: string
-              example: Sofía
+              example: Leandro
             apellido:
               type: string
-              example: Pérez
+              example: Paredes
         cantidad:
           type: integer
           example: 2
