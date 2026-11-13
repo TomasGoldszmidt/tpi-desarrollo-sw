@@ -9,9 +9,10 @@ function queryString(params) {
 }
 
 // Catálogo: eventos que todavía no se realizaron, con filtros opcionales.
-// orden: 'fecha' | 'precio' | 'puntaje'. Viene de a páginas: { resultados, pagina, limite, total, hayMas }.
-export function buscarEventos({ texto, categoriaId, orden, pagina, limite } = {}) {
-  return request(`/eventos${queryString({ texto: texto?.trim(), categoriaId, orden, pagina, limite })}`);
+// orden: 'fecha' | 'precio' | 'puntaje'. precioMin y precioMax: algún tipo de entrada en ese rango.
+// Viene de a páginas: { resultados, pagina, limite, total, hayMas }.
+export function buscarEventos({ texto, categoriaId, orden, precioMin, precioMax, pagina, limite } = {}) {
+  return request(`/eventos${queryString({ texto: texto?.trim(), categoriaId, orden, precioMin, precioMax, pagina, limite })}`);
 }
 
 // Detalle: tipos de entrada con sus disponibles y el organizador con su puntaje.
