@@ -26,13 +26,15 @@ export function Campo({ etiqueta, error, ayuda, style, ...props }) {
 }
 
 // Campo de contraseña con el ojo para verla.
-export function CampoContrasenia({ etiqueta, error, ayuda, ayudaCumplida = false, ...props }) {
+// ref llega al TextInput (React 19 pasa ref como prop), para enfocarlo desde el campo anterior.
+export function CampoContrasenia({ etiqueta, error, ayuda, ayudaCumplida = false, ref, ...props }) {
   const [visible, setVisible] = useState(false);
   return (
     <View style={styles.campo}>
       <Text style={styles.etiqueta}>{etiqueta}</Text>
       <View style={[styles.input, styles.conBoton, error && styles.inputError]}>
         <TextInput
+          ref={ref}
           style={styles.inputPelado}
           secureTextEntry={!visible}
           autoCapitalize="none"

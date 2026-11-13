@@ -7,23 +7,34 @@ import { Avatar } from '../../components/Avatar.js';
 import { MenuCuenta } from '../../components/MenuCuenta.js';
 import { Campana } from '../../components/Campana.js';
 import { useNotificaciones } from '../../context/NotificacionesContext.js';
+import { useLayout } from '../../hooks/useLayout.js';
 import { Logo, Marca } from '../../components/Logo.js';
-import { colors, spacing } from '../../theme.js';
+import { colors, spacing, TOQUE_MINIMO } from '../../theme.js';
+
+// Ícono de cada pestaña: lleno cuando está elegida, de línea cuando no.
+function icono(lleno, linea) {
+  return function TabIcon({ color, size, focused }) {
+    return <Ionicons name={focused ? lleno : linea} size={size} color={color} />;
+  };
+}
 
 // Pestañas de la app, visibles para todos: cualquier usuario puede comprar y organizar.
+// En teléfono y tablet vertical van abajo; en tablet horizontal (900 o más) pasan a una
+// barra a la izquierda.
 export default function TabsLayout() {
   const { usuario, cerrarSesion } = useUsuario();
   const [menuAbierto, setMenuAbierto] = useState(false);
   const { actualizar } = useNotificaciones();
+  const { esAncho } = useLayout();
 
   // Sin sesión (se cerró, o se recargó la app) se vuelve a iniciar sesión.
   if (!usuario) {
     return <Redirect href="/" />;
   }
 
-  function editarPerfil() {
+  function ir(ruta) {
     setMenuAbierto(false);
-    router.push('/perfil');
+    router.push(ruta);
   }
 
   function salir() {
@@ -37,9 +48,16 @@ export default function TabsLayout() {
         // Al entrar a una pestaña se vuelve a preguntar por notificaciones nuevas.
         screenListeners={{ focus: actualizar }}
         screenOptions={{
-          tabBarActiveTintColor: colors.primary,
+          tabBarPosition: esAncho ? 'left' : 'bottom',
+          tabBarVariant: esAncho ? 'material' : 'uikit',
+          tabBarActiveTintColor: colors.primaryText,
           tabBarInactiveTintColor: colors.textMuted,
+          tabBarActiveBackgroundColor: esAncho ? colors.primarySoft : undefined,
+          tabBarLabelStyle: styles.etiqueta,
+          tabBarStyle: esAncho ? styles.barraLateral : styles.barra,
           headerTitleAlign: 'left',
+          headerShadowVisible: false,
+          headerStyle: styles.header,
           headerTitle: () => (
             <View style={styles.marca}>
               <Logo />
@@ -50,48 +68,27 @@ export default function TabsLayout() {
             <View style={styles.derecha}>
               <Campana />
               <Pressable
+                style={styles.cuenta}
                 onPress={() => setMenuAbierto(true)}
+                accessibilityRole="button"
                 accessibilityLabel={`Tu cuenta (${usuario.nombre} ${usuario.apellido})`}
               >
-                <Avatar usuario={usuario} />
+                <Avatar usuario={usuario} size={34} />
               </Pressable>
             </View>
           ),
         }}
       >
-        <Tabs.Screen
-          name="catalogo"
-          options={{
-            title: 'Catálogo',
-            tabBarIcon: ({ color, size }) => <Ionicons name="search" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="favoritos"
-          options={{
-            title: 'Favoritos',
-            tabBarIcon: ({ color, size }) => <Ionicons name="heart-outline" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="compras"
-          options={{
-            title: 'Mis compras',
-            tabBarIcon: ({ color, size }) => <Ionicons name="ticket-outline" size={size} color={color} />,
-          }}
-        />
-        <Tabs.Screen
-          name="eventos"
-          options={{
-            title: 'Mis eventos',
-            tabBarIcon: ({ color, size }) => <Ionicons name="calendar-outline" size={size} color={color} />,
-          }}
-        />
+        <Tabs.Screen name="catalogo" options={{ title: 'Catálogo', tabBarIcon: icono('search', 'search-outline') }} />
+        <Tabs.Screen name="favoritos" options={{ title: 'Favoritos', tabBarIcon: icono('heart', 'heart-outline') }} />
+        <Tabs.Screen name="compras" options={{ title: 'Mis compras', tabBarIcon: icono('ticket', 'ticket-outline') }} />
+        <Tabs.Screen name="eventos" options={{ title: 'Mis eventos', tabBarIcon: icono('calendar', 'calendar-outline') }} />
       </Tabs>
       {menuAbierto ? (
         <MenuCuenta
           usuario={usuario}
-          onEditarPerfil={editarPerfil}
+          onEditarPerfil={() => ir('/perfil')}
+          onVerResenias={() => ir(`/usuarios/${usuario.id}/resenias`)}
           onCerrarSesion={salir}
           onCerrar={() => setMenuAbierto(false)}
         />
@@ -101,6 +98,10 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
+  header: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: colors.borderSoft,
+  },
   marca: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -109,7 +110,23 @@ const styles = StyleSheet.create({
   derecha: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: spacing.lg,
-    marginRight: spacing.lg,
+    gap: spacing.xs,
+    marginRight: spacing.sm,
+  },
+  cuenta: {
+    width: TOQUE_MINIMO,
+    height: TOQUE_MINIMO,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  etiqueta: {
+    fontSize: 12,
+  },
+  barra: {
+    borderTopColor: colors.borderSoft,
+  },
+  barraLateral: {
+    borderRightColor: colors.borderSoft,
+    width: 104,
   },
 });
