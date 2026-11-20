@@ -81,3 +81,4 @@
 - [x] Rediseño de Mis eventos, ventas, mensajes y crear evento
 - [ ] Prueba del rediseño en el emulador (teléfono y tablet)
 - [x] Límite de largo de los textos del evento en el backend
+- [x] Un solo componente de filtros (`FiltroChips`) en una línea deslizable: categorías del catálogo, Mis compras, Mis eventos y ventas de un evento

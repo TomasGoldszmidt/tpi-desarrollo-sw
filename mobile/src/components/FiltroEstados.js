@@ -7,7 +7,8 @@ import { ORDEN_ESTADOS, estiloEstado } from './EstadoBadge.js';
 // cuenta todas las compras, aunque no estén cargadas todas las páginas.
 // elegido es un EstadoCompra o null (Todas). Si el elegido se queda sin compras,
 // su chip se sigue mostrando con 0 para que se entienda por qué la lista está vacía.
-export function FiltroEstados({ cantidades, elegido, onElegir }) {
+// El resto de las props (sangria, style) pasan a FiltroChips.
+export function FiltroEstados({ cantidades, elegido, onElegir, ...resto }) {
   const estados = ORDEN_ESTADOS.filter((estado) => cantidades[estado] > 0 || estado === elegido);
 
   const opciones = [
@@ -24,5 +25,5 @@ export function FiltroEstados({ cantidades, elegido, onElegir }) {
     }),
   ];
 
-  return <FiltroChips opciones={opciones} elegido={elegido} onElegir={onElegir} />;
+  return <FiltroChips opciones={opciones} elegido={elegido} onElegir={onElegir} {...resto} />;
 }

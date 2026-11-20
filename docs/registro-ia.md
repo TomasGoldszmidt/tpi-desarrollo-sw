@@ -1193,3 +1193,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El backend de una prueba anterior había quedado corriendo (detener la tarea de npm no cerró el proceso de node) y tenía datos de prueba en memoria; hubo que cerrarlo para arrancar del seed.
   - Al tipear con adb, el primer carácter del email salió duplicado ("pparedes@gmail.com"); se armó un script que verifica lo escrito antes de enviar.
 - **Aprendizaje:** un guion se valida recorriéndolo en la app real: los pasos escritos desde el código no muestran cuánto hay que navegar para llegar a cada pantalla.
+
+### 2026-11-20 · Un solo componente de filtros, en una línea deslizable
+- **Tarea:** Un solo componente de filtros (`FiltroChips`) en una línea deslizable
+- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "el filtro de los estados de mis compras debe usar el mismo componente que el del catalogo, que sea una linea y se pueda deslizar. Todos los filtros de estados deben ser el mismo componente." Ante la duda de la IA, elegí conservar en los estados el punto de color, la cantidad y el color del estado al elegirlos.
+- **Resultado:**
+  - `FiltroChips` pasó a ser el único componente de filtros: una línea con scroll horizontal que se estira hasta el borde de la pantalla (prop `sangria`), con la cantidad y el punto opcionales.
+  - El catálogo dejó sus chips propios y usa `FiltroChips` para las categorías; Mis compras y las ventas de un evento lo usan a través de `FiltroEstados`, y Mis eventos directo. Mis compras pasó de tres renglones de chips a uno.
+  - Probado en el emulador en las cuatro pantallas: se desliza, filtra, y el chip de estado elegido toma el color de su estado.
+- **Bien:** los cuatro filtros ya compartían casi todo; alcanzó con cambiar un componente y borrar el duplicado del catálogo.
+- **Corregido / problemas:** en la primera prueba, los chips de Mis compras salían cortados por abajo: la lista de debajo achicaba la fila deslizable. Se arregló con `flexShrink: 0`. Sin probarlo en el emulador no se hubiera visto, porque el lint pasaba.
+- **Aprendizaje:** cuando una misma cosa se ve distinta en dos pantallas, conviene pedir un solo componente compartido: así el próximo cambio se hace una vez y queda igual en todos lados.

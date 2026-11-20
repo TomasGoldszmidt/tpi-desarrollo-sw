@@ -10,6 +10,7 @@ import { useLayout } from '../../hooks/useLayout.js';
 import { Boton } from '../../components/Boton.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { EventoCard } from '../../components/EventoCard.js';
+import { FiltroChips } from '../../components/FiltroChips.js';
 import { PieLista } from '../../components/PieLista.js';
 import { FiltrosModal, ORDENES, PRECIOS, OpcionesOrden, OpcionesPrecio } from '../../components/FiltrosModal.js';
 import { colors, fontSize, spacing } from '../../theme.js';
@@ -177,29 +178,15 @@ export default function Catalogo() {
         <Text style={styles.titulo}>Catálogo</Text>
         {buscador}
       </View>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chips}
-        style={styles.chipsScroll}
-        keyboardShouldPersistTaps="handled"
-      >
-        {opcionesCategoria.map((categoria) => {
-          const elegida = filtros.categoriaId === categoria.id;
-          return (
-            <Pressable
-              key={categoria.id ?? 'todas'}
-              style={[styles.chip, elegida && styles.chipElegido]}
-              onPress={() => cambiar({ categoriaId: categoria.id })}
-              hitSlop={4}
-              accessibilityRole="button"
-              accessibilityState={{ selected: elegida }}
-            >
-              <Text style={[styles.chipTexto, elegida && styles.chipTextoElegido]}>{categoria.nombre}</Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+      {/* La pantalla no tiene padding: la fila no se estira, pero los chips arrancan alineados con el título. */}
+      <FiltroChips
+        opciones={opcionesCategoria.map((categoria) => ({ valor: categoria.id, texto: categoria.nombre }))}
+        elegido={filtros.categoriaId}
+        onElegir={(categoriaId) => cambiar({ categoriaId })}
+        sangria={0}
+        relleno={spacing.lg}
+        style={styles.chips}
+      />
       <View style={styles.resumen}>
         {cantidad}
         <Pressable
@@ -285,33 +272,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  chipsScroll: {
-    flexGrow: 0,
-  },
   chips: {
-    gap: spacing.sm,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-  },
-  chip: {
-    minHeight: 36,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-  },
-  chipElegido: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipTexto: {
-    color: colors.text,
-    fontSize: fontSize.small,
-  },
-  chipTextoElegido: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
+    marginTop: spacing.md,
+    marginBottom: 0,
   },
   resumen: {
     flexDirection: 'row',

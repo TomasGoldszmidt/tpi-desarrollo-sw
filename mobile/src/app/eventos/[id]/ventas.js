@@ -108,7 +108,9 @@ export default function VentasEvento() {
   const listaCompras = (
     <>
       <Text style={[styles.seccion, esAncho && styles.seccionAncho]}>Compras · {cantidades?.todas ?? ventas.total}</Text>
-      {cantidades && cantidades.todas > 0 ? <FiltroEstados cantidades={cantidades} elegido={estado} onElegir={setEstado} /> : null}
+      {cantidades && cantidades.todas > 0 ? (
+        <FiltroEstados cantidades={cantidades} elegido={estado} onElegir={setEstado} sangria={esAncho ? spacing.xl : spacing.lg} />
+      ) : null}
       {compras.length === 0 ? (
         <View style={styles.vacio}>
           <Text style={styles.vacioTexto}>

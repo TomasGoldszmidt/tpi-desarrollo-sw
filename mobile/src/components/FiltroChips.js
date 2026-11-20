@@ -1,15 +1,25 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { colors, fontSize, spacing } from '../theme.js';
 
-// Chips para filtrar un listado (en uno o más renglones). Cada opción tiene un valor
-// (null = sin filtro), un texto, su cantidad y, opcional, un punto de color y los colores
-// que toma al elegirla (por defecto, el verde de la app). Los usan Mis compras (por estado)
-// y Mis eventos (próximos, realizados, con mensajes nuevos).
-// opciones: [{ valor, texto, cantidad, punto?, puntoActivo?, estiloActivo?: { backgroundColor, color } }]
-// puntoActivo: el color del punto con el chip elegido, si tiene que cambiar para verse.
-export function FiltroChips({ opciones, elegido, onElegir }) {
+// Chips para filtrar un listado, en una sola línea que se desliza de costado. Es el único
+// componente de filtros de la app: las categorías del catálogo, los estados de Mis compras
+// y de las ventas de un evento (ver FiltroEstados) y Mis eventos.
+// opciones: [{ valor, texto, cantidad?, punto?, puntoActivo?, estiloActivo?: { backgroundColor, color } }]
+// valor null = sin filtro. cantidad y punto son opcionales (las categorías no los tienen).
+// estiloActivo: los colores al elegirlo (por defecto, el verde de la app); puntoActivo: el
+// color del punto con el chip elegido, si tiene que cambiar para verse.
+// sangria: el padding horizontal del contenedor; la fila se estira hasta el borde de la
+// pantalla para que los chips se deslicen de punta a punta, y arranca alineada con el resto.
+// relleno: el margen de los chips a los costados (por defecto, igual a la sangría).
+export function FiltroChips({ opciones, elegido, onElegir, sangria = spacing.lg, relleno = sangria, style }) {
   return (
-    <View style={styles.fila}>
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      keyboardShouldPersistTaps="handled"
+      style={[styles.scroll, { marginHorizontal: -sangria }, style]}
+      contentContainerStyle={[styles.fila, { paddingHorizontal: relleno }]}
+    >
       {opciones.map((opcion) => (
         <Chip
           key={opcion.valor ?? 'todos'}
@@ -22,7 +32,7 @@ export function FiltroChips({ opciones, elegido, onElegir }) {
           onPress={() => onElegir(opcion.valor)}
         />
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -30,6 +40,7 @@ const ACTIVO_POR_DEFECTO = { backgroundColor: colors.primary, color: '#FFFFFF' }
 
 function Chip({ texto, cantidad, punto, puntoActivo, activo, estiloActivo, onPress }) {
   const colorTexto = activo ? estiloActivo.color : colors.text;
+  const conCantidad = cantidad !== undefined;
   return (
     <Pressable
       style={[styles.chip, activo && { backgroundColor: estiloActivo.backgroundColor, borderColor: 'transparent' }]}
@@ -37,22 +48,24 @@ function Chip({ texto, cantidad, punto, puntoActivo, activo, estiloActivo, onPre
       hitSlop={4}
       accessibilityRole="button"
       accessibilityState={{ selected: activo }}
-      accessibilityLabel={`${texto}: ${cantidad}`}
+      accessibilityLabel={conCantidad ? `${texto}: ${cantidad}` : texto}
     >
       {punto ? <View style={[styles.punto, { backgroundColor: activo && puntoActivo ? puntoActivo : punto }]} /> : null}
-      <Text style={[styles.texto, { color: colorTexto }]}>{texto}</Text>
-      <Text style={[styles.texto, styles.cantidad, { color: colorTexto }]}>{cantidad}</Text>
+      <Text style={[styles.texto, activo && styles.textoActivo, { color: colorTexto }]}>{texto}</Text>
+      {conCantidad ? <Text style={[styles.texto, styles.cantidad, { color: colorTexto }]}>{cantidad}</Text> : null}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  // Si no entran en un renglón, los chips pasan al de abajo: así se ven todos sin deslizar.
-  fila: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
+  // Ni crece ni se achica: arriba de una lista con flex, si no, la lista la aplasta y corta los chips.
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 0,
     marginBottom: spacing.md,
+  },
+  fila: {
+    gap: spacing.sm,
   },
   chip: {
     flexDirection: 'row',
@@ -62,7 +75,6 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderRadius: 999,
     minHeight: 36,
-    paddingVertical: 4,
     paddingHorizontal: 14,
   },
   punto: {
@@ -71,7 +83,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   texto: {
-    fontSize: fontSize.body,
+    fontSize: fontSize.small,
+  },
+  textoActivo: {
+    fontWeight: 'bold',
   },
   cantidad: {
     fontWeight: 'bold',
