@@ -1205,3 +1205,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** los cuatro filtros ya compartían casi todo; alcanzó con cambiar un componente y borrar el duplicado del catálogo.
 - **Corregido / problemas:** en la primera prueba, los chips de Mis compras salían cortados por abajo: la lista de debajo achicaba la fila deslizable. Se arregló con `flexShrink: 0`. Sin probarlo en el emulador no se hubiera visto, porque el lint pasaba.
 - **Aprendizaje:** cuando una misma cosa se ve distinta en dos pantallas, conviene pedir un solo componente compartido: así el próximo cambio se hace una vez y queda igual en todos lados.
+
+### 2026-11-20 · Flujo del video acotado a comprar una entrada
+- **Tarea:** Elegir el flujo a presentar y preparar guion del video (corrección)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "el flujo que hay que mostrar no es todo ese ciclo, un flujo es mas corto, un flujo podria ser comprar una entrada, desde que inicia sesion hasta que compra la entrada y la paga".
+- **Resultado:**
+  - Guion rehecho sobre un solo flujo: iniciar sesión → buscar el evento → elegir la entrada y reservar → pagar, y cerrar mostrando la compra en Mis compras (casos 3, 12 y 1). Se sacaron los pasos de marcar como utilizada y reseñar, que cambiaban de usuario dos veces.
+  - Con el tiempo que liberó, cada paso explica más a fondo su back-end y su front-end. Se sumó el inicio de sesión: la validación en la pantalla, `POST /sesiones`, el hash con `scrypt` y el mismo mensaje de error para email y contraseña. También la búsqueda del caso 3 (`buscarEventos`).
+  - Tiempos: ~8:45. La tabla de pestañas de VS Code quedó con los archivos de este flujo.
+- **Bien:** acotar el flujo dejó tiempo para mostrar el código de cada paso, que es lo que pide la consigna.
+- **Corregido / problemas:** la IA había elegido el "ciclo de la compra" (comprar → pagar → usar → reseñar), que en realidad son varios flujos, y lo había mantenido en las actualizaciones del guion sin cuestionarlo. Lo corregí yo.
+- **Aprendizaje:** la consigna pide un flujo y explicarlo a fondo; mostrar más pantallas no suma si cada una se explica por arriba. Conviene contrastar con el enunciado no solo el código, también la forma de presentarlo.

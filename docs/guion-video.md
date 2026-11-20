@@ -1,20 +1,21 @@
 # Guion del video
 
-**Flujo elegido:** el ciclo de la compra, comprar → pagar → usar → reseñar (casos de uso 12, 1 y 9, con el 2 del lado del organizador).
+**Flujo elegido:** comprar una entrada, desde que el comprador inicia sesión hasta que la paga: iniciar sesión → buscar el evento → elegir la entrada y reservar → pagar (casos de uso 3, 12 y 1).
 
-**Duración objetivo:** ~8:45 (el enunciado pide entre 5 y 10). Los tiempos de cada parte suman eso; si un ensayo pasa de 9:30, aplicar "Para acortar" del final.
+**Duración objetivo:** ~8:45 (el enunciado pide entre 5 y 10). Si un ensayo pasa de 9:30, aplicar "Para acortar" del final.
 
 **Formato:** el código se muestra **a la par del flujo**. En cada paso se hace la acción en la app y enseguida se abre el código que la resuelve: primero la pantalla (frontend) y después el endpoint y el dominio (backend). Lo de "decir" son ideas para contar con tus palabras, no un texto para leer.
 
 | Parte | Qué cubre de la consigna | Tiempo |
 |---|---|---|
-| 0. Presentación | Contexto y arquitectura | 0:45 |
-| 1. Reservar | Interfaz, front-end y back-end | 2:00 |
-| 2. Pagar | Interfaz, front-end y back-end | 1:30 |
-| 3. Usar | Interfaz y back-end (organizador) | 1:00 |
-| 4. Reseñar | Interfaz, front-end y back-end | 1:00 |
-| 5. Skills | Cómo se trabajó con la IA | 1:00 |
-| 6. Conclusión | Ventajas, desventajas, dificultades, aprendizajes y valoración | 1:30 |
+| 0. Presentación | Contexto y arquitectura | 0:30 |
+| 1. Iniciar sesión | Interfaz, front-end y back-end | 1:15 |
+| 2. Buscar el evento | Interfaz, front-end y back-end | 1:00 |
+| 3. Elegir la entrada y reservar | Interfaz, front-end y back-end | 2:00 |
+| 4. Pagar | Interfaz, front-end y back-end | 1:30 |
+| 5. La compra en Mis compras | Interfaz | 0:30 |
+| 6. Skills | Cómo se trabajó con la IA | 0:45 |
+| 7. Conclusión | Ventajas, desventajas, dificultades, aprendizajes y valoración | 1:15 |
 
 ---
 
@@ -27,119 +28,121 @@
 
   | # | Archivo | Qué se muestra |
   |---|---|---|
-  | 1 | `mobile/src/app/eventos/[id]/comprar.js` | `cantidadValida`, el "+" deshabilitado, el "Agotado" y `reservar` |
-  | 2 | `mobile/src/api/client.js` | el header `X-User-Id` y el error del backend |
-  | 3 | `backend/src/routes/compraRoutes.js` | las rutas de compras |
-  | 4 | `backend/src/controllers/compraController.js` | `create` y `changeEstado` |
-  | 5 | `backend/src/domain/compra.js` | `comprar`, `TRANSICIONES` y `actualizarEstado` |
-  | 6 | `backend/src/domain/tipoEntrada.js` | `calcularDisponibles` y `hayCupoPara` |
-  | 7 | `backend/src/persistence/schemas.js` | el `@typedef` de `Compra` |
-  | 8 | `mobile/src/app/compras/[id].js` | las acciones según el estado y el rol, y `ejecutar` |
-  | 9 | `backend/src/domain/resenia.js` | `crearResenia` |
+  | 1 | `mobile/src/app/index.js` | `ingresar`: valida los campos, llama al backend y guarda la cuenta |
+  | 2 | `mobile/src/context/UsuarioContext.js` y `mobile/src/api/client.js` | el usuario activo y el header `X-User-Id` |
+  | 3 | `backend/src/controllers/sesionController.js` y `backend/src/domain/cuenta.js` | `POST /sesiones`, `iniciarSesion` y `verificarContrasenia` |
+  | 4 | `backend/src/domain/evento.js` | `buscarEventos` y `COMPARADORES` |
+  | 5 | `mobile/src/app/eventos/[id]/comprar.js` | `cantidadValida`, el "Agotado", `reservar` y `Reserva.pagar` |
+  | 6 | `backend/src/controllers/compraController.js` | `create` y `changeEstado` |
+  | 7 | `backend/src/domain/compra.js` | `comprar`, `TRANSICIONES` y `actualizarEstado` |
+  | 8 | `backend/src/domain/tipoEntrada.js` | `calcularDisponibles` y `hayCupoPara` |
 
   Para saltar a una función: `Ctrl` + `Shift` + `O` y escribir su nombre.
 - [ ] Ensayar el recorrido una vez y **volver a reiniciar el backend** antes de grabar: lo que se compra en el ensayo queda en memoria.
 
 ---
 
-## 0. Presentación y arquitectura · ~0:45
+## 0. Presentación y arquitectura · ~0:30
 
 **Pantalla:** la app en "Iniciá sesión" y, al lado, el árbol de carpetas de VS Code.
 
 **Decir:**
-- Qué es AI Ticket It: venta de entradas, con compradores y organizadores. Se entra con email y contraseña, o se crea una cuenta.
-- Backend en Node + Express 5, en capas: `routes` → `controllers` → `domain` → `persistence/repositories`. Los repositorios solo guardan y consultan; las reglas de negocio están en el dominio. Persistencia en memoria, orientada a documentos.
-- App en React Native con Expo y Expo Router: cada archivo de `src/app/` es una pantalla.
-- Todo se desarrolló con Claude Code. El flujo es el ciclo de una compra: la sigo en la app y voy mostrando el código de cada paso.
+- AI Ticket It: venta de entradas, con compradores y organizadores. Voy a mostrar cómo un comprador compra una entrada, desde que inicia sesión hasta que la paga.
+- Backend en Node + Express 5, en capas: `routes` → `controllers` → `domain` → `persistence/repositories`. Las reglas de negocio están en el dominio y la persistencia es en memoria.
+- App en React Native con Expo y Expo Router: cada archivo de `src/app/` es una pantalla. Todo se desarrolló con Claude Code.
 
 ---
 
-## 1. Reservar (caso 12) · ~2:00
+## 1. Iniciar sesión · ~1:15
 
-**App:** iniciar sesión como **Paredes** (`paredes@gmail.com` / `paredes1234`) → Catálogo → buscar "verano" (el festival no aparece en la primera pantalla) → **Festival de Verano** → **Comprar · desde $ 90.000**.
+**App:** escribir `paredes@gmail.com` con una contraseña equivocada → **Ingresar**: aparece "El email o la contraseña no son correctos.". Corregirla a `paredes1234` → **Ingresar**: entra al catálogo.
+
+**Frontend · `index.js`:**
+- `ingresar` primero valida los campos en la pantalla (vacíos o email mal escrito) sin llamar al backend.
+- Si están bien, llama a `iniciarSesion` (`POST /sesiones`) y guarda la cuenta con `UsuarioContext`. Con la sesión iniciada, la pantalla redirige sola al catálogo.
+- `client.js`: desde ahí, cada pedido manda el id del usuario en el header `X-User-Id`. Si el backend responde con error, la pantalla muestra su mensaje tal cual.
+
+**Backend:**
+- `sesionController.create`: valida la forma del email y la contraseña y llama al dominio.
+- `cuenta.js: iniciarSesion`: la contraseña nunca se guarda, se guarda un hash con sal (`scrypt`, que viene con Node). `verificarContrasenia` lo recalcula y compara con `timingSafeEqual`.
+- **Decir:** el mensaje de error es el mismo si el email no existe o si la contraseña está mal, para no revelar qué emails tienen cuenta. No hay token: para el TP, la app identifica al usuario con el header, y es una decisión que tomé a propósito.
+
+---
+
+## 2. Buscar el evento (caso 3) · ~1:00
+
+**App:** en el catálogo, mostrar las categorías en una fila que se desliza. Escribir "verano" en el buscador → aparece **Festival de Verano**, con el puntaje del organizador y el precio desde $ 90.000.
+
+**Código:**
+- `catalogo.js`: el texto, la categoría y el orden viajan como parámetros de `GET /eventos`, de a páginas.
+- `evento.js: buscarEventos`: filtra por texto (sin importar tildes ni mayúsculas) y categoría, saca los eventos que ya se realizaron y ordena con `COMPARADORES` (fecha, precio o puntaje del organizador, el caso 11).
+
+---
+
+## 3. Elegir la entrada y reservar (caso 12) · ~2:00
+
+**App:** **Festival de Verano** → **Comprar · desde $ 90.000**.
+- Arriba, los tres pasos: Entradas, Reservar y Pagar.
 - Mostrar el **Backstage Agotado**, que no se puede elegir.
 - Elegir **General** y subir a 2 con el "+": el total pasa a $ 180.000.
 
 **Frontend · `comprar.js`:**
 - `cantidadValida` nunca supera las disponibles del tipo elegido, y el "+" se deshabilita al llegar al tope.
 - Un tipo sin disponibles se muestra "Agotado" y queda deshabilitado.
-- `reservar` llama a `crearCompra`; si el backend rechaza por cupo, muestra su mensaje y vuelve a pedir las disponibles.
 - **Decir:** las disponibles las calcula el backend; la pantalla solo las respeta.
 
 **App:** **Reservar 2 entradas** → "Tus entradas están reservadas", con la compra **Pendiente de pago**.
 
-**Frontend · `client.js`:** el cliente HTTP manda el usuario activo en el header `X-User-Id`. Si el backend responde con error, la pantalla muestra su mensaje tal cual.
+**Frontend · `comprar.js: reservar`:** llama a `crearCompra` (`POST /compras`). Si el backend la rechaza por cupo (alguien compró antes), muestra su mensaje y vuelve a pedir las disponibles.
 
 **Backend:**
-- `compraRoutes.js`: `POST /compras` para comprar. Las acciones sobre una compra son subrecursos: `/pago`, `/utilizacion`, `/cancelacion`.
 - `compraController.create`: valida la forma del pedido (ids, cantidad ≥ 1), llama al dominio y responde **201** con el header `Location`.
-- `compra.js: comprar`: el evento existe y no se realizó, el organizador no puede comprar en su propio evento, y `hayCupoPara`.
+- `compra.js: comprar`: el evento existe y no se realizó, el organizador no puede comprar en su propio evento, y `hayCupoPara`. El total lo calcula el backend con el precio actual.
 - `tipoEntrada.js`: `hayCupoPara` es el método del diagrama de clases. `calcularDisponibles` no se guarda, se calcula con las compras que ocupan cupo.
 - **Decir:** una compra **pendiente ya ocupa cupo** (por eso la pantalla dice "reservadas"), para que dos personas no compren la última entrada y la segunda se entere recién al pagar. Las canceladas y reembolsadas liberan el lugar.
 
 ---
 
-## 2. Pagar (caso 1) · ~1:30
+## 4. Pagar · ~1:30
 
-**App:** **Pagar ahora $ 180.000**. Se abre el detalle de la compra: **Confirmada**, con los días que faltan (60), y el historial con "Reservada" y "Pagada", los dos por vos.
+**App:** **Pagar ahora $ 180.000**. Se abre el detalle de la compra: **Confirmada**, con "Faltan 60 días", y el historial con "Reservada" y "Pagada", los dos por vos.
 
-**Frontend · `compras/[id].js`:**
-- Los botones dependen del estado y del rol: ahora que está confirmada, el comprador ve "Cancelar y pedir reembolso"; si estuviera pendiente vería Pagar y Cancelar, y el organizador ve "Marcar como utilizada".
-- `ejecutar` muestra la carga encima, llama al backend y después **vuelve a pedir la compra**, en lugar de cambiar el estado a mano.
+**Frontend · `comprar.js: Reserva.pagar`:** llama a `pagarCompra` (`POST /compras/:id/pago`) y abre el detalle de la compra, que la vuelve a pedir al backend en lugar de cambiar el estado a mano. Con "Pagar más tarde" queda pendiente y se paga después desde Mis compras.
 
 **Backend:**
-- `compraController`: pagar es una línea, `changeEstado(() => CONFIRMADA)`. Marcar como utilizada y cancelar usan la misma función.
+- `compraController`: pagar es una línea, `changeEstado(() => CONFIRMADA)`. Cancelar y marcar como utilizada usan la misma función.
 - `compra.js: TRANSICIONES`: cada cambio de estado es una fila con desde, hacia, quién puede y con qué condición. PENDIENTE → CONFIRMADA lo hace el comprador antes del evento.
 - `actualizarEstado` (el método del diagrama): valida la transición (409), quién la pide (403) y la fecha (409), y graba el estado junto con el historial.
-- `schemas.js: Compra`: la compra lleva embebidos el historial y el chat, y guarda `total`, porque es lo que se pagó aunque después cambie el precio.
-
-**App:** atrás → pestaña **Mis compras**. Los estados se distinguen por color e ícono, con un chip por estado y su cantidad; las pendientes van primero. Tocar el chip **Confirmadas** para ver el Festival con "Faltan 60 días".
+- **Decir:** las reglas de la consigna (por ejemplo, que no se pueda cancelar una compra utilizada) quedan escritas como filas de esta tabla, en lugar de varios `if`.
 
 ---
 
-## 3. Usar (organizador, casos 2 y 9) · ~1:00
+## 5. La compra en Mis compras (caso 1) · ~0:30
 
-**App:** avatar → **Cerrar sesión** → entrar como **Dilollo** (`dilollo@gmail.com` / `dilollo1234`) → Mis eventos → chip **Realizados** → **Noche de Stand-up**.
-- Las ventas: lo recaudado, las entradas disponibles por tipo (118 de 120) y el estado de cada compra, con chips para filtrar.
-- Entrar a la compra de **Blanco** (Confirmada) → **Marcar como utilizada** → **Marcar**. Queda **Utilizada**.
+**App:** atrás → pestaña **Mis compras**. Los estados se distinguen por color e ícono, con un chip por estado y su cantidad. Tocar el chip **Confirmadas**: aparece el Festival con "Faltan 60 días".
 
-**Decir:** una compra nueva no se puede marcar como utilizada hasta el día del evento, por eso uso una compra del seed de un evento que ya pasó.
-
-**Código:** `compra.js: TRANSICIONES`, la fila CONFIRMADA → UTILIZADA: solo la hace el organizador y desde el día del evento. Es la misma tabla del paso anterior; en la pantalla es el mismo detalle de compra, con otro botón por el rol.
+**Decir:** los días que faltan los calcula el backend (`diasRestantes`) y solo se muestran en las compras confirmadas, como pide el caso de uso.
 
 ---
 
-## 4. Reseñar (casos 9 y 10) · ~1:00
-
-**App:** avatar → **Cerrar sesión** → entrar como **Blanco** (`blanco@gmail.com` / `blanco1234`) → Mis compras → chip **Utilizadas** → **Noche de Stand-up** → 5 estrellas y un comentario → **Publicar reseña**. Queda como "Tu reseña".
-
-**Código:**
-- `compras/[id].js`: el formulario de reseña aparece solo cuando la compra está Utilizada.
-- `resenia.js: crearResenia`: busca una compra UTILIZADA del comprador para ese evento y rechaza una segunda reseña.
-
-**App:** Catálogo → buscar "amistoso" → **Amistoso** (también es de Dilollo): el organizador pasó de "Sin reseñas" a "★ 5 · 1 reseña", y el comentario aparece en su tarjeta.
-
----
-
-## 5. Skills y cómo ayudaron · ~1:00
+## 6. Skills y cómo ayudaron · ~0:45
 
 **Pantalla:** la carpeta `.claude/skills/` y una skill abierta (por ejemplo `nuevo-endpoint/SKILL.md`, en el "Paso 2 · Entregar el análisis y FRENAR").
 
-**Decir:** creé una skill por tipo de tarea. Las que deciden algo primero analizan y frenan hasta que yo apruebo. Elegir dos o tres ejemplos de la tabla, no todos:
+**Decir:** creé una skill por tipo de tarea; las que deciden algo primero analizan y frenan hasta que yo apruebo. Elegir dos ejemplos de este flujo:
 
 | Skill | Ejemplo concreto de este flujo |
 |---|---|
-| `/persistencia` | Para Compra propuso el historial y el chat embebidos y guardar `total`. Fue una sola decisión que resolvió cuatro entidades del diagrama |
-| `/nuevo-endpoint` | Analizó pagar y utilizar como subrecursos (`/pago`, `/utilizacion`) en lugar de un `PATCH` con el estado, y planteó que el organizador no pueda comprar en su evento |
+| `/nuevo-endpoint` | Analizó pagar como subrecurso (`POST /compras/:id/pago`) en lugar de un `PATCH` con el estado, y planteó que el organizador no pueda comprar en su evento |
 | `/nueva-pantalla` | El boceto de la compra se corrigió antes de escribir código. Le marqué dos veces que mostraba cosas técnicas ("409") dentro del celular, y la regla quedó escrita en la skill |
-| `/probar-caso-de-uso` | Probó la carrera por el cupo: Paredes eligiendo 3 VIP en el emulador mientras Blanco compraba 98 por la API |
-| `/swagger` y `/registrar-ia` | Cada endpoint quedó documentado en el mismo commit, y cada subtarea anotada en `docs/registro-ia.md`, de donde sale la conclusión |
+| `/probar-caso-de-uso` | Probó la carrera por el cupo: un comprador eligiendo 3 VIP en el emulador mientras otro compraba 98 por la API |
+| `/persistencia` | Para Compra propuso el historial embebido y guardar `total`, que es lo que se paga aunque después cambie el precio |
 
 **Decir:** la ventaja de las skills es que una corrección queda escrita y se aplica en las tareas que siguen, en lugar de repetirla en cada conversación.
 
 ---
 
-## 6. Conclusión sobre el uso de IA · ~1:30
+## 7. Conclusión sobre el uso de IA · ~1:15
 
 **Pantalla:** `docs/conclusion-ia.md`, o la cámara.
 
@@ -149,7 +152,7 @@ Decir con tus palabras los seis puntos de "Para decir en el video" del final de 
 
 ## Si sobra o falta tiempo
 
-- **Para acortar (a ~7 min):** en el paso 3 mostrar solo la app, porque la tabla de transiciones ya se vio, y en el paso 5 quedarse con un solo ejemplo.
+- **Para acortar (a ~7 min):** en el paso 2 mostrar solo la app, sin código, y en el paso 6 quedarse con un solo ejemplo.
 - **Para alargar:**
-  - **Swagger (~20 s), al final del paso 2:** abrir <http://localhost:3000/api-docs>, **Authorize** con `3` (Paredes) y hacer `POST /compras/{id}/pago` sobre la compra recién pagada → **409** "No se puede pasar de CONFIRMADA a CONFIRMADA". **Decir:** es la tabla de transiciones rechazando un paso que no existe, y todos los errores responden `{ "error": "mensaje" }`.
-  - Cancelar la compra de Bernarda (queda Cancelada) y la de Noche de Rock (queda Reembolsada), y mostrar que `estadoAlCancelar` elige entre las dos filas de la misma tabla.
+  - **Swagger (~20 s), al final del paso 4:** abrir <http://localhost:3000/api-docs>, **Authorize** con `3` (Paredes) y hacer `POST /compras/{id}/pago` sobre la compra recién pagada → **409** "No se puede pasar de CONFIRMADA a CONFIRMADA". **Decir:** es la tabla de transiciones rechazando un paso que no existe, y todos los errores responden `{ "error": "mensaje" }`.
+  - En el paso 3, mostrar en `client.js` cómo el mensaje de error del backend llega tal cual a la pantalla.
