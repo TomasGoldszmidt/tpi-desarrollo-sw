@@ -1152,3 +1152,18 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El panel lateral muestra el catálogo con barra de pestañas propia de React Navigation, no exactamente como el boceto (la campana y la cuenta siguen arriba).
   - Se commiteó junto con el chat un cambio pendiente de `Conversacion.js` de una sesión anterior.
 - **Aprendizaje:** un rediseño grande conviene hacerlo por capas (tema, componentes, pantallas) y commitear cada una, así se puede volver atrás por partes.
+
+### 2026-11-20 · Revisión contra el enunciado y docs desactualizados
+- **Tarea:** revisión general del TP antes de grabar el video; tildar las tareas de la sección 3 ya hechas
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "Revisa el codigo del proyecto y fijate que se cumpla con todos los requerimientos del tp", y después "Sí, corregilos".
+- **Resultado:**
+  - Revisión del enunciado contra el backend, la app y los docs: los 12 casos de uso y los requisitos técnicos se cumplen, y los 97 tests pasan. Pendiente: el video, la prueba del rediseño en el emulador y el límite de largo de los textos del evento.
+  - `guion-video.md` y `prueba-integral.md` seguían con los usuarios viejos del seed (Lucía, Martín, Sofía, Juan, con emails `@aiticketit.com`) y con la pantalla "¿Quién usa la app?", que ya no existe. Se pasaron a Tomas, Dilollo, Paredes y Blanco con sus credenciales, y a "Cerrar sesión" / "Iniciá sesión", usando el mapeo de roles del commit que cambió el seed.
+  - Se tildaron las 5 tareas de la sección 3 que estaban hechas desde el rediseño (inicio de sesión, filtro de Mis compras, favoritos, notificaciones y bandeja de mensajes), después de verificar que estuvieran en el código.
+- **Bien:** la revisión encontró que el guion del video no se podía seguir tal cual (las credenciales no existían), antes de ponerse a grabar.
+- **Corregido / problemas:**
+  - En la primera revisión, la IA solo marcó la línea de "¿Quién usa la app?" y no vio que todos los usuarios del guion estaban desactualizados; recién lo encontró al ponerse a corregir.
+  - El reemplazo automático de nombres cambió "Teatro San Martín" por "Teatro San Dilollo"; se corrigió al revisar el diff. También se ajustó la cita del chat ("Sí, chica, …") al texto actual del seed.
+  - Los resultados esperados de la prueba integral son del seed del 2026-11-03; el seed sumó después mensajes de Blanco sin responder, así que algunos "Esperado" pueden no coincidir hasta repetir la prueba.
+- **Aprendizaje:** cuando cambio datos del seed, tengo que buscar en los docs todo lo que los menciona (guion, pruebas), no solo en el código y los tests; y un reemplazo automático de texto siempre hay que revisarlo en el diff.

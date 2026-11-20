@@ -12,7 +12,7 @@
 
 - [ ] **Pantalla partida:** el emulador a un costado y VS Code ocupando el resto. Subir el tamaño de letra del editor (`Ctrl` + `+`) para que se lea en el video, y cerrar las barras laterales que no se usan.
 - [ ] Reiniciar el backend (`npm run dev` en `backend/`), así el seed arranca limpio.
-- [ ] Abrir la app en el emulador, en la pantalla "¿Quién usa la app?".
+- [ ] Abrir la app en el emulador, en la pantalla "Iniciá sesión".
 - [ ] Abrir Swagger en el navegador (<http://localhost:3000/api-docs>) para el final del paso 2.
 - [ ] Dejar abiertas estas pestañas en VS Code, en el orden en que aparecen:
 
@@ -47,7 +47,7 @@
 
 ## 1. Comprar (caso 12) · ~2:00
 
-**App:** iniciar sesión como **Sofía** (`sofia@aiticketit.com` / `sofia1234`) → Catálogo → **Festival de Verano** → comprar.
+**App:** iniciar sesión como **Paredes** (`paredes@gmail.com` / `paredes1234`) → Catálogo → **Festival de Verano** → comprar.
 - Mostrar el **Backstage Agotado**, que no se puede elegir.
 - Elegir **General** y subir a 2 con el "+": el total pasa a $ 180.000.
 
@@ -85,15 +85,15 @@
 
 **App:** ir a **Mis compras**. Los estados se distinguen por color y la confirmada muestra cuántos días faltan (~60).
 
-**Swagger (opcional, ~20 s):** con **Authorize**, cargar `3` (Sofía). Hacer `POST /compras/{id}/pago` sobre la compra recién pagada → **409** "No se puede pasar de CONFIRMADA a CONFIRMADA". **Decir:** es la tabla de transiciones rechazando un paso que no existe, y todos los errores responden `{ "error": "mensaje" }`.
+**Swagger (opcional, ~20 s):** con **Authorize**, cargar `3` (Paredes). Hacer `POST /compras/{id}/pago` sobre la compra recién pagada → **409** "No se puede pasar de CONFIRMADA a CONFIRMADA". **Decir:** es la tabla de transiciones rechazando un paso que no existe, y todos los errores responden `{ "error": "mensaje" }`.
 
 ---
 
 ## 3. Usar (organizador, casos 2 y 9) · ~1:15
 
-**App:** avatar → **Cerrar sesión** → entrar como **Martín** (`martin@aiticketit.com` / `martin1234`) → Mis eventos → **Noche de Stand-up** (ya realizado).
+**App:** avatar → **Cerrar sesión** → entrar como **Dilollo** (`dilollo@gmail.com` / `dilollo1234`) → Mis eventos → **Noche de Stand-up** (ya realizado).
 - Las ventas: el estado de cada compra y las entradas disponibles por tipo.
-- Entrar a la compra de **Juan** (Confirmada) → **Marcar como utilizada** → confirmar. Queda **Utilizada**.
+- Entrar a la compra de **Blanco** (Confirmada) → **Marcar como utilizada** → confirmar. Queda **Utilizada**.
 
 **Decir:** una compra nueva no se puede marcar como utilizada hasta el día del evento, por eso uso una compra del seed de un evento que ya pasó.
 
@@ -105,13 +105,13 @@
 
 ## 4. Reseñar (casos 9 y 10) · ~1:15
 
-**App:** avatar → **Cerrar sesión** → entrar como **Juan** (`juan@aiticketit.com` / `juan1234`) → Mis compras → **Noche de Stand-up** → 5 estrellas y un comentario → **Publicar reseña**. Queda como "Tu reseña".
+**App:** avatar → **Cerrar sesión** → entrar como **Blanco** (`blanco@gmail.com` / `blanco1234`) → Mis compras → **Noche de Stand-up** → 5 estrellas y un comentario → **Publicar reseña**. Queda como "Tu reseña".
 
 **Código:**
 - `compras/[id].js`: el formulario de reseña aparece solo cuando la compra está Utilizada.
 - `resenia.js: crearResenia`: busca una compra UTILIZADA del comprador para ese evento y rechaza una segunda reseña.
 
-**App:** Catálogo → **Amistoso** (también es de Martín): el organizador ahora tiene puntaje y la reseña aparece en "Reseñas de sus eventos".
+**App:** Catálogo → **Amistoso** (también es de Dilollo): el organizador ahora tiene puntaje y la reseña aparece en "Reseñas de sus eventos".
 
 ---
 
@@ -127,7 +127,7 @@
 | `/nuevo-endpoint` | Analizó pagar y utilizar como subrecursos (`/pago`, `/utilizacion`) en lugar de un `PATCH` con el estado, y planteó que el organizador no pueda comprar en su evento |
 | `/swagger` | Cada endpoint que se creaba o cambiaba quedaba documentado en el mismo commit |
 | `/nueva-pantalla` | El boceto de la compra se corrigió antes de escribir código. Le marqué dos veces que mostraba cosas técnicas ("409") dentro del celular, y la regla quedó escrita en la skill |
-| `/probar-caso-de-uso` | Probó la carrera por el cupo: Sofía eligiendo 3 VIP en el emulador mientras Juan compraba 98 por la API |
+| `/probar-caso-de-uso` | Probó la carrera por el cupo: Paredes eligiendo 3 VIP en el emulador mientras Blanco compraba 98 por la API |
 | `/registrar-ia` | Cada subtarea quedó anotada en `docs/registro-ia.md`, con lo que salió bien y lo que hubo que corregir. De ahí sale la conclusión |
 
 **Decir:** la ventaja de las skills es que una corrección queda escrita y se aplica en las tareas que siguen, en lugar de repetirla en cada conversación.

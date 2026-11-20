@@ -43,11 +43,11 @@
 - [x] Detalle de compra: acciones (pagar, cancelar, reseñar) y chat
 - [x] Pantalla de creación de evento (organizador)
 - [x] Pantalla de ventas por evento (organizador)
-- [ ] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
-- [ ] Mis compras: filtrar y diferenciar por estado
-- [ ] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
-- [ ] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header
-- [ ] Mensajes de cada evento: bandeja de conversaciones responsive
+- [x] Pantallas de inicio de sesión, registro y edición del perfil (reemplazan la elección de usuario)
+- [x] Mis compras: filtrar y diferenciar por estado
+- [x] Favoritos: corazón en el catálogo y el detalle, y pestaña Favoritos
+- [x] Pantalla de notificaciones (se marcan como leídas al entrar), con la campana en el header (después se cambió: se marcan al abrir cada una, ver abajo)
+- [x] Mensajes de cada evento: bandeja de conversaciones responsive
 - [x] Notificaciones: se marcan como leídas al abrir cada una, con "Marcar todas como leídas"
 - [x] Chats: se marcan como leídos al abrirlos; los indicadores muestran mensajes nuevos, y Mis compras tiene acceso directo al chat
 

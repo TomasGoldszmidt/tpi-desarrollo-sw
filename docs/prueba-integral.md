@@ -10,9 +10,9 @@ En cada caso, anotar ✅ o ❌. Si algo falla o se ve mal, alcanza con una líne
 
 ---
 
-## Parte A · Lucía organiza (casos 4 y 2)
+## Parte A · Tomas organiza (casos 4 y 2)
 
-Elegir a **Lucía Fernández** en "¿Quién usa la app?".
+Iniciar sesión como **Tomas Goldszmidt** (`tomas@gmail.com` / `tomas1234`).
 
 ### A1. Crear evento con validaciones (caso 4)
 1. Mis eventos → **Crear evento** → tocar **Crear evento** sin completar nada.
@@ -32,7 +32,7 @@ Elegir a **Lucía Fernández** en "¿Quién usa la app?".
 1. Mis eventos → Meetup de prueba.
    - Esperado: la imagen o el bloque gris, General 50 y Primera fila 2 disponibles, y "Todavía nadie compró entradas para este evento."
 2. Volver → **Festival de Verano**.
-   - Esperado: las dos imágenes (se deslizan), Backstage **Agotado** y una compra Confirmada de Juan.
+   - Esperado: las dos imágenes (se deslizan), Backstage **Agotado** y una compra Confirmada de Blanco.
 
 | A2 | Resultado |
 |---|---|
@@ -40,9 +40,9 @@ Elegir a **Lucía Fernández** en "¿Quién usa la app?".
 
 ---
 
-## Parte B · Sofía compra (casos 1, 3, 11, 10, 12, 5, 7, 8 y 9)
+## Parte B · Paredes compra (casos 1, 3, 11, 10, 12, 5, 7, 8 y 9)
 
-Tocar el avatar (arriba a la derecha) y elegir a **Sofía Pérez**.
+Tocar el avatar (arriba a la derecha) → **Cerrar sesión**, e iniciar sesión como **Leandro Paredes** (`paredes@gmail.com` / `paredes1234`).
 
 ### B1. Mis compras (caso 1)
 - Esperado, de la más nueva a la más vieja:
@@ -51,7 +51,7 @@ Tocar el avatar (arriba a la derecha) y elegir a **Sofía Pérez**.
   - **Acústico en el Gran Rex**: Utilizada.
   - **Noche de Stand-up**: Utilizada.
 - Solo la Confirmada muestra los días restantes. Cada estado se distingue bien por su color.
-- Noche de Rock tiene borde verde y abajo dice "Lucía te respondió · Sí, chica, la revisan en la puerta." Las demás, sin aviso.
+- Noche de Rock tiene borde verde y abajo dice "Tomas te respondió · Sí, la revisan en la puerta." Las demás, sin aviso.
 
 | B1 | Resultado |
 |---|---|
@@ -66,15 +66,15 @@ En Catálogo:
 5. Buscar "zzz". Esperado: "No hay eventos para esta búsqueda" y **Limpiar filtros** vuelve a la lista completa.
 6. Filtros → categoría **Teatro** → Ver resultados. Esperado: solo Bernarda Alba, con el filtro visible arriba y una forma de quitarlo.
 7. Filtros → Ordenar por **Precio**. Esperado: de menor a mayor precio desde: Meetup ($1000), Amistoso ($15.000), Bernarda ($20.000), Rock ($45.000) y Festival ($90.000).
-8. Ordenar por **Puntaje**. Esperado: primero los eventos de Lucía (4.5) y al final los de Martín, que no tiene reseñas todavía.
+8. Ordenar por **Puntaje**. Esperado: primero los eventos de Tomas (4.5) y al final los de Dilollo, que no tiene reseñas todavía.
 
 | B2 | Resultado |
 |---|---|
 | | |
 
 ### B3. Reseñas del organizador (caso 10)
-1. Abrir **Noche de Rock**. Esperado: organizadora Lucía con 4.5 y 2 reseñas. Al entrar, "Reseñas de sus eventos" muestra la de Sofía (5) y la de Juan (4), las dos del Acústico.
-2. Abrir **Amistoso**. Esperado: Martín, con "Todavía no tiene reseñas".
+1. Abrir **Noche de Rock**. Esperado: organizador Tomas con 4.5 y 2 reseñas. Al entrar, "Reseñas de sus eventos" muestra la de Paredes (5) y la de Blanco (4), las dos del Acústico.
+2. Abrir **Amistoso**. Esperado: Dilollo, con "Todavía no tiene reseñas".
 
 | B3 | Resultado |
 |---|---|
@@ -92,9 +92,9 @@ En Catálogo:
 | | |
 
 ### B5. Chat del comprador (caso 5)
-1. Mis compras → **Noche de Rock** → chat. Esperado: la conversación del seed (la pregunta de la mochila y la respuesta de Lucía).
+1. Mis compras → **Noche de Rock** → chat. Esperado: la conversación del seed (la pregunta de la mochila y la respuesta de Tomas).
 2. Enviar "¿A qué hora abren las puertas?". Esperado: aparece al instante, el teclado no tapa el campo y la vista previa del detalle muestra el último mensaje.
-3. Volver a Mis compras. Esperado: Noche de Rock ya no tiene el aviso, porque ahora espera la respuesta de Lucía.
+3. Volver a Mis compras. Esperado: Noche de Rock ya no tiene el aviso, porque ahora espera la respuesta de Tomas.
 
 | B5 | Resultado |
 |---|---|
@@ -113,7 +113,7 @@ En Catálogo:
 ### B7. Reseñar (caso 9)
 1. **Acústico** → esperado: "Tu reseña" con las 5 estrellas que ya tenía, sin formulario.
 2. **Noche de Stand-up** → "¿Cómo estuvo el evento?" → 4 estrellas y un comentario → **Publicar reseña**. Esperado: queda como "Tu reseña".
-3. Catálogo → Amistoso. Esperado: Martín ahora tiene 4 y 1 reseña.
+3. Catálogo → Amistoso. Esperado: Dilollo ahora tiene 4 y 1 reseña.
 
 | B7 | Resultado |
 |---|---|
@@ -121,26 +121,26 @@ En Catálogo:
 
 ---
 
-## Parte C · Lucía responde y revisa las ventas (casos 6 y 2)
+## Parte C · Tomas responde y revisa las ventas (casos 6 y 2)
 
-Cambiar a **Lucía**.
+Cerrar sesión e iniciar sesión como **Tomas Goldszmidt** (`tomas@gmail.com` / `tomas1234`).
 
 ### C1. Responder el chat (caso 6)
 1. Mis eventos. Esperado: Noche de Rock con borde verde y "1 compra espera tu respuesta"; los demás eventos, sin aviso.
-2. Noche de Rock → ventas. Esperado: la compra de Sofía con borde verde y "Sofía espera tu respuesta" con el comienzo de su último mensaje.
-3. Entrar a la compra → chat. Esperado: los mensajes de Sofía, incluidos los dos nuevos.
+2. Noche de Rock → ventas. Esperado: la compra de Paredes con borde verde y "Paredes espera tu respuesta" con el comienzo de su último mensaje.
+3. Entrar a la compra → chat. Esperado: los mensajes de Paredes, incluidos los dos nuevos.
 4. Responder "Abren a las 19" y volver. Esperado: el aviso desaparece de las ventas y de Mis eventos.
-5. Como Sofía, en Mis compras. Esperado: Noche de Rock vuelve a decir "Lucía te respondió · Abren a las 19", y en el chat aparece la respuesta.
+5. Como Paredes, en Mis compras. Esperado: Noche de Rock vuelve a decir "Tomas te respondió · Abren a las 19", y en el chat aparece la respuesta.
 
 | C1 | Resultado |
 |---|---|
 | | |
 
 ### C2. Ventas con cambios (caso 2)
-1. **Noche de Rock**. Esperado: Campo 500 y Platea 200 disponibles (las dos reembolsadas liberaron el lugar). Las compras de Sofía y Juan figuran Reembolsadas.
-2. **Festival de Verano**. Esperado: General 998, VIP 100, Backstage Agotado, y la compra nueva de Sofía Confirmada.
-3. **Meetup de prueba**. Esperado: Primera fila Agotado (la compra pendiente ocupa lugar), General 50, y la compra de Sofía Pendiente de pago.
-4. **Noche de Rock** → compra de Sofía. Esperado: no aparece "Marcar como utilizada" (está reembolsada).
+1. **Noche de Rock**. Esperado: Campo 500 y Platea 200 disponibles (las dos reembolsadas liberaron el lugar). Las compras de Paredes y Blanco figuran Reembolsadas.
+2. **Festival de Verano**. Esperado: General 998, VIP 100, Backstage Agotado, y la compra nueva de Paredes Confirmada.
+3. **Meetup de prueba**. Esperado: Primera fila Agotado (la compra pendiente ocupa lugar), General 50, y la compra de Paredes Pendiente de pago.
+4. **Noche de Rock** → compra de Paredes. Esperado: no aparece "Marcar como utilizada" (está reembolsada).
 
 | C2 | Resultado |
 |---|---|
@@ -148,12 +148,12 @@ Cambiar a **Lucía**.
 
 ---
 
-## Parte D · Martín marca una entrada como utilizada
+## Parte D · Dilollo marca una entrada como utilizada
 
-Cambiar a **Martín Gómez**.
+Cerrar sesión e iniciar sesión como **Lautaro Dilollo** (`dilollo@gmail.com` / `dilollo1234`).
 
-1. Mis eventos → **Noche de Stand-up** → compra de Juan (Confirmada) → **Marcar como utilizada** → Marcar. Esperado: Utilizada, el cambio a nombre de Martín en el historial y el botón desaparece.
-2. Mis eventos → **Amistoso** → la compra cancelada de Juan. Esperado: sin acciones.
+1. Mis eventos → **Noche de Stand-up** → compra de Blanco (Confirmada) → **Marcar como utilizada** → Marcar. Esperado: Utilizada, el cambio a nombre de Dilollo en el historial y el botón desaparece.
+2. Mis eventos → **Amistoso** → la compra cancelada de Blanco. Esperado: sin acciones.
 
 | D | Resultado |
 |---|---|
@@ -161,12 +161,12 @@ Cambiar a **Martín Gómez**.
 
 ---
 
-## Parte E · Juan reseña lo que acaba de usar (casos 1 y 9)
+## Parte E · Blanco reseña lo que acaba de usar (casos 1 y 9)
 
-Cambiar a **Juan Rodríguez**.
+Cerrar sesión e iniciar sesión como **Lautaro Blanco** (`blanco@gmail.com` / `blanco1234`).
 
 1. Mis compras. Esperado: aparecen los cinco estados distintos: Backstage Confirmada (~60 días), Noche de Rock Reembolsada, Amistoso Cancelada, Acústico Utilizada y Stand-up Utilizada.
-2. **Stand-up** → reseña de 5 estrellas → Publicar. Esperado: queda "Tu reseña". En el Amistoso, Martín pasa a tener 4.5 y 2 reseñas.
+2. **Stand-up** → reseña de 5 estrellas → Publicar. Esperado: queda "Tu reseña". En el Amistoso, Dilollo pasa a tener 4.5 y 2 reseñas.
 
 | E | Resultado |
 |---|---|
@@ -177,7 +177,7 @@ Cambiar a **Juan Rodríguez**.
 ## Parte F · Generales y pulido visual
 
 1. **Sin backend:** frenar el backend y recargar una pantalla. Esperado: el mensaje de error con **Reintentar**. Levantarlo de nuevo y Reintentar.
-2. **Cambiar de usuario:** desde el avatar, en cualquier pestaña. Esperado: vuelve a "¿Quién usa la app?" y al elegir otro se ven sus datos.
+2. **Cerrar sesión:** desde el avatar, en cualquier pestaña. Esperado: pide confirmar, vuelve a "Iniciá sesión" y al entrar con otra cuenta se ven sus datos.
 3. **Visual:** recorrer todas las pantallas buscando textos cortados, cosas tapadas por el teclado, colores o espacios inconsistentes, y botones que no respondan al tocarlos.
 
 | F | Resultado |
