@@ -1179,3 +1179,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el análisis propuso tomar los valores de la app en lugar de inventar otros, así el backend y la pantalla coinciden.
 - **Corregido / problemas:** ninguno. Quedó afuera, a propósito, limitar la cantidad de tipos de entrada y de imágenes y el largo de cada URL.
 - **Aprendizaje:** una validación que ya está en la app tiene que estar también en el backend, porque a la API se le puede pegar sin pasar por la pantalla (como en Swagger).
+
+### 2026-11-20 · Guion del video actualizado y probado en el emulador
+- **Tarea:** Elegir el flujo a presentar y preparar guion del video (actualización)
+- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "actualiza el guion y proba ese flujo en el emulador".
+- **Resultado:**
+  - Guion reescrito para la compra en pasos del rediseño: "Reservar 2 entradas" y después "Pagar ahora $ 180.000", que abre el detalle ya confirmado. Tabla de tiempos que suma ~8:45 (antes daba ~10:15, más que el máximo), Swagger pasó a "para alargar" y la sección de skills se achicó a 1 minuto.
+  - Recorrido completo en el emulador con adb: Paredes reserva y paga (Confirmada, "Faltan 60 días", historial Reservada/Pagada), Dilollo marca como utilizada la compra de Blanco del Stand-up, Blanco publica la reseña y el Amistoso pasa de "Sin reseñas" a "★ 5 · 1 reseña". Todo funcionó.
+  - Con lo visto se ajustaron los pasos: buscar el evento en el catálogo, usar los chips Confirmadas, Realizados y Utilizadas para llegar a cada compra, el texto real del botón ("Publicar reseña") y un aviso sobre el botón flotante de Expo Go.
+- **Bien:** probar el guion en el celular mostró que varios eventos no aparecen en la primera pantalla; sin eso, en la grabación habría que scrollear buscándolos.
+- **Corregido / problemas:**
+  - El backend de una prueba anterior había quedado corriendo (detener la tarea de npm no cerró el proceso de node) y tenía datos de prueba en memoria; hubo que cerrarlo para arrancar del seed.
+  - Al tipear con adb, el primer carácter del email salió duplicado ("pparedes@gmail.com"); se armó un script que verifica lo escrito antes de enviar.
+- **Aprendizaje:** un guion se valida recorriéndolo en la app real: los pasos escritos desde el código no muestran cuánto hay que navegar para llegar a cada pantalla.
