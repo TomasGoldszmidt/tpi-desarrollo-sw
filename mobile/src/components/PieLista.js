@@ -19,7 +19,7 @@ export function PieLista({ cargandoMas, errorMas, hayMas, varias, onVerMas, rest
           accessibilityRole="button"
         >
           {cargandoMas ? <ActivityIndicator size="small" color={colors.primary} /> : null}
-          <Text style={styles.botonTexto}>{cargandoMas ? 'Cargando…' : `Ver más (quedan ${restantes})`}</Text>
+          <Text style={styles.botonTexto}>{cargandoMas ? 'Cargando…' : `Ver más (${restantes === 1 ? 'queda' : 'quedan'} ${restantes})`}</Text>
         </Pressable>
       </View>
     );

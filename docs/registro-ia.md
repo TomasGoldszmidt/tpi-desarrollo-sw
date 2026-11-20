@@ -1240,3 +1240,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - Era la tercera versión del flujo en el día: la IA había propuesto primero el ciclo entero y después login → compra → pago, y en las dos lo tuve que acotar yo.
   - En la conclusión, la IA escribió que la regla de que una compra pendiente ocupe lugar salió de la prueba de la carrera por el cupo. Al chequearlo en el registro, esa regla se había aprobado antes; se corrigió el ejemplo.
 - **Aprendizaje:** a la IA le cuesta acotar: propone mostrar de más. Tengo que decirle explícitamente qué entra y qué queda afuera, y hacerle verificar contra el registro cada ejemplo que pone en mi nombre.
+
+### 2026-11-20 · Singular en los mensajes de cupo y disponibles
+- **Tarea:** Corrección de bugs y pulido visual (detalle encontrado al preparar el video)
+- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "Sí, corregilo", sobre el mensaje "No hay cupo suficiente: quedan 1 entradas".
+- **Resultado:**
+  - Backend: `comprar` dice "queda 1 entrada" cuando queda una sola, con un test nuevo (98 tests).
+  - App: el mismo error estaba en tres textos más, y se corrigieron con el mismo cambio: "1 disponible" en el detalle del evento y en la compra (nueva función `formatDisponibles` en `format.js`) y "Ver más (queda 1)" en las listas.
+  - Probado contra el backend (409 "No hay cupo suficiente: queda 1 entrada") y en el emulador ("1 disponible" en la compra).
+- **Bien:** el detalle apareció al ensayar la demo del video, antes de grabarla.
+- **Corregido / problemas:** al guardar `format.js`, Expo recargó la app entera y se perdió la sesión (no se recuerda al recargar). Si se toca código durante la grabación, hay que volver a iniciar sesión.
+- **Aprendizaje:** cuando aparece un error de texto en un lugar, conviene buscar el mismo patrón en todo el proyecto: acá había cuatro.

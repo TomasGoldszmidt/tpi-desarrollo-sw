@@ -13,7 +13,7 @@ import { EstadoBadge, Etiqueta } from '../../../components/EstadoBadge.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { Aviso } from '../../../components/Formulario.js';
 import { Pasos } from '../../../components/Pasos.js';
-import { formatFecha, formatPrecio } from '../../../format.js';
+import { formatDisponibles, formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
 // Caso de uso 12: comprar eligiendo un tipo de entrada y una cantidad, sin superar el cupo.
@@ -100,7 +100,7 @@ export default function Comprar() {
                   <Text style={[styles.opcionNombre, agotado && styles.apagado]}>{opcion.nombre}</Text>
                   <Text style={styles.meta}>
                     {opcion.descripcion}
-                    {agotado ? '' : ` · ${opcion.disponibles} disponibles`}
+                    {agotado ? '' : ` · ${formatDisponibles(opcion.disponibles)}`}
                   </Text>
                 </View>
                 {agotado ? (

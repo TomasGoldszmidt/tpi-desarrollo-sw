@@ -286,6 +286,14 @@ describe('comprar', () => {
       409, 'No hay cupo suficiente: quedan 0 entradas');
   });
 
+  it('si queda una sola entrada, el mensaje va en singular', () => {
+    const vip = tipo(festival, 'VIP');
+    const disponibles = calcularDisponibles(vip, compraRepository.findByEvento(festival.id));
+    comprar({ eventoId: festival.id, tipoEntradaId: vip.id, cantidad: disponibles - 1 }, blanco);
+    rechaza(() => comprar({ eventoId: festival.id, tipoEntradaId: vip.id, cantidad: 2 }, paredes),
+      409, 'No hay cupo suficiente: queda 1 entrada');
+  });
+
   it('rechaza un evento o tipo de entrada inexistente', () => {
     rechaza(() => comprar({ eventoId: 99, tipoEntradaId: 1, cantidad: 1 }, paredes), 400, 'No existe el evento 99');
     rechaza(() => comprar({ eventoId: rock.id, tipoEntradaId: 9, cantidad: 1 }, paredes), 400, 'El evento no tiene el tipo de entrada 9');

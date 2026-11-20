@@ -16,7 +16,7 @@ import { Estrellas } from '../../components/Estrellas.js';
 import { Galeria } from '../../components/Galeria.js';
 import { PantallaCarga } from '../../components/Carga.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
-import { formatDia, formatDiasRestantes, formatFecha, formatPrecio, formatPuntaje } from '../../format.js';
+import { formatDia, formatDiasRestantes, formatDisponibles, formatFecha, formatPrecio, formatPuntaje } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
 const UN_DIA = 24 * 60 * 60 * 1000;
@@ -163,7 +163,7 @@ function TipoEntradaFila({ tipo, ultimo }) {
         ) : quedanPocas(tipo) ? (
           <Text style={styles.pocas}>Quedan pocas · {tipo.disponibles}</Text>
         ) : (
-          <Text style={styles.disponibles}>{tipo.disponibles} disponibles</Text>
+          <Text style={styles.disponibles}>{formatDisponibles(tipo.disponibles)}</Text>
         )}
       </View>
     </View>

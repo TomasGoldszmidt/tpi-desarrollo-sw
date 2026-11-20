@@ -97,7 +97,8 @@ export function comprar({ eventoId, tipoEntradaId, cantidad }, comprador, ahora 
   const compras = compraRepository.findByEvento(evento.id);
   if (!hayCupoPara(tipoEntrada, compras, cantidad)) {
     const disponibles = calcularDisponibles(tipoEntrada, compras);
-    throw new BusinessRuleError(`No hay cupo suficiente: quedan ${disponibles} entradas`);
+    const quedan = disponibles === 1 ? 'queda 1 entrada' : `quedan ${disponibles} entradas`;
+    throw new BusinessRuleError(`No hay cupo suficiente: ${quedan}`);
   }
 
   return compraRepository.create({

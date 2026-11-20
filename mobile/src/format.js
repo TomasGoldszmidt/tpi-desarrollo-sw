@@ -70,6 +70,11 @@ export function formatDiasRestantes(diasRestantes) {
   return `Faltan ${diasRestantes} días`;
 }
 
+// Entradas que quedan de un tipo: 1 → "1 disponible"; 5 → "5 disponibles".
+export function formatDisponibles(disponibles) {
+  return disponibles === 1 ? '1 disponible' : `${disponibles} disponibles`;
+}
+
 // Fecha y hora elegidas como hora argentina → ISO en UTC, para mandar al backend.
 // dia: { anio, mes (0-11), dia }; hora: { hora, minuto }.
 export function fechaArgentinaISO(dia, hora) {
