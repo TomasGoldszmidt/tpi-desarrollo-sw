@@ -1264,3 +1264,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** medir las palabras por sección contra el tiempo de cada una mostró que el primer borrador no entraba, antes de ensayarlo.
 - **Corregido / problemas:** el primer borrador de la IA era demasiado largo para los tiempos que ella misma había fijado; se detectó al contarlo y se recortó.
 - **Aprendizaje:** un texto para leer en voz alta hay que medirlo (unas 140 palabras por minuto) y dejar margen para las acciones en pantalla.
+
+### 2026-11-20 · Ejemplo de la conclusión cambiado
+- **Tarea:** Redactar conclusión sobre el uso de IA (ajuste)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "modifica el guion, no digas que el guion lo hice con claude", sobre el ejemplo de la desventaja que hablaba del guion del video.
+- **Resultado:** en el guion y en `docs/conclusion-ia.md` la desventaja ahora usa otros dos ejemplos que ya estaban en la conclusión: las pruebas de búsqueda con textos que no aparecen en la pantalla y una prueba dada por buena que había corrido código viejo. Se sacó el punto "No revisa sus propias decisiones viejas", cuyo único ejemplo era el guion.
+- **Bien:** el cambio fue directo, y los ejemplos nuevos salen del registro.
+- **Corregido / problemas:** el ejemplo lo había propuesto la IA sin preguntarme si quería contar en el video que el guion lo armé con ella.
+- **Aprendizaje:** lo que digo en el video en primera persona lo decido yo; antes de aceptar un ejemplo, pienso si quiero contarlo.

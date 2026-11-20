@@ -157,7 +157,7 @@ Seguir el pedido de punta a punta, **antes** de tocar Reservar, abriendo cada ar
 > La ventaja más clara es la velocidad en lo repetitivo: validaciones, documentación, tests. También me sirvió para entender antes de decidir: le preguntaba el porqué y las decisiones las tomaba yo. Y probó cosas que solo no hubiera probado, como la carrera por el cupo que acaban de ver.
 
 **Decir (desventajas, ~0:30):**
-> La desventaja es que afirma cosas sin verificarlas: puso que hacía falta Node 20 cuando Expo pedía 22. Y no revisa sus decisiones viejas: el guion de este video siguió con usuarios que ya no existían y con un flujo demasiado largo, hasta que se lo marqué. Hay que revisar todo lo que hace.
+> La desventaja es que afirma cosas sin verificarlas: puso que hacía falta Node 20 cuando Expo pedía 22. Y no ve lo que no está en el código: armó pruebas de búsqueda con textos que no aparecen en la pantalla, y dio por buena una prueba que había corrido con código viejo. Hay que revisar todo lo que hace.
 
 **Decir (dificultades, ~0:20):**
 > Lo más difícil fue el entorno: conectar el emulador con el backend, y saber qué estaba probando, porque a veces la app seguía conectada a un servidor viejo. Y algunas correcciones las repetí hasta dejarlas escritas como regla en una skill.

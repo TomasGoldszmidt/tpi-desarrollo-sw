@@ -19,7 +19,6 @@ Usé Claude Code como herramienta principal, pero sin dejarlo ejecutar de corrid
 - **Afirma cosas de memoria:** completó requisitos de versión sin verificarlos (puso Node 20 cuando Expo pide 22.13) y dio por cerradas opciones que tenían alternativas simples.
 - **No ve lo que no se ve en el código:** los casos de búsqueda que armó usaban textos que no aparecen en la pantalla, y no detectó sola que la estructura de los datos estaba dispersa en varios archivos. Mirar el resultado como revisor sigue siendo tarea mía.
 - **Recorta por costo, no por valor:** cuando le pregunté si algo lo pedía la consigna, propuso una versión chica que dejaba afuera justo la parte más importante para el usuario.
-- **No revisa sus propias decisiones viejas:** el guion del video siguió con usuarios que ya no existían en el seed después de cambiarlos, y el flujo que había elegido (comprar → pagar → usar → reseñar) eran en realidad varios flujos. Lo mantuvo en cada actualización hasta que se lo marqué.
 - **Errores con las herramientas:** dio por buena una prueba que había corrido código viejo, tuvo problemas al manejar el emulador y algunos reemplazos por consola fallaron por las comillas o los saltos de línea de Windows.
 
 ## Dificultades
@@ -59,7 +58,7 @@ Es la parte más importante del video. Cada punto lleva un ejemplo concreto; mej
 
 1. **Cómo la usé (~0:25):** Claude Code con aprobación paso a paso: la IA explica qué va a hacer y recién con mi ok lo hace. Mostrar la carpeta `.claude/skills/`: una skill por tipo de tarea, con el punto donde frena. *Ejemplo:* `/nuevo-endpoint` me presentó el análisis de `POST /compras` (errores, status y reglas) antes de escribir código.
 2. **Ventajas (~0:30):** velocidad en lo repetitivo (validaciones, Swagger, tests), entender antes de decidir y pruebas que solo no hubiera hecho. *Ejemplo:* la carrera por el cupo del paso 4 la probó la IA, combinando el emulador con una compra por la API en el medio. Y la regla de que una compra pendiente ya ocupe lugar me la explicó antes de que la aprobara.
-3. **Desventajas (~0:30):** afirma cosas de memoria, no ve lo que no está en el código y no revisa sus decisiones viejas. *Ejemplos:* puso Node 20 cuando Expo pedía 22.13, y el guion de este video seguía con usuarios que ya no existían y con un flujo demasiado largo, hasta que se lo marqué.
+3. **Desventajas (~0:30):** afirma cosas de memoria y no ve lo que no está en el código. *Ejemplos:* puso Node 20 cuando Expo pedía 22.13, armó pruebas de búsqueda con textos que no aparecen en la pantalla y dio por buena una prueba que había corrido con código viejo.
 4. **Dificultades (~0:20):** el entorno (red, emulador, Expo Go conectado a un servidor viejo) y saber qué se estaba probando con la persistencia en memoria. Algunas correcciones las tuve que repetir hasta escribirlas como regla en una skill.
 5. **No todo conviene hacerlo con la IA (~0:20):** las pruebas en el celular me convino hacerlas yo; manejando el emulador se traba, no tiene mi criterio y gasta muchos tokens, que son tiempo y plata.
 6. **Aprendizajes (~0:20):** pedir el plan antes de que ejecute, que lo que corrijo dos veces quede escrito, y hacerla verificar contra el enunciado y contra el código.
