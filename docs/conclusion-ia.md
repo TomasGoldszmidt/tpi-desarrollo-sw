@@ -45,7 +45,7 @@ Los tokens son algo muy importante que hay que priorizar: si los gastás inneces
 
 ## Valoración personal
 
-**Productividad:** en siete días de trabajo llegué a un backend con 97 tests, una API documentada y una app con todos los casos de uso del enunciado. Sin IA me hubiera llevado bastante más tiempo. Igual, la ganancia no es automática: depende de darle contexto, revisar lo que hace y no dejarla trabajar de corrido. En las tareas en que la dejé manejar sola cosas como el emulador, perdí tiempo y tokens.
+**Productividad:** en siete días de trabajo llegué a un backend con 98 tests, una API documentada y una app con todos los casos de uso del enunciado. Sin IA me hubiera llevado bastante más tiempo. Igual, la ganancia no es automática: depende de darle contexto, revisar lo que hace y no dejarla trabajar de corrido. En las tareas en que la dejé manejar sola cosas como el emulador, perdí tiempo y tokens.
 
 **Calidad:** creo que el resultado es mejor que lo que hubiera hecho solo en el mismo tiempo, sobre todo en los casos borde, los mensajes de error y la documentación. Pero la calidad salió de la combinación: la IA propone y yo reviso. Varias de las mejoras más importantes salieron de preguntas mías ("¿esto lo pide la consigna?", "¿es un buen patrón?") o de probar la app yo mismo.
 

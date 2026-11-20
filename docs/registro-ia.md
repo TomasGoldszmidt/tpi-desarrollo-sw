@@ -1252,3 +1252,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el detalle apareció al ensayar la demo del video, antes de grabarla.
 - **Corregido / problemas:** al guardar `format.js`, Expo recargó la app entera y se perdió la sesión (no se recuerda al recargar). Si se toca código durante la grabación, hay que volver a iniciar sesión.
 - **Aprendizaje:** cuando aparece un error de texto en un lugar, conviene buscar el mismo patrón en todo el proyecto: acá había cuatro.
+
+### 2026-11-20 · Texto base para cada paso del guion
+- **Tarea:** Elegir el flujo a presentar y preparar guion del video (texto para decir)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "en cada punto del guion agrega exactamente que tengo que decir en cada paso, es para tener una base, despues voy a usar mis palabras".
+- **Resultado:**
+  - Cada paso del guion tiene su bloque **Decir** en primera persona, en el orden de la pantalla (app, frontend, backend), incluida la conclusión completa en siete partes. Los ejemplos de la conclusión se chequearon contra el registro.
+  - La primera versión sumaba ~1290 palabras, unos 9:15 hablando, que con las pausas de cada acción pasaba de 10 minutos. Se recortó a ~1080 palabras (~7:45), sin tocar el contenido de la conclusión.
+  - La conclusión pasó de 97 a 98 tests, por el test que se agregó hoy.
+- **Bien:** medir las palabras por sección contra el tiempo de cada una mostró que el primer borrador no entraba, antes de ensayarlo.
+- **Corregido / problemas:** el primer borrador de la IA era demasiado largo para los tiempos que ella misma había fijado; se detectó al contarlo y se recortó.
+- **Aprendizaje:** un texto para leer en voz alta hay que medirlo (unas 140 palabras por minuto) y dejar margen para las acciones en pantalla.
