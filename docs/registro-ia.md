@@ -1217,3 +1217,12 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** acotar el flujo dejó tiempo para mostrar el código de cada paso, que es lo que pide la consigna.
 - **Corregido / problemas:** la IA había elegido el "ciclo de la compra" (comprar → pagar → usar → reseñar), que en realidad son varios flujos, y lo había mantenido en las actualizaciones del guion sin cuestionarlo. Lo corregí yo.
 - **Aprendizaje:** la consigna pide un flujo y explicarlo a fondo; mostrar más pantallas no suma si cada una se explica por arriba. Conviene contrastar con el enunciado no solo el código, también la forma de presentarlo.
+
+### 2026-11-20 · Números de la conclusión actualizados
+- **Tarea:** Redactar conclusión sobre el uso de IA (actualización)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** "Sí, actualizalos", sobre los números viejos de `docs/conclusion-ia.md` que había marcado la revisión.
+- **Resultado:** la conclusión pasó de "50 entradas, 4 días (31/10 al 3/11), 63 commits y 56 tests" a 81 entradas, 7 días de trabajo (31/10 al 20/11), 109 commits y 97 tests, contados con `git` y con `npm test` (los totales incluyen esta entrada y su commit). El tiempo de "Para decir en el video" quedó en ~1:15, como en el guion.
+- **Bien:** los números salieron de contar en el repo, no de memoria.
+- **Corregido / problemas:** ninguno.
+- **Aprendizaje:** los números de un documento se desactualizan solos; antes de presentarlo hay que recontarlos.

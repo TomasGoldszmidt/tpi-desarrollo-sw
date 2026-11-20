@@ -1,6 +1,6 @@
 # Conclusión sobre el uso de IA
 
-Conclusión del video. Sale de lo anotado en `docs/registro-ia.md`: 50 entradas a lo largo de 4 días de trabajo (del 31/10 al 3/11) y 63 commits.
+Conclusión del video. Sale de lo anotado en `docs/registro-ia.md`: 81 entradas a lo largo de 7 días de trabajo (del 31/10 al 20/11) y 109 commits.
 
 ## Cómo trabajé
 
@@ -44,7 +44,7 @@ Los tokens son algo muy importante que hay que priorizar: si los gastás inneces
 
 ## Valoración personal
 
-**Productividad:** en cuatro días llegué a un backend con 56 tests, una API documentada y una app con todos los casos de uso del enunciado. Sin IA me hubiera llevado bastante más tiempo. Igual, la ganancia no es automática: depende de darle contexto, revisar lo que hace y no dejarla trabajar de corrido. En las tareas en que la dejé manejar sola cosas como el emulador, perdí tiempo y tokens.
+**Productividad:** en siete días de trabajo llegué a un backend con 97 tests, una API documentada y una app con todos los casos de uso del enunciado. Sin IA me hubiera llevado bastante más tiempo. Igual, la ganancia no es automática: depende de darle contexto, revisar lo que hace y no dejarla trabajar de corrido. En las tareas en que la dejé manejar sola cosas como el emulador, perdí tiempo y tokens.
 
 **Calidad:** creo que el resultado es mejor que lo que hubiera hecho solo en el mismo tiempo, sobre todo en los casos borde, los mensajes de error y la documentación. Pero la calidad salió de la combinación: la IA propone y yo reviso. Varias de las mejoras más importantes salieron de preguntas mías ("¿esto lo pide la consigna?", "¿es un buen patrón?") o de probar la app yo mismo.
 
@@ -52,7 +52,7 @@ La IA no reemplaza el criterio: lo vuelve más importante, porque produce rápid
 
 ---
 
-## Para decir en el video (~1:30)
+## Para decir en el video (~1:15)
 
 1. **Cómo la usé:** con aprobación paso a paso y una skill por tipo de tarea.
 2. **Ventajas:** velocidad en lo repetitivo, entender antes de decidir, skills que mejoran con cada corrección y pruebas más completas.
