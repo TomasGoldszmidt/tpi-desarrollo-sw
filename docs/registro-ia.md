@@ -1226,3 +1226,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** los números salieron de contar en el repo, no de memoria.
 - **Corregido / problemas:** ninguno.
 - **Aprendizaje:** los números de un documento se desactualizan solos; antes de presentarlo hay que recontarlos.
+
+### 2026-11-20 · Video centrado en la compra de entradas y conclusión ampliada
+- **Tarea:** Elegir el flujo a presentar y preparar guion del video, y Redactar conclusión sobre el uso de IA (correcciones)
+- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
+- **Pedido (prompt):** "el flujo debe ser unicamente de la compra de entradas, nada de login ni de pago, asi vamnos mas en detalle y la conclusion de la ia es muy importante".
+- **Resultado:**
+  - Guion rehecho sobre la compra sola (caso 12): el evento y sus disponibles, elegir el tipo y la cantidad, el recorrido del pedido de la ruta a la persistencia (401, 400, 409 y 201 con `Location`) y una demo en vivo de dos compradores a la vez. La sesión se inicia antes de grabar y el flujo termina en la reserva.
+  - La demo se probó en el emulador: con 3 VIP elegidas en la app, Blanco compra 98 desde la API; al reservar aparece "No hay cupo suficiente: quedan 2 entradas", la cantidad baja sola a 2 y la reserva de 2 queda Pendiente de pago. También se verificó el mensaje del 400 con cantidad 0.
+  - La conclusión pasó de 1:15 a 2:30, con siete puntos y un ejemplo concreto en cada uno, y se sumó como desventaja que la IA no revisa sus decisiones viejas (el guion con usuarios que no existían y el flujo demasiado largo).
+- **Bien:** al ir a un solo flujo se puede mostrar el caso de error en vivo, que es lo que mejor explica por qué el backend vuelve a validar el cupo.
+- **Corregido / problemas:**
+  - Era la tercera versión del flujo en el día: la IA había propuesto primero el ciclo entero y después login → compra → pago, y en las dos lo tuve que acotar yo.
+  - En la conclusión, la IA escribió que la regla de que una compra pendiente ocupe lugar salió de la prueba de la carrera por el cupo. Al chequearlo en el registro, esa regla se había aprobado antes; se corrigió el ejemplo.
+- **Aprendizaje:** a la IA le cuesta acotar: propone mostrar de más. Tengo que decirle explícitamente qué entra y qué queda afuera, y hacerle verificar contra el registro cada ejemplo que pone en mi nombre.
