@@ -25,11 +25,15 @@ function toDetalle(evento) {
   );
 }
 
+// Largo máximo de los textos del evento. Son los mismos que LARGOS en mobile/src/app/eventos/nuevo.js:
+// si se cambian, cambiarlos en los dos lados.
+const LARGOS = { nombre: 80, descripcion: 1000, lugar: 150, tipoNombre: 40, tipoDescripcion: 120 };
+
 function parseTipoEntrada(tipo, i) {
   const campo = (nombre) => `tiposEntrada[${i}].${nombre}`;
   return {
-    nombre: requireString(tipo?.nombre, campo('nombre')),
-    descripcion: requireString(tipo?.descripcion, campo('descripcion')),
+    nombre: requireString(tipo?.nombre, campo('nombre'), { maxLength: LARGOS.tipoNombre }),
+    descripcion: requireString(tipo?.descripcion, campo('descripcion'), { maxLength: LARGOS.tipoDescripcion }),
     precio: requireNumber(tipo?.precio, campo('precio'), { min: 0 }),
     cupo: requireInteger(tipo?.cupo, campo('cupo'), { min: 1 }),
   };
@@ -72,9 +76,9 @@ export async function create(req, res) {
     : requireArray(body.multimedia, 'multimedia').map((url, i) => requireUrl(url, `multimedia[${i}]`));
 
   const datos = {
-    nombre: requireString(body.nombre, 'nombre'),
-    descripcion: requireString(body.descripcion, 'descripcion'),
-    lugar: requireString(body.lugar, 'lugar'),
+    nombre: requireString(body.nombre, 'nombre', { maxLength: LARGOS.nombre }),
+    descripcion: requireString(body.descripcion, 'descripcion', { maxLength: LARGOS.descripcion }),
+    lugar: requireString(body.lugar, 'lugar', { maxLength: LARGOS.lugar }),
     categoriaId: requireId(body.categoriaId, 'categoriaId'),
     fecha: requireDate(body.fecha, 'fecha'),
     multimedia,

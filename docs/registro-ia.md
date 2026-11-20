@@ -1167,3 +1167,15 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El reemplazo automático de nombres cambió "Teatro San Martín" por "Teatro San Dilollo"; se corrigió al revisar el diff. También se ajustó la cita del chat ("Sí, chica, …") al texto actual del seed.
   - Los resultados esperados de la prueba integral son del seed del 2026-11-03; el seed sumó después mensajes de Blanco sin responder, así que algunos "Esperado" pueden no coincidir hasta repetir la prueba.
 - **Aprendizaje:** cuando cambio datos del seed, tengo que buscar en los docs todo lo que los menciona (guion, pruebas), no solo en el código y los tests; y un reemplazo automático de texto siempre hay que revisarlo en el diff.
+
+### 2026-11-20 · Límite de largo de los textos del evento
+- **Tarea:** Límite de largo de los textos del evento en el backend
+- **Herramienta / skill:** Claude Code, `/nuevo-endpoint`, `/swagger`, `/registrar-ia`
+- **Pedido (prompt):** "Sí, implementalo", sobre el análisis de `/nuevo-endpoint` para `POST /eventos`.
+- **Resultado:**
+  - `eventoController.js` valida el largo máximo con `requireString(..., { maxLength })`: nombre 80, descripción 1000, lugar 150, y en cada tipo de entrada nombre 40 y descripción 120. Son los mismos `LARGOS` que ya usaba la pantalla de crear evento; un comentario en cada lado avisa que hay que cambiarlos juntos.
+  - Swagger: `maxLength` en el esquema `NuevoEvento` y el caso agregado en la descripción del 400.
+  - Prueba contra el backend: 201 justo en el límite (también con espacios alrededor, porque se recortan antes de medir) y 400 con el mensaje del campo para cada texto con un carácter de más. Los 97 tests siguen pasando.
+- **Bien:** el análisis propuso tomar los valores de la app en lugar de inventar otros, así el backend y la pantalla coinciden.
+- **Corregido / problemas:** ninguno. Quedó afuera, a propósito, limitar la cantidad de tipos de entrada y de imágenes y el largo de cada URL.
+- **Aprendizaje:** una validación que ya está en la app tiene que estar también en el backend, porque a la API se le puede pegar sin pasar por la pantalla (como en Swagger).

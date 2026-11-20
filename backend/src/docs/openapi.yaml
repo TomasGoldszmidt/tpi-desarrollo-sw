@@ -823,7 +823,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/EventoDetalle'
         '400':
-          description: Falta un campo, tiene un formato inválido o la categoría no existe
+          description: Falta un campo, tiene un formato inválido, un texto supera su largo máximo o la categoría no existe
           content:
             application/json:
               schema:
@@ -2021,10 +2021,13 @@ components:
       properties:
         nombre:
           type: string
+          maxLength: 80
         descripcion:
           type: string
+          maxLength: 1000
         lugar:
           type: string
+          maxLength: 150
         categoriaId:
           type: integer
         fecha:
@@ -2045,8 +2048,10 @@ components:
             properties:
               nombre:
                 type: string
+                maxLength: 40
               descripcion:
                 type: string
+                maxLength: 120
               precio:
                 type: number
                 minimum: 0

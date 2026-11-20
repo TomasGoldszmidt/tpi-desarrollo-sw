@@ -80,4 +80,4 @@
 - [x] Resumen de ventas y filtro por estado en `GET /eventos/:id/compras`
 - [x] Rediseño de Mis eventos, ventas, mensajes y crear evento
 - [ ] Prueba del rediseño en el emulador (teléfono y tablet)
-- [ ] Límite de largo de los textos del evento en el backend
+- [x] Límite de largo de los textos del evento en el backend

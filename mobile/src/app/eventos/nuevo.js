@@ -20,6 +20,7 @@ import { colors, fontSize, spacing, TOQUE_MINIMO } from '../../theme.js';
 const tipoVacio = () => ({ nombre: '', descripcion: '', precio: '', cupo: '' });
 
 // Largos máximos de cada texto, para que un nombre larguísimo no rompa las tarjetas.
+// Los mismos que valida el backend (LARGOS en backend/src/controllers/eventoController.js).
 const LARGOS = { nombre: 80, descripcion: 1000, lugar: 150, tipoNombre: 40, tipoDescripcion: 120 };
 
 // Precio y cupo se cargan como texto; solo se aceptan dígitos (y una coma en el precio).
