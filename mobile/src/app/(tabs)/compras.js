@@ -8,7 +8,7 @@ import { useAvisos } from '../../context/AvisosContext.js';
 import { usePaginado } from '../../hooks/usePaginado.js';
 import { useLayout } from '../../hooks/useLayout.js';
 import { Boton } from '../../components/Boton.js';
-import { CargaEncima } from '../../components/Carga.js';
+import { CargaEncima } from '../../components/CargaEncima.js';
 import { CompraCard } from '../../components/CompraCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { FiltroEstados } from '../../components/FiltroEstados.js';

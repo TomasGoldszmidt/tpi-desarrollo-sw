@@ -7,14 +7,15 @@ import { useCarga } from '../../../hooks/useCarga.js';
 import { usePaginado } from '../../../hooks/usePaginado.js';
 import { useLayout } from '../../../hooks/useLayout.js';
 import { Boton } from '../../../components/Boton.js';
-import { PantallaCarga } from '../../../components/Carga.js';
+import { PantallaCarga } from '../../../components/PantallaCarga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
-import { EstadoBadge, ESTADOS_INACTIVOS, Etiqueta } from '../../../components/EstadoBadge.js';
 import { FiltroEstados } from '../../../components/FiltroEstados.js';
 import { PieLista } from '../../../components/PieLista.js';
-import { AvisoMensaje, mensajeNoLeido } from '../../../components/AvisoMensaje.js';
+import { DisponiblesFila } from '../../../components/ventas/DisponiblesFila.js';
+import { VentaCard } from '../../../components/ventas/VentaCard.js';
+import { VentaFila } from '../../../components/ventas/VentaFila.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
-import { formatDia, formatFecha, formatPrecio } from '../../../format.js';
+import { formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../../../theme.js';
 
 // Compras por página: las siguientes se piden con "Ver más".
@@ -191,79 +192,6 @@ export default function VentasEvento() {
   );
 }
 
-function DisponiblesFila({ tipo }) {
-  const vendidas = tipo.cupo - tipo.disponibles;
-  return (
-    <View style={styles.tipo}>
-      <View style={styles.tipoArriba}>
-        <Text style={styles.tipoNombre}>
-          {tipo.nombre} <Text style={styles.cap}>{formatPrecio(tipo.precio)}</Text>
-        </Text>
-        {tipo.disponibles === 0 ? (
-          <Etiqueta texto="Agotado" fondo={colors.dangerSoft} color={colors.dangerText} />
-        ) : (
-          <Text style={styles.meta}>
-            <Text style={styles.fuerte}>{tipo.disponibles}</Text> de {tipo.cupo}
-          </Text>
-        )}
-      </View>
-      <View style={styles.barra} accessible accessibilityLabel={`${vendidas} vendidas de ${tipo.cupo}`}>
-        <View style={[styles.barraVendida, { width: `${(vendidas / tipo.cupo) * 100}%` }]} />
-      </View>
-    </View>
-  );
-}
-
-function VentaCard({ compra, usuario, onPress }) {
-  const inactiva = ESTADOS_INACTIVOS.includes(compra.estado);
-  const noLeido = mensajeNoLeido(compra, usuario);
-  const creada = compra.historial[0].fechaHora;
-
-  return (
-    <Pressable style={({ pressed }) => [styles.venta, pressed && styles.presionada]} onPress={onPress} accessibilityRole="button">
-      <View style={styles.ventaFila}>
-        <Text style={styles.comprador}>
-          {compra.comprador.nombre} {compra.comprador.apellido}
-        </Text>
-        <Text style={[styles.total, inactiva && styles.tachado]}>{formatPrecio(compra.total)}</Text>
-      </View>
-      <View style={styles.ventaFila}>
-        <Text style={styles.meta}>
-          {compra.tipoEntrada.nombre} × {compra.cantidad} · {formatDia(creada)}
-        </Text>
-        <EstadoBadge estado={compra.estado} />
-      </View>
-      {noLeido ? <AvisoMensaje texto={`${compra.comprador.nombre} te escribió`} mensaje={noLeido.mensaje} /> : null}
-    </Pressable>
-  );
-}
-
-function VentaFila({ compra, usuario, onPress }) {
-  const noLeido = mensajeNoLeido(compra, usuario);
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.filaTabla, noLeido && styles.filaNueva, pressed && styles.presionada]}
-      onPress={onPress}
-      accessibilityRole="button"
-    >
-      <View style={[styles.colComprador, styles.celdaComprador]}>
-        {noLeido ? <View style={styles.punto} accessibilityLabel="Mensaje sin leer" /> : null}
-        <Text style={styles.fuerte}>
-          {compra.comprador.nombre} {compra.comprador.apellido}
-        </Text>
-      </View>
-      <Text style={[styles.td, styles.colEntradas]}>
-        {compra.tipoEntrada.nombre} × {compra.cantidad}
-      </Text>
-      <Text style={[styles.td, styles.colFecha]}>{formatDia(compra.historial[0].fechaHora)}</Text>
-      <View style={styles.colEstado}>
-        <EstadoBadge estado={compra.estado} />
-      </View>
-      <Text style={[styles.td, styles.colTotal, styles.fuerte]}>{formatPrecio(compra.total)}</Text>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -296,16 +224,6 @@ const styles = StyleSheet.create({
   meta: {
     color: colors.textSecondary,
     fontSize: fontSize.small,
-  },
-  cap: {
-    color: colors.textMuted,
-    fontSize: fontSize.caption,
-    fontWeight: 'normal',
-  },
-  fuerte: {
-    color: colors.text,
-    fontSize: fontSize.body,
-    fontWeight: 'bold',
   },
   resumen: {
     flexDirection: 'row',
@@ -344,59 +262,6 @@ const styles = StyleSheet.create({
   },
   tipos: {
     gap: spacing.md,
-  },
-  tipo: {
-    gap: 6,
-  },
-  tipoArriba: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  tipoNombre: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  barra: {
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: colors.disabled,
-    overflow: 'hidden',
-  },
-  barraVendida: {
-    height: '100%',
-    backgroundColor: colors.brand,
-  },
-  venta: {
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSoft,
-    gap: spacing.xs,
-  },
-  ventaFila: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  presionada: {
-    backgroundColor: colors.primarySofter,
-  },
-  comprador: {
-    flex: 1,
-    color: colors.text,
-    fontSize: fontSize.body,
-    fontWeight: 'bold',
-  },
-  total: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  tachado: {
-    color: colors.textMuted,
-    textDecorationLine: 'line-through',
   },
   vacio: {
     borderWidth: 1,
@@ -468,9 +333,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: colors.borderSoft,
   },
-  filaNueva: {
-    backgroundColor: colors.primarySofter,
-  },
   encabezadoTabla: {
     minHeight: 36,
     borderBottomColor: colors.border,
@@ -481,21 +343,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-  },
-  td: {
-    color: colors.text,
-    fontSize: fontSize.body,
-  },
-  celdaComprador: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  punto: {
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: colors.primary,
   },
   colComprador: {
     flex: 2.2,

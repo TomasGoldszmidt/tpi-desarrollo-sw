@@ -8,9 +8,11 @@ import { useUsuario } from '../context/UsuarioContext.js';
 import { useNotificaciones } from '../context/NotificacionesContext.js';
 import { useAlturaTeclado } from '../hooks/useAlturaTeclado.js';
 import { useCarga } from '../hooks/useCarga.js';
-import { CargaEncima, PantallaCarga } from './Carga.js';
+import { Burbuja } from './Burbuja.js';
+import { CargaEncima } from './CargaEncima.js';
+import { PantallaCarga } from './PantallaCarga.js';
 import { EstadoCarga } from './EstadoCarga.js';
-import { formatDia, formatHora } from '../format.js';
+import { formatDia } from '../format.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
 // Cada cuánto se vuelven a pedir los mensajes mientras el chat está abierto. El backend
@@ -210,17 +212,6 @@ function conSeparadores(mensajes) {
   return items;
 }
 
-// Los mensajes propios van a la derecha en verde; los del otro, a la izquierda con su nombre.
-function Burbuja({ mensaje, propio }) {
-  return (
-    <View style={[styles.burbuja, propio ? styles.propia : styles.ajena]}>
-      {!propio ? <Text style={styles.autor}>{mensaje.autor.nombre}</Text> : null}
-      <Text style={[styles.mensaje, propio && styles.textoPropio]}>{mensaje.mensaje}</Text>
-      <Text style={[styles.hora, propio && styles.textoPropio]}>{formatHora(mensaje.enviado)}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -255,42 +246,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: 3,
     marginVertical: spacing.xs,
-  },
-  burbuja: {
-    maxWidth: '80%',
-    borderRadius: 14,
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-  },
-  propia: {
-    alignSelf: 'flex-end',
-    backgroundColor: colors.primary,
-    borderBottomRightRadius: 4,
-  },
-  ajena: {
-    alignSelf: 'flex-start',
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderBottomLeftRadius: 4,
-  },
-  autor: {
-    color: colors.primaryText,
-    fontSize: 11,
-    fontWeight: 'bold',
-  },
-  mensaje: {
-    color: colors.text,
-    fontSize: fontSize.body,
-  },
-  textoPropio: {
-    color: '#FFFFFF',
-  },
-  hora: {
-    alignSelf: 'flex-end',
-    color: colors.textMuted,
-    fontSize: 11,
-    marginTop: 2,
   },
   vacio: {
     color: colors.textSecondary,

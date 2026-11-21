@@ -5,8 +5,12 @@ import { crearUsuario } from '../api/usuarios.js';
 import { useUsuario } from '../context/UsuarioContext.js';
 import { useAlturaTeclado } from '../hooks/useAlturaTeclado.js';
 import { useLayout } from '../hooks/useLayout.js';
-import { CargaEncima } from '../components/Carga.js';
-import { Aviso, BotonPrincipal, Campo, CampoContrasenia, MIN_CONTRASENIA, emailValido } from '../components/Formulario.js';
+import { CargaEncima } from '../components/CargaEncima.js';
+import { Aviso } from '../components/Aviso.js';
+import { BotonPrincipal } from '../components/BotonPrincipal.js';
+import { Campo } from '../components/Campo.js';
+import { CampoContrasenia } from '../components/CampoContrasenia.js';
+import { MIN_CONTRASENIA, emailValido } from '../validaciones.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../theme.js';
 
 // Crear una cuenta. Si sale bien, se inicia sesión con ella y se entra a la app.

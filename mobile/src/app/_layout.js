@@ -1,12 +1,10 @@
-import { View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { UsuarioProvider, useUsuario } from '../context/UsuarioContext.js';
-import { FavoritosProvider } from '../context/FavoritosContext.js';
-import { NotificacionesProvider } from '../context/NotificacionesContext.js';
+import { UsuarioProvider } from '../context/UsuarioContext.js';
 import { AvisosProvider } from '../context/AvisosContext.js';
-import { Logo, Marca } from '../components/Logo.js';
-import { colors, spacing } from '../theme.js';
+import { ConFavoritos } from '../components/ConFavoritos.js';
+import { LogoConMarca } from '../components/LogoConMarca.js';
+import { colors } from '../theme.js';
 
 // Header de las pantallas que se abren por encima de las pestañas: flecha para volver y el logo.
 const conHeader = {
@@ -14,25 +12,8 @@ const conHeader = {
   headerTintColor: colors.primary,
   headerBackButtonDisplayMode: 'minimal',
   headerTitleAlign: 'left',
-  headerTitle: () => (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: spacing.sm }}>
-      <Logo />
-      <Marca />
-    </View>
-  ),
+  headerTitle: () => <LogoConMarca />,
 };
-
-// Los favoritos y las notificaciones dependen del usuario: con key, al cambiar de sesión
-// arrancan de cero.
-function ConFavoritos({ children }) {
-  const { usuario } = useUsuario();
-  const key = usuario?.id ?? 'sin-sesion';
-  return (
-    <FavoritosProvider key={`favoritos-${key}`}>
-      <NotificacionesProvider key={`notificaciones-${key}`}>{children}</NotificacionesProvider>
-    </FavoritosProvider>
-  );
-}
 
 export default function RootLayout() {
   return (

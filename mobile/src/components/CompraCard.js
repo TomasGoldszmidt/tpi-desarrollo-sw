@@ -1,7 +1,8 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Boton } from './Boton.js';
-import { EstadoBadge, ESTADOS_INACTIVOS, Etiqueta } from './EstadoBadge.js';
+import { EstadoBadge, ESTADOS_INACTIVOS } from './EstadoBadge.js';
+import { Etiqueta } from './Etiqueta.js';
 import { AvisoMensaje, estiloEsperando, mensajeNoLeido } from './AvisoMensaje.js';
 import { formatDiasRestantes, formatFecha, formatPrecio } from '../format.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../theme.js';

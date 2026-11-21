@@ -1,7 +1,7 @@
 import { Alert, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { Avatar } from './Avatar.js';
+import { OpcionMenu } from './OpcionMenu.js';
 import { colors, fontSize, spacing } from '../theme.js';
 
 // Menú de la cuenta: una hoja que sube desde abajo (al alcance del pulgar) y se cierra
@@ -32,26 +32,11 @@ export function MenuCuenta({ usuario, onEditarPerfil, onVerResenias, onCerrarSes
           </View>
         </View>
 
-        <Opcion icono="person-outline" texto="Editar perfil" onPress={onEditarPerfil} />
-        <Opcion icono="star-outline" texto="Reseñas de mis eventos" onPress={onVerResenias} />
-        <Opcion icono="log-out-outline" texto="Cerrar sesión" onPress={confirmarSalida} peligro />
+        <OpcionMenu icono="person-outline" texto="Editar perfil" onPress={onEditarPerfil} />
+        <OpcionMenu icono="star-outline" texto="Reseñas de mis eventos" onPress={onVerResenias} />
+        <OpcionMenu icono="log-out-outline" texto="Cerrar sesión" onPress={confirmarSalida} peligro />
       </View>
     </Modal>
-  );
-}
-
-function Opcion({ icono, texto, onPress, peligro = false }) {
-  const color = peligro ? colors.danger : colors.text;
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.opcion, pressed && styles.presionada]}
-      onPress={onPress}
-      accessibilityRole="button"
-    >
-      <Ionicons name={icono} size={22} color={peligro ? colors.danger : colors.textSecondary} />
-      <Text style={[styles.opcionTexto, { color }, peligro && styles.negrita]}>{texto}</Text>
-      {!peligro ? <Ionicons name="chevron-forward" size={18} color={colors.textMuted} /> : null}
-    </Pressable>
   );
 }
 
@@ -97,23 +82,5 @@ const styles = StyleSheet.create({
   email: {
     color: colors.textSecondary,
     fontSize: fontSize.small,
-  },
-  opcion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSoft,
-  },
-  presionada: {
-    backgroundColor: colors.surface,
-  },
-  opcionTexto: {
-    flex: 1,
-    fontSize: fontSize.body,
-  },
-  negrita: {
-    fontWeight: 'bold',
   },
 });

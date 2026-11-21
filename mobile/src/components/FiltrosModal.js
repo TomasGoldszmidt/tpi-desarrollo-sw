@@ -3,22 +3,9 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Boton } from './Boton.js';
+import { OpcionesOrden, ORDENES } from './OpcionesOrden.js';
+import { OpcionesPrecio, PRECIOS } from './OpcionesPrecio.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../theme.js';
-
-// Los valores de orden que acepta GET /eventos. El primero es el de por defecto.
-export const ORDENES = [
-  { valor: 'fecha', etiqueta: 'Fecha', detalle: 'Los más próximos primero' },
-  { valor: 'precio', etiqueta: 'Precio', detalle: 'Los más baratos primero' },
-  { valor: 'puntaje', etiqueta: 'Puntaje del organizador', detalle: 'Los mejor reseñados primero' },
-];
-
-// Rangos rápidos de precio (precioMin y precioMax de GET /eventos). El primero es "sin filtro".
-export const PRECIOS = [
-  { valor: 'cualquiera', etiqueta: 'Cualquiera' },
-  { valor: 'hasta10', etiqueta: 'Hasta $ 10.000', precioMax: 10000 },
-  { valor: 'de10a25', etiqueta: '$ 10.000 a $ 25.000', precioMin: 10000, precioMax: 25000 },
-  { valor: 'mas25', etiqueta: 'Más de $ 25.000', precioMin: 25000 },
-];
 
 // Hoja de abajo para ordenar el catálogo y filtrar por precio (la categoría está en los
 // chips de la pantalla). Trabaja sobre una copia y solo la aplica con "Ver resultados";
@@ -58,59 +45,6 @@ export function FiltrosModal({ filtros, onAplicar, onCerrar }) {
         </View>
       </View>
     </Modal>
-  );
-}
-
-// También los usa el panel lateral del catálogo en tablet horizontal.
-export function OpcionesOrden({ orden, onElegir }) {
-  return (
-    <View accessibilityRole="radiogroup">
-      <Text style={styles.etiqueta}>Ordenar por</Text>
-      {ORDENES.map((opcion, i) => {
-        const elegida = orden === opcion.valor;
-        return (
-          <Pressable
-            key={opcion.valor}
-            style={[styles.opcion, i === ORDENES.length - 1 && styles.sinBorde]}
-            onPress={() => onElegir(opcion.valor)}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: elegida }}
-          >
-            <View style={styles.opcionTextos}>
-              <Text style={[styles.opcionTexto, elegida && styles.negrita]}>{opcion.etiqueta}</Text>
-              <Text style={styles.detalle}>{opcion.detalle}</Text>
-            </View>
-            <Ionicons
-              name={elegida ? 'radio-button-on' : 'radio-button-off'}
-              size={22}
-              color={elegida ? colors.primary : colors.textMuted}
-            />
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
-export function OpcionesPrecio({ precio, onElegir }) {
-  return (
-    <View style={styles.chips}>
-      {PRECIOS.map((opcion) => {
-        const elegida = precio === opcion.valor;
-        return (
-          <Pressable
-            key={opcion.valor}
-            style={[styles.chip, elegida && styles.chipElegido]}
-            onPress={() => onElegir(opcion.valor)}
-            hitSlop={4}
-            accessibilityRole="radio"
-            accessibilityState={{ checked: elegida }}
-          >
-            <Text style={[styles.chipTexto, elegida && styles.chipTextoElegido]}>{opcion.etiqueta}</Text>
-          </Pressable>
-        );
-      })}
-    </View>
   );
 }
 
@@ -162,56 +96,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.6,
     marginTop: spacing.lg,
     marginBottom: spacing.sm,
-  },
-  opcion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: 56,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSoft,
-  },
-  sinBorde: {
-    borderBottomWidth: 0,
-  },
-  opcionTextos: {
-    flex: 1,
-  },
-  opcionTexto: {
-    color: colors.text,
-    fontSize: fontSize.body,
-  },
-  negrita: {
-    fontWeight: 'bold',
-  },
-  detalle: {
-    color: colors.textMuted,
-    fontSize: fontSize.caption,
-  },
-  chips: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: spacing.sm,
-  },
-  chip: {
-    minHeight: 36,
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-  },
-  chipElegido: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  chipTexto: {
-    color: colors.text,
-    fontSize: fontSize.small,
-  },
-  chipTextoElegido: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
   },
   botones: {
     flexDirection: 'row',

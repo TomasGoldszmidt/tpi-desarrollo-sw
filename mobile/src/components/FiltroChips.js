@@ -1,5 +1,6 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { colors, fontSize, spacing } from '../theme.js';
+import { ScrollView, StyleSheet } from 'react-native';
+import { Chip } from './Chip.js';
+import { colors, spacing } from '../theme.js';
 
 // Chips para filtrar un listado, en una sola línea que se desliza de costado. Es el único
 // componente de filtros de la app: las categorías del catálogo, los estados de Mis compras
@@ -38,25 +39,6 @@ export function FiltroChips({ opciones, elegido, onElegir, sangria = spacing.lg,
 
 const ACTIVO_POR_DEFECTO = { backgroundColor: colors.primary, color: '#FFFFFF' };
 
-function Chip({ texto, cantidad, punto, puntoActivo, activo, estiloActivo, onPress }) {
-  const colorTexto = activo ? estiloActivo.color : colors.text;
-  const conCantidad = cantidad !== undefined;
-  return (
-    <Pressable
-      style={[styles.chip, activo && { backgroundColor: estiloActivo.backgroundColor, borderColor: 'transparent' }]}
-      onPress={onPress}
-      hitSlop={4}
-      accessibilityRole="button"
-      accessibilityState={{ selected: activo }}
-      accessibilityLabel={conCantidad ? `${texto}: ${cantidad}` : texto}
-    >
-      {punto ? <View style={[styles.punto, { backgroundColor: activo && puntoActivo ? puntoActivo : punto }]} /> : null}
-      <Text style={[styles.texto, activo && styles.textoActivo, { color: colorTexto }]}>{texto}</Text>
-      {conCantidad ? <Text style={[styles.texto, styles.cantidad, { color: colorTexto }]}>{cantidad}</Text> : null}
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
   // Ni crece ni se achica: arriba de una lista con flex, si no, la lista la aplasta y corta los chips.
   scroll: {
@@ -66,29 +48,5 @@ const styles = StyleSheet.create({
   },
   fila: {
     gap: spacing.sm,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 999,
-    minHeight: 36,
-    paddingHorizontal: 14,
-  },
-  punto: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  texto: {
-    fontSize: fontSize.small,
-  },
-  textoActivo: {
-    fontWeight: 'bold',
-  },
-  cantidad: {
-    fontWeight: 'bold',
   },
 });

@@ -12,7 +12,9 @@ import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { EventoCard } from '../../components/EventoCard.js';
 import { FiltroChips } from '../../components/FiltroChips.js';
 import { PieLista } from '../../components/PieLista.js';
-import { FiltrosModal, ORDENES, PRECIOS, OpcionesOrden, OpcionesPrecio } from '../../components/FiltrosModal.js';
+import { FiltrosModal } from '../../components/FiltrosModal.js';
+import { ORDENES, OpcionesOrden } from '../../components/OpcionesOrden.js';
+import { PRECIOS, OpcionesPrecio } from '../../components/OpcionesPrecio.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
 const ORDEN_POR_DEFECTO = ORDENES[0].valor;

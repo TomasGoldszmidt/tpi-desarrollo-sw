@@ -1,5 +1,5 @@
 import { useCallback, useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -8,15 +8,15 @@ import { getReseniasOrganizador } from '../../api/usuarios.js';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { useLayout } from '../../hooks/useLayout.js';
-import { Avatar } from '../../components/Avatar.js';
 import { Boton } from '../../components/Boton.js';
 import { BotonFavorito } from '../../components/BotonFavorito.js';
-import { Etiqueta } from '../../components/EstadoBadge.js';
-import { Estrellas } from '../../components/Estrellas.js';
+import { Etiqueta } from '../../components/Etiqueta.js';
 import { Galeria } from '../../components/Galeria.js';
-import { PantallaCarga } from '../../components/Carga.js';
+import { PantallaCarga } from '../../components/PantallaCarga.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
-import { formatDia, formatDiasRestantes, formatDisponibles, formatFecha, formatPrecio, formatPuntaje } from '../../format.js';
+import { OrganizadorCard } from '../../components/detalleEvento/OrganizadorCard.js';
+import { TipoEntradaFila } from '../../components/detalleEvento/TipoEntradaFila.js';
+import { formatDiasRestantes, formatFecha, formatPrecio } from '../../format.js';
 import { colors, fontSize, spacing } from '../../theme.js';
 
 const UN_DIA = 24 * 60 * 60 * 1000;
@@ -32,9 +32,6 @@ function diasHasta(fecha, ahora) {
   };
   return Math.round((dia(fecha) - dia(ahora)) / UN_DIA);
 }
-
-// Un tipo de entrada "se está agotando" cuando queda menos del 10 % del cupo.
-const quedanPocas = (tipo) => tipo.disponibles > 0 && tipo.disponibles < tipo.cupo * 0.1;
 
 // Detalle de un evento (caso de uso 10 y entrada al 12): imágenes, datos, tipos de entrada con
 // sus disponibles y el organizador con su puntaje y la reseña más reciente. El botón dice desde
@@ -148,84 +145,6 @@ export default function DetalleEvento() {
   );
 }
 
-function TipoEntradaFila({ tipo, ultimo }) {
-  const agotado = tipo.disponibles === 0;
-  return (
-    <View style={[styles.tipo, ultimo && styles.sinBorde]}>
-      <View style={styles.flexible}>
-        <Text style={[styles.tipoNombre, agotado && styles.apagado]}>{tipo.nombre}</Text>
-        <Text style={styles.tipoDescripcion}>{tipo.descripcion}</Text>
-      </View>
-      <View style={styles.tipoPrecio}>
-        <Text style={[styles.tipoNombre, agotado && styles.apagado]}>{formatPrecio(tipo.precio)}</Text>
-        {agotado ? (
-          <Etiqueta texto="Agotado" fondo={colors.dangerSoft} color={colors.dangerText} />
-        ) : quedanPocas(tipo) ? (
-          <Text style={styles.pocas}>Quedan pocas · {tipo.disponibles}</Text>
-        ) : (
-          <Text style={styles.disponibles}>{formatDisponibles(tipo.disponibles)}</Text>
-        )}
-      </View>
-    </View>
-  );
-}
-
-// El organizador con su puntaje, la reseña más reciente y el enlace a todas sus reseñas.
-// Sin reseñas no hay enlace, para no llevar a una pantalla vacía.
-function OrganizadorCard({ organizador, ultimaResenia }) {
-  const { puntaje, cantidadResenias } = organizador;
-  const verResenias = () => router.push(`/usuarios/${organizador.id}/resenias`);
-  return (
-    <View style={styles.caja}>
-      <Pressable
-        style={styles.organizadorFila}
-        onPress={cantidadResenias > 0 ? verResenias : undefined}
-        disabled={cantidadResenias === 0}
-        accessibilityRole={cantidadResenias > 0 ? 'button' : undefined}
-      >
-        <Avatar usuario={organizador} size={44} />
-        <View style={styles.flexible}>
-          <Text style={styles.tipoNombre}>
-            {organizador.nombre} {organizador.apellido}
-          </Text>
-          {puntaje === null ? (
-            <Text style={styles.tipoDescripcion}>Todavía no tiene reseñas</Text>
-          ) : (
-            <Text style={styles.tipoDescripcion}>
-              <Text style={styles.estrella} accessibilityLabel={`${formatPuntaje(puntaje)} de 5`}>★ {formatPuntaje(puntaje)}</Text>
-              {' · '}{cantidadResenias} {cantidadResenias === 1 ? 'reseña' : 'reseñas'} de eventos anteriores
-            </Text>
-          )}
-        </View>
-        {cantidadResenias > 0 ? <Ionicons name="chevron-forward" size={20} color={colors.primary} /> : null}
-      </Pressable>
-
-      {ultimaResenia ? (
-        <View style={styles.muestra}>
-          <View style={styles.muestraArriba}>
-            <Text style={styles.muestraAutor}>{ultimaResenia.comprador.nombre} {ultimaResenia.comprador.apellido}</Text>
-            <Estrellas valor={ultimaResenia.puntuacion} size={13} />
-          </View>
-          <Text style={styles.tipoDescripcion}>
-            {ultimaResenia.evento.nombre} · {formatDia(ultimaResenia.evento.fecha)}
-          </Text>
-          <Text style={styles.muestraTexto}>{ultimaResenia.detalle}</Text>
-        </View>
-      ) : null}
-
-      {cantidadResenias > 0 ? (
-        <Boton
-          titulo={cantidadResenias === 1 ? 'Ver la reseña' : `Ver las ${cantidadResenias} reseñas`}
-          variante="texto"
-          chico
-          onPress={verResenias}
-          style={styles.verResenias}
-        />
-      ) : null}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -321,78 +240,6 @@ const styles = StyleSheet.create({
   },
   comprarLateral: {
     marginTop: spacing.sm,
-  },
-  tipo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.borderSoft,
-  },
-  sinBorde: {
-    borderBottomWidth: 0,
-  },
-  tipoNombre: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  tipoDescripcion: {
-    color: colors.textSecondary,
-    fontSize: fontSize.small,
-  },
-  tipoPrecio: {
-    alignItems: 'flex-end',
-    gap: 2,
-  },
-  disponibles: {
-    color: colors.primaryText,
-    fontSize: fontSize.caption,
-  },
-  pocas: {
-    color: '#8A4B00',
-    fontSize: fontSize.caption,
-    fontWeight: 'bold',
-  },
-  apagado: {
-    color: colors.textMuted,
-  },
-  organizadorFila: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    minHeight: 64,
-  },
-  estrella: {
-    color: colors.starText,
-    fontWeight: 'bold',
-  },
-  muestra: {
-    borderTopWidth: 1,
-    borderTopColor: colors.borderSoft,
-    paddingTop: spacing.md,
-    gap: 2,
-  },
-  muestraArriba: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  muestraAutor: {
-    color: colors.text,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
-  },
-  muestraTexto: {
-    color: colors.text,
-    fontSize: fontSize.body,
-    lineHeight: 21,
-    marginTop: spacing.xs,
-  },
-  verResenias: {
-    marginLeft: -spacing.md,
   },
   pie: {
     paddingHorizontal: spacing.lg,

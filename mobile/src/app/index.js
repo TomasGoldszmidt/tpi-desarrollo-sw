@@ -5,9 +5,14 @@ import { Redirect, router } from 'expo-router';
 import { iniciarSesion } from '../api/sesiones.js';
 import { useUsuario } from '../context/UsuarioContext.js';
 import { useAlturaTeclado } from '../hooks/useAlturaTeclado.js';
-import { CargaEncima } from '../components/Carga.js';
-import { Aviso, BotonPrincipal, Campo, CampoContrasenia, emailValido } from '../components/Formulario.js';
-import { Logo, Marca } from '../components/Logo.js';
+import { CargaEncima } from '../components/CargaEncima.js';
+import { Aviso } from '../components/Aviso.js';
+import { BotonPrincipal } from '../components/BotonPrincipal.js';
+import { Campo } from '../components/Campo.js';
+import { CampoContrasenia } from '../components/CampoContrasenia.js';
+import { emailValido } from '../validaciones.js';
+import { Logo } from '../components/Logo.js';
+import { Marca } from '../components/Marca.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../theme.js';
 
 // Primera pantalla: iniciar sesión con email y contraseña. Desde acá se va a crear una cuenta.

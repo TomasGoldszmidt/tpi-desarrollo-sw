@@ -6,7 +6,7 @@ import { useCarga } from '../../../hooks/useCarga.js';
 import { usePaginado } from '../../../hooks/usePaginado.js';
 import { Avatar } from '../../../components/Avatar.js';
 import { Estrellas } from '../../../components/Estrellas.js';
-import { PantallaCarga } from '../../../components/Carga.js';
+import { PantallaCarga } from '../../../components/PantallaCarga.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { PieLista } from '../../../components/PieLista.js';
 import { ReseniaItem } from '../../../components/ReseniaItem.js';

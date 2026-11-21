@@ -8,7 +8,7 @@ import { useFavoritos } from '../../context/FavoritosContext.js';
 import { useCarga } from '../../hooks/useCarga.js';
 import { useLayout } from '../../hooks/useLayout.js';
 import { Boton } from '../../components/Boton.js';
-import { Etiqueta } from '../../components/EstadoBadge.js';
+import { Etiqueta } from '../../components/Etiqueta.js';
 import { EventoCard } from '../../components/EventoCard.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
 import { Seccion } from '../../components/Seccion.js';

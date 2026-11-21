@@ -1,29 +1,7 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Boton } from './Boton.js';
 import { colors, fontSize, spacing } from '../theme.js';
-
-// Piezas de los formularios de cuenta (inicio de sesión, registro y perfil).
-
-export const emailValido = (texto) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(texto.trim());
-export const MIN_CONTRASENIA = 8;
-
-// Un campo con su etiqueta arriba y el error (o una ayuda) abajo.
-export function Campo({ etiqueta, error, ayuda, style, ...props }) {
-  return (
-    <View style={[styles.campo, style]}>
-      <Text style={styles.etiqueta}>{etiqueta}</Text>
-      <TextInput
-        style={[styles.input, error && styles.inputError]}
-        placeholderTextColor={colors.textMuted}
-        accessibilityLabel={etiqueta}
-        {...props}
-      />
-      {error ? <Text style={styles.error}>{error}</Text> : ayuda ? <Text style={styles.ayuda}>{ayuda}</Text> : null}
-    </View>
-  );
-}
 
 // Campo de contraseña con el ojo para verla.
 // ref llega al TextInput (React 19 pasa ref como prop), para enfocarlo desde el campo anterior.
@@ -63,23 +41,6 @@ export function CampoContrasenia({ etiqueta, error, ayuda, ayudaCumplida = false
       ) : null}
     </View>
   );
-}
-
-// Aviso dentro de un formulario: un error que no es de un campo, o que se guardó.
-export function Aviso({ tipo = 'error', children }) {
-  if (!children) return null;
-  const ok = tipo === 'ok';
-  const color = ok ? colors.primaryText : colors.dangerText;
-  return (
-    <View style={[styles.aviso, ok ? styles.avisoOk : styles.avisoError]} accessibilityRole="alert">
-      <Ionicons name={ok ? 'checkmark-circle-outline' : 'alert-circle-outline'} size={18} color={color} />
-      <Text style={[styles.avisoTexto, { color }]}>{children}</Text>
-    </View>
-  );
-}
-
-export function BotonPrincipal({ titulo, onPress, disabled }) {
-  return <Boton titulo={titulo} onPress={onPress} disabled={disabled} style={styles.boton} />;
 }
 
 const styles = StyleSheet.create({
@@ -147,27 +108,5 @@ const styles = StyleSheet.create({
   },
   ayudaCumplida: {
     color: colors.primaryText,
-  },
-  aviso: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.sm,
-    borderRadius: 10,
-    padding: spacing.md,
-    marginTop: spacing.sm,
-  },
-  avisoTexto: {
-    flex: 1,
-    fontSize: fontSize.body,
-    lineHeight: 20,
-  },
-  avisoError: {
-    backgroundColor: colors.dangerSoft,
-  },
-  avisoOk: {
-    backgroundColor: colors.primarySoft,
-  },
-  boton: {
-    marginTop: spacing.xl,
   },
 });

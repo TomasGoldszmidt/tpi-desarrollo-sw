@@ -11,17 +11,20 @@ import { useCarga } from '../../hooks/useCarga.js';
 import { useAlturaTeclado } from '../../hooks/useAlturaTeclado.js';
 import { useLayout } from '../../hooks/useLayout.js';
 import { Boton } from '../../components/Boton.js';
-import { CargaEncima, PantallaCarga } from '../../components/Carga.js';
+import { CargaEncima } from '../../components/CargaEncima.js';
+import { PantallaCarga } from '../../components/PantallaCarga.js';
 import { EstadoCarga } from '../../components/EstadoCarga.js';
-import { Aviso } from '../../components/Formulario.js';
+import { Aviso } from '../../components/Aviso.js';
+import { CampoEvento } from '../../components/nuevoEvento/CampoEvento.js';
+import { Paso } from '../../components/nuevoEvento/Paso.js';
+import { Selector } from '../../components/nuevoEvento/Selector.js';
+import { TipoEntradaForm } from '../../components/nuevoEvento/TipoEntradaForm.js';
+import { estilosFormulario } from '../../components/nuevoEvento/estilos.js';
+import { LARGOS } from '../../components/nuevoEvento/largos.js';
 import { fechaArgentinaISO, formatDiaElegido, formatHoraElegida } from '../../format.js';
 import { colors, fontSize, spacing, TOQUE_MINIMO } from '../../theme.js';
 
 const tipoVacio = () => ({ nombre: '', descripcion: '', precio: '', cupo: '' });
-
-// Largos máximos de cada texto, para que un nombre larguísimo no rompa las tarjetas.
-// Los mismos que valida el backend (LARGOS en backend/src/controllers/eventoController.js).
-const LARGOS = { nombre: 80, descripcion: 1000, lugar: 150, tipoNombre: 40, tipoDescripcion: 120 };
 
 // Precio y cupo se cargan como texto; solo se aceptan dígitos (y una coma en el precio).
 const precioValido = (texto) => /^\d+(,\d{1,2})?$/.test(texto);
@@ -208,9 +211,9 @@ export default function NuevoEvento() {
   const datos = (
     <>
       <Paso numero={1} titulo="Datos del evento" />
-      <Campo etiqueta="Nombre" error={marcar(!lleno(nombre)) && 'Completá el nombre'} onLayout={registrar('nombre')}>
+      <CampoEvento etiqueta="Nombre" error={marcar(!lleno(nombre)) && 'Completá el nombre'} onLayout={registrar('nombre')}>
         <TextInput
-          style={[styles.input, marcar(!lleno(nombre)) && styles.inputError]}
+          style={[estilosFormulario.input, marcar(!lleno(nombre)) && estilosFormulario.inputError]}
           value={nombre}
           onChangeText={setNombre}
           maxLength={LARGOS.nombre}
@@ -218,10 +221,10 @@ export default function NuevoEvento() {
           placeholderTextColor={colors.textMuted}
           accessibilityLabel="Nombre del evento"
         />
-      </Campo>
-      <Campo etiqueta="Descripción" error={marcar(!lleno(descripcion)) && 'Completá la descripción'} onLayout={registrar('descripcion')}>
+      </CampoEvento>
+      <CampoEvento etiqueta="Descripción" error={marcar(!lleno(descripcion)) && 'Completá la descripción'} onLayout={registrar('descripcion')}>
         <TextInput
-          style={[styles.input, styles.multilinea, marcar(!lleno(descripcion)) && styles.inputError]}
+          style={[estilosFormulario.input, styles.multilinea, marcar(!lleno(descripcion)) && estilosFormulario.inputError]}
           value={descripcion}
           onChangeText={setDescripcion}
           maxLength={LARGOS.descripcion}
@@ -230,15 +233,15 @@ export default function NuevoEvento() {
           placeholderTextColor={colors.textMuted}
           accessibilityLabel="Descripción"
         />
-      </Campo>
-      <Campo etiqueta="Categoría" error={marcar(categoriaId === null) && 'Elegí una categoría'} onLayout={registrar('categoria')}>
+      </CampoEvento>
+      <CampoEvento etiqueta="Categoría" error={marcar(categoriaId === null) && 'Elegí una categoría'} onLayout={registrar('categoria')}>
         <View style={styles.chips}>
           {categorias.map((categoria) => {
             const elegida = categoria.id === categoriaId;
             return (
               <Pressable
                 key={categoria.id}
-                style={[styles.chip, elegida && styles.chipElegido, marcar(categoriaId === null) && styles.inputError]}
+                style={[styles.chip, elegida && styles.chipElegido, marcar(categoriaId === null) && estilosFormulario.inputError]}
                 onPress={() => setCategoriaId(categoria.id)}
                 hitSlop={4}
                 accessibilityRole="radio"
@@ -249,37 +252,37 @@ export default function NuevoEvento() {
             );
           })}
         </View>
-      </Campo>
+      </CampoEvento>
 
       <Paso numero={2} titulo="Fecha y lugar" />
       <View onLayout={registrar('fechaHora')}>
-        <View style={styles.fila}>
+        <View style={estilosFormulario.fila}>
           <View style={styles.columnaAncha}>
-            <Campo etiqueta="Fecha">
+            <CampoEvento etiqueta="Fecha">
               <Selector
                 icono="calendar-outline"
                 texto={dia ? formatDiaElegido(dia) : 'Elegir'}
                 onPress={elegirDia}
                 conError={marcar(!dia) || horaPasada}
               />
-            </Campo>
+            </CampoEvento>
           </View>
-          <View style={styles.columna}>
-            <Campo etiqueta="Hora">
+          <View style={estilosFormulario.columna}>
+            <CampoEvento etiqueta="Hora">
               <Selector
                 icono="time-outline"
                 texto={hora ? formatHoraElegida(hora) : 'Elegir'}
                 onPress={elegirHora}
                 conError={marcar(!hora) || horaPasada}
               />
-            </Campo>
+            </CampoEvento>
           </View>
         </View>
-        {errorFechaHora ? <Text style={styles.error}>{errorFechaHora}</Text> : null}
+        {errorFechaHora ? <Text style={estilosFormulario.error}>{errorFechaHora}</Text> : null}
       </View>
-      <Campo etiqueta="Lugar" error={marcar(!lleno(lugar)) && 'Completá el lugar'} onLayout={registrar('lugar')}>
+      <CampoEvento etiqueta="Lugar" error={marcar(!lleno(lugar)) && 'Completá el lugar'} onLayout={registrar('lugar')}>
         <TextInput
-          style={[styles.input, marcar(!lleno(lugar)) && styles.inputError]}
+          style={[estilosFormulario.input, marcar(!lleno(lugar)) && estilosFormulario.inputError]}
           value={lugar}
           onChangeText={setLugar}
           maxLength={LARGOS.lugar}
@@ -287,7 +290,7 @@ export default function NuevoEvento() {
           placeholderTextColor={colors.textMuted}
           accessibilityLabel="Lugar"
         />
-      </Campo>
+      </CampoEvento>
     </>
   );
 
@@ -313,9 +316,9 @@ export default function NuevoEvento() {
           ))}
         </View>
       ) : null}
-      <View style={styles.fila}>
+      <View style={estilosFormulario.fila}>
         <TextInput
-          style={[styles.input, styles.columnaAncha]}
+          style={[estilosFormulario.input, styles.columnaAncha]}
           value={link}
           onChangeText={setLink}
           placeholder="Pegá el link de una imagen"
@@ -326,7 +329,7 @@ export default function NuevoEvento() {
         />
         <Boton titulo="Agregar" variante="secundario" chico onPress={agregarLink} disabled={!linkValido(link.trim())} style={styles.agregarLink} />
       </View>
-      {lleno(link) && !linkValido(link.trim()) ? <Text style={styles.error}>El link tiene que empezar con http:// o https://</Text> : null}
+      {lleno(link) && !linkValido(link.trim()) ? <Text style={estilosFormulario.error}>El link tiene que empezar con http:// o https://</Text> : null}
     </>
   );
 
@@ -391,111 +394,6 @@ export default function NuevoEvento() {
   );
 }
 
-// Encabezado de cada bloque del formulario, numerado.
-function Paso({ numero, titulo, opcional = false }) {
-  return (
-    <View style={styles.paso}>
-      <View style={styles.pasoNumero}>
-        <Text style={styles.pasoNumeroTexto}>{numero}</Text>
-      </View>
-      <Text style={styles.pasoTitulo} accessibilityRole="header">
-        {titulo}
-        {opcional ? <Text style={styles.opcional}>  opcional</Text> : null}
-      </Text>
-    </View>
-  );
-}
-
-function Campo({ etiqueta, error, onLayout, children }) {
-  return (
-    <View style={styles.campo} onLayout={onLayout}>
-      <Text style={styles.etiqueta}>{etiqueta}</Text>
-      {children}
-      {error ? <Text style={styles.error}>{error}</Text> : null}
-    </View>
-  );
-}
-
-function Selector({ texto, icono, onPress, conError }) {
-  return (
-    <Pressable
-      style={[styles.input, styles.selector, conError && styles.inputError]}
-      onPress={onPress}
-      accessibilityRole="button"
-    >
-      <Ionicons name={icono} size={18} color={colors.textSecondary} />
-      <Text style={[styles.selectorTexto, texto === 'Elegir' ? styles.placeholder : styles.valor]}>{texto}</Text>
-      <Ionicons name="chevron-down" size={16} color={colors.textSecondary} />
-    </Pressable>
-  );
-}
-
-// Un tipo de entrada del formulario. onQuitar es null en el primero: siempre queda uno.
-function TipoEntradaForm({ numero, tipo, errores, onChange, onQuitar }) {
-  const conError = Object.values(errores).some(Boolean);
-  return (
-    <View style={[styles.tipo, conError && styles.tipoConError]}>
-      <View style={styles.tipoArriba}>
-        <Text style={styles.tipoNumero}>Tipo {numero}</Text>
-        {onQuitar ? <Boton titulo="Quitar" variante="peligro" chico onPress={onQuitar} accessibilityLabel={`Quitar el tipo ${numero}`} /> : null}
-      </View>
-      <Text style={styles.etiqueta}>Nombre</Text>
-      <TextInput
-        style={[styles.input, errores.nombre && styles.inputError]}
-        value={tipo.nombre}
-        onChangeText={(valor) => onChange('nombre', valor)}
-        maxLength={LARGOS.tipoNombre}
-        placeholder="Ej: General"
-        placeholderTextColor={colors.textMuted}
-        accessibilityLabel={`Nombre del tipo ${numero}`}
-      />
-      {errores.nombre ? <Text style={styles.error}>{errores.nombre}</Text> : null}
-      <Text style={[styles.etiqueta, styles.separado]}>Descripción</Text>
-      <TextInput
-        style={[styles.input, errores.descripcion && styles.inputError]}
-        value={tipo.descripcion}
-        onChangeText={(valor) => onChange('descripcion', valor)}
-        maxLength={LARGOS.tipoDescripcion}
-        placeholder="Ej: Sin ubicación asignada"
-        placeholderTextColor={colors.textMuted}
-        accessibilityLabel={`Descripción del tipo ${numero}`}
-      />
-      {errores.descripcion ? <Text style={styles.error}>{errores.descripcion}</Text> : null}
-      <View style={[styles.fila, styles.separado]}>
-        <View style={styles.columna}>
-          <Text style={styles.etiqueta}>Precio</Text>
-          <View style={[styles.input, styles.conPrefijo, errores.precio && styles.inputError]}>
-            <Text style={styles.valor}>$ </Text>
-            <TextInput
-              style={styles.inputPelado}
-              value={tipo.precio}
-              onChangeText={(valor) => onChange('precio', valor.replace(/[^\d,]/g, ''))}
-              keyboardType="decimal-pad"
-              placeholder="0"
-              placeholderTextColor={colors.textMuted}
-              accessibilityLabel={`Precio del tipo ${numero}`}
-            />
-          </View>
-          {errores.precio ? <Text style={styles.error}>{errores.precio}</Text> : null}
-        </View>
-        <View style={styles.columna}>
-          <Text style={styles.etiqueta}>Cupo</Text>
-          <TextInput
-            style={[styles.input, errores.cupo && styles.inputError]}
-            value={tipo.cupo}
-            onChangeText={(valor) => onChange('cupo', valor.replace(/\D/g, ''))}
-            keyboardType="number-pad"
-            placeholder="100"
-            placeholderTextColor={colors.textMuted}
-            accessibilityLabel={`Cupo del tipo ${numero}`}
-          />
-          {errores.cupo ? <Text style={styles.error}>{errores.cupo}</Text> : null}
-        </View>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -538,90 +436,9 @@ const styles = StyleSheet.create({
     fontSize: fontSize.headline,
     fontWeight: 'bold',
   },
-  paso: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-    marginTop: spacing.xl,
-    marginBottom: spacing.xs,
-  },
-  pasoNumero: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primarySoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pasoNumeroTexto: {
-    color: colors.primaryText,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
-  },
-  pasoTitulo: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  opcional: {
-    color: colors.textMuted,
-    fontSize: fontSize.caption,
-    fontWeight: 'normal',
-  },
-  campo: {
-    marginTop: spacing.md,
-  },
-  etiqueta: {
-    color: colors.text,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
-    marginBottom: 6,
-  },
-  input: {
-    minHeight: 48,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.body,
-    color: colors.text,
-    backgroundColor: colors.background,
-  },
-  inputError: {
-    borderColor: colors.danger,
-    borderWidth: 1.5,
-  },
   multilinea: {
     minHeight: 88,
     textAlignVertical: 'top',
-  },
-  selector: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  selectorTexto: {
-    flex: 1,
-  },
-  placeholder: {
-    color: colors.textMuted,
-    fontSize: fontSize.body,
-  },
-  valor: {
-    color: colors.text,
-    fontSize: fontSize.body,
-  },
-  conPrefijo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 0,
-  },
-  inputPelado: {
-    flex: 1,
-    paddingVertical: spacing.sm,
-    fontSize: fontSize.body,
-    color: colors.text,
   },
   chips: {
     flexDirection: 'row',
@@ -648,22 +465,8 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: 'bold',
   },
-  fila: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'flex-start',
-  },
-  columna: {
-    flex: 1,
-  },
   columnaAncha: {
     flex: 2,
-  },
-  error: {
-    color: colors.danger,
-    fontSize: fontSize.caption,
-    fontWeight: '500',
-    marginTop: spacing.xs,
   },
   miniaturas: {
     flexDirection: 'row',
@@ -697,34 +500,6 @@ const styles = StyleSheet.create({
   agregarLink: {
     alignSelf: 'auto',
     minHeight: 48,
-  },
-  tipo: {
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 14,
-    padding: spacing.md + 2,
-    marginTop: spacing.sm,
-    marginBottom: spacing.sm,
-  },
-  tipoConError: {
-    borderColor: colors.danger,
-  },
-  tipoArriba: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    minHeight: 40,
-    marginBottom: spacing.xs,
-  },
-  tipoNumero: {
-    color: colors.textSecondary,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  separado: {
-    marginTop: spacing.md,
   },
   pie: {
     paddingHorizontal: spacing.lg,

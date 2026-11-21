@@ -83,3 +83,4 @@
 - [x] Límite de largo de los textos del evento en el backend
 - [x] Un solo componente de filtros (`FiltroChips`) en una línea deslizable: categorías del catálogo, Mis compras, Mis eventos y ventas de un evento
 - [x] Capa de services en el backend (los controllers quedan solo HTTP y el dominio puro) y tests de integración de los flujos principales
+- [x] Un componente por archivo en la app: los componentes internos de cada pantalla pasan a `src/components/` (agrupados por pantalla)

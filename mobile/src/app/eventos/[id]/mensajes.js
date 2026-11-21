@@ -1,18 +1,16 @@
 import { useCallback, useRef, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { FlatList, RefreshControl, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { getEvento, getVentasEvento } from '../../../api/eventos.js';
 import { useUsuario } from '../../../context/UsuarioContext.js';
 import { useCarga } from '../../../hooks/useCarga.js';
 import { usePaginado } from '../../../hooks/usePaginado.js';
-import { Avatar } from '../../../components/Avatar.js';
 import { Conversacion } from '../../../components/Conversacion.js';
-import { PantallaCarga } from '../../../components/Carga.js';
+import { PantallaCarga } from '../../../components/PantallaCarga.js';
 import { PieLista } from '../../../components/PieLista.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
-import { EstadoBadge } from '../../../components/EstadoBadge.js';
-import { tieneNoLeidos } from '../../../components/AvisoMensaje.js';
-import { formatDia } from '../../../format.js';
+import { ConversacionFila } from '../../../components/mensajes/ConversacionFila.js';
+import { CabeceraChat } from '../../../components/mensajes/CabeceraChat.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
 // Desde este ancho la lista y el chat se ven lado a lado (tablet o celular en horizontal).
@@ -165,62 +163,6 @@ export default function MensajesEvento() {
   );
 }
 
-function ConversacionFila({ compra, usuario, elegida, onPress }) {
-  const ultimo = compra.mensajes.at(-1);
-  const propio = ultimo.usuarioId === usuario.id;
-  const noLeida = tieneNoLeidos(compra);
-  return (
-    <Pressable
-      style={({ pressed }) => [styles.fila, elegida && styles.filaElegida, pressed && styles.presionada]}
-      onPress={onPress}
-    >
-      <Avatar usuario={compra.comprador} size={40} />
-      <View style={styles.filaInfo}>
-        <View style={styles.filaArriba}>
-          <Text style={styles.comprador} numberOfLines={1}>
-            {compra.comprador.nombre} {compra.comprador.apellido}
-          </Text>
-          <Text style={styles.fecha}>{formatDia(ultimo.enviado)}</Text>
-        </View>
-        <View style={styles.filaArriba}>
-          <Text style={[styles.ultimo, noLeida && styles.ultimoEspera]} numberOfLines={1}>
-            {propio ? 'Vos: ' : ''}
-            {ultimo.mensaje}
-          </Text>
-          {noLeida ? <View style={styles.punto} /> : null}
-        </View>
-        <View style={styles.compra}>
-          <EstadoBadge estado={compra.estado} chico />
-          <Text style={styles.detalle}>
-            {compra.tipoEntrada.nombre} × {compra.cantidad}
-          </Text>
-        </View>
-      </View>
-    </Pressable>
-  );
-}
-
-// Arriba del chat en la vista dividida: con quién, qué compró y el acceso a la compra.
-function CabeceraChat({ compra }) {
-  return (
-    <View style={styles.cabecera}>
-      <Avatar usuario={compra.comprador} size={32} />
-      <View style={styles.filaInfo}>
-        <Text style={styles.comprador}>
-          {compra.comprador.nombre} {compra.comprador.apellido}
-        </Text>
-        <Text style={styles.detalle}>
-          {compra.tipoEntrada.nombre} × {compra.cantidad}
-        </Text>
-      </View>
-      <EstadoBadge estado={compra.estado} />
-      <Pressable onPress={() => router.push(`/compras/${compra.id}`)} hitSlop={12} accessibilityRole="button">
-        <Text style={styles.verCompra}>Ver compra</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   pantalla: {
     flex: 1,
@@ -267,78 +209,6 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: fontSize.small,
     marginTop: 2,
-  },
-  fila: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    padding: spacing.sm,
-    borderRadius: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  filaElegida: {
-    backgroundColor: colors.primarySoft,
-  },
-  presionada: {
-    opacity: 0.7,
-  },
-  filaInfo: {
-    flex: 1,
-    gap: 2,
-  },
-  filaArriba: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-  },
-  comprador: {
-    flex: 1,
-    color: colors.text,
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  fecha: {
-    color: colors.textMuted,
-    fontSize: 11,
-  },
-  ultimo: {
-    flex: 1,
-    color: colors.textSecondary,
-    fontSize: fontSize.body,
-  },
-  ultimoEspera: {
-    color: colors.text,
-    fontWeight: 'bold',
-  },
-  punto: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-  },
-  compra: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    marginTop: 2,
-  },
-  detalle: {
-    color: colors.textSecondary,
-    fontSize: fontSize.small,
-  },
-  cabecera: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.border,
-  },
-  verCompra: {
-    color: colors.primary,
-    fontSize: fontSize.small,
-    fontWeight: 'bold',
   },
   vacio: {
     alignItems: 'center',

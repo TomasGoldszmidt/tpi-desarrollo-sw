@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { Redirect, Tabs, router } from 'expo-router';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import { useUsuario } from '../../context/UsuarioContext.js';
 import { Avatar } from '../../components/Avatar.js';
 import { MenuCuenta } from '../../components/MenuCuenta.js';
 import { Campana } from '../../components/Campana.js';
 import { useNotificaciones } from '../../context/NotificacionesContext.js';
 import { useLayout } from '../../hooks/useLayout.js';
-import { Logo, Marca } from '../../components/Logo.js';
+import { LogoConMarca } from '../../components/LogoConMarca.js';
+import { TabIcon } from '../../components/TabIcon.js';
 import { colors, spacing, TOQUE_MINIMO } from '../../theme.js';
 
 // Ícono de cada pestaña: lleno cuando está elegida, de línea cuando no.
 function icono(lleno, linea) {
-  return function TabIcon({ color, size, focused }) {
-    return <Ionicons name={focused ? lleno : linea} size={size} color={color} />;
+  return function tabBarIcon(props) {
+    return <TabIcon lleno={lleno} linea={linea} {...props} />;
   };
 }
 
@@ -58,12 +58,7 @@ export default function TabsLayout() {
           headerTitleAlign: 'left',
           headerShadowVisible: false,
           headerStyle: styles.header,
-          headerTitle: () => (
-            <View style={styles.marca}>
-              <Logo />
-              <Marca />
-            </View>
-          ),
+          headerTitle: () => <LogoConMarca />,
           headerRight: () => (
             <View style={styles.derecha}>
               <Campana />
@@ -101,11 +96,6 @@ const styles = StyleSheet.create({
   header: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: colors.borderSoft,
-  },
-  marca: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
   },
   derecha: {
     flexDirection: 'row',
