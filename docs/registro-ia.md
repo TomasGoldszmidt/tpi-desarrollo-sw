@@ -758,33 +758,6 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El registro decía que un `npm install` normal ya funcionaba. El dry-run mostró que, sin `--legacy-peer-deps`, npm agrega `react-dom`, `react-native-reanimated` y `react-native-gesture-handler`, que la app no usa. Se dejó la instalación con `--legacy-peer-deps`, que es con la que se probó, y se explicó el motivo.
 - **Aprendizaje:** un README tiene que salir de verificar los comandos, no de lo que la IA "sabe". Los requisitos de versión cambian con cada SDK, y la IA los completa de memoria si no se le pide que los chequee.
 
-### 2026-11-03 · Flujo y guion del video
-- **Tarea:** "Elegir el flujo a presentar y preparar guion del video (incluir las skills creadas y cómo ayudaron)" (sección 4)
-- **Herramienta / skill:** Claude Code + `/registrar-ia`
-- **Pedido (prompt):** "Dale" a seguir con el guion, y "Ciclo de la compra" entre los cuatro flujos que propuso la IA.
-- **Resultado:**
-  - La IA propuso cuatro flujos (ciclo de la compra, cancelación y reembolso, chat, y crear evento → ventas) y recomendó el ciclo de la compra, por ser el que tiene más reglas de dominio y pasa por comprador y organizador.
-  - `docs/guion-video.md`, de ~9 minutos: preparación (archivos a abrir, reiniciar el backend), recorrido en la app (Sofía compra y paga, Martín marca como utilizada, Juan reseña), backend (capas, `comprar` y `hayCupoPara`, la tabla `TRANSICIONES`, persistencia embebida, errores en Swagger), frontend, skills con un ejemplo concreto de cada una sacado del registro, y la conclusión.
-  - Se verificaron contra el backend los mensajes de error del guion y cómo se carga el usuario activo en Swagger.
-- **Bien:** los ejemplos de las skills salieron del registro, así que son situaciones que pasaron de verdad (el "409" en el boceto, la carrera por el cupo), no descripciones genéricas.
-- **Corregido / problemas:**
-  - La IA avisó que una compra nueva no se puede marcar como utilizada hasta el día del evento. Por eso el guion usa, para usar y reseñar, la compra de Juan del Stand-up que ya está en el seed, en lugar de la que se compra en el video.
-  - El guion decía que en Swagger se ponía el header `X-User-Id`. Al revisar el `openapi.yaml`, el usuario activo se carga con el botón Authorize, y se corrigió.
-  - La IA armó el guion con el backend y el frontend en bloques separados, después del recorrido en la app. Le propuse mostrar el código a la par del flujo, con VS Code y el emulador en la misma pantalla, y se reordenó por pasos (comprar, pagar, usar y reseñar), cada uno con su pantalla y su backend.
-- **Aprendizaje:** antes de grabar conviene ensayar el recorrido y reiniciar el backend. Como la persistencia es en memoria, lo que se hace en el ensayo cambia lo que se ve en la grabación.
-
-### 2026-11-03 · Conclusión sobre el uso de IA
-- **Tarea:** "Redactar conclusión sobre el uso de IA" (sección 4)
-- **Herramienta / skill:** Claude Code + `/registrar-ia`
-- **Pedido (prompt):** "Dale" a seguir con la conclusión, y "Está bien así" al borrador.
-- **Resultado:**
-  - `docs/conclusion-ia.md` con las partes que pide el enunciado: cómo trabajé, ventajas, desventajas, dificultades, aprendizajes y una valoración de productividad y calidad. Al final, un resumen de seis puntos para decir en el video en ~1:30.
-  - Se armó desde el registro (50 entradas, 63 commits, 20 subtareas sin correcciones), con ejemplos que pasaron de verdad: la tabla de transiciones, la carrera por el cupo, Node 20 de memoria, los casos de búsqueda con texto que no se ve y el recorte que dejaba afuera Mis eventos.
-  - La sección que había escrito yo ("No todo conviene hacerlo con la IA") quedó sin cambios.
-- **Bien:** como cada subtarea tenía su entrada con lo que salió bien y lo que hubo que corregir, la conclusión no hubo que reconstruirla de memoria.
-- **Corregido / problemas:** ninguno. La IA marcó qué partes eran más personales (la valoración y la frase de cierre) para que las revisara antes de aprobar.
-- **Aprendizaje:** llevar el registro durante todo el TP fue lo que hizo posible una conclusión concreta. Anotar los errores en el momento vale más que acordarse al final.
-
 ### 2026-11-11 · Inicio de sesión, registro y perfil: backend
 - **Tarea:** "Inicio de sesión, registro y edición del perfil" (sección 2, agregada al TP)
 - **Herramienta / skill:** Claude Code + `/nueva-pantalla` (boceto), `/swagger` y `/registrar-ia`
@@ -808,7 +781,7 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
   - El chip de las pestañas abre `MenuCuenta`, con Editar perfil y Cerrar sesión. `UsuarioContext` pasa a tener `iniciarSesion`, `actualizarCuenta` y `cerrarSesion`.
   - Piezas compartidas en `components/Formulario.js`: un campo con su error, la contraseña con Mostrar/Ocultar, el aviso de error o confirmación y el botón principal.
   - Al crear la cuenta, `router.dismissAll()` vuelve a la primera pantalla, que con la sesión iniciada redirige al catálogo. Así no queda el login atrás en la pila.
-  - Se actualizaron el README (credenciales del seed), el guion del video (cerrar sesión para cambiar de usuario) y la skill `nueva-pantalla`.
+  - Se actualizaron el README (credenciales del seed) y la skill `nueva-pantalla`.
 - **Bien:** reusar los estilos y `CargaEncima` de los formularios que ya existían hizo que las pantallas nuevas quedaran iguales al resto sin rediseñar nada.
 - **Corregido / problemas:**
   - La IA sacó `getUsuarios` de `api/usuarios.js` creyendo que solo lo usaba la lista de usuarios. Lint pasó igual, pero al buscar las referencias apareció que Mis compras lo usa para los nombres de los compradores, y se volvió a agregar.
@@ -1154,19 +1127,19 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Aprendizaje:** un rediseño grande conviene hacerlo por capas (tema, componentes, pantallas) y commitear cada una, así se puede volver atrás por partes.
 
 ### 2026-11-20 · Revisión contra el enunciado y docs desactualizados
-- **Tarea:** revisión general del TP antes de grabar el video; tildar las tareas de la sección 3 ya hechas
+- **Tarea:** revisión general del TP contra el enunciado; tildar las tareas de la sección 3 ya hechas
 - **Herramienta / skill:** Claude Code, `/registrar-ia`
 - **Pedido (prompt):** "Revisa el codigo del proyecto y fijate que se cumpla con todos los requerimientos del tp", y después "Sí, corregilos".
 - **Resultado:**
-  - Revisión del enunciado contra el backend, la app y los docs: los 12 casos de uso y los requisitos técnicos se cumplen, y los 97 tests pasan. Pendiente: el video, la prueba del rediseño en el emulador y el límite de largo de los textos del evento.
-  - `guion-video.md` y `prueba-integral.md` seguían con los usuarios viejos del seed (Lucía, Martín, Sofía, Juan, con emails `@aiticketit.com`) y con la pantalla "¿Quién usa la app?", que ya no existe. Se pasaron a Tomas, Dilollo, Paredes y Blanco con sus credenciales, y a "Cerrar sesión" / "Iniciá sesión", usando el mapeo de roles del commit que cambió el seed.
+  - Revisión del enunciado contra el backend, la app y los docs: los 12 casos de uso y los requisitos técnicos se cumplen, y los 97 tests pasan. Pendiente: la prueba del rediseño en el emulador y el límite de largo de los textos del evento.
+  - `prueba-integral.md` seguía con los usuarios viejos del seed (Lucía, Martín, Sofía, Juan, con emails `@aiticketit.com`) y con la pantalla "¿Quién usa la app?", que ya no existe. Se pasó a Tomas, Dilollo, Paredes y Blanco con sus credenciales, y a "Cerrar sesión" / "Iniciá sesión", usando el mapeo de roles del commit que cambió el seed.
   - Se tildaron las 5 tareas de la sección 3 que estaban hechas desde el rediseño (inicio de sesión, filtro de Mis compras, favoritos, notificaciones y bandeja de mensajes), después de verificar que estuvieran en el código.
-- **Bien:** la revisión encontró que el guion del video no se podía seguir tal cual (las credenciales no existían), antes de ponerse a grabar.
+- **Bien:** la revisión encontró docs que ya no se podían seguir tal cual (las credenciales no existían).
 - **Corregido / problemas:**
-  - En la primera revisión, la IA solo marcó la línea de "¿Quién usa la app?" y no vio que todos los usuarios del guion estaban desactualizados; recién lo encontró al ponerse a corregir.
+  - En la primera revisión, la IA solo marcó la línea de "¿Quién usa la app?" y no vio que todos los usuarios estaban desactualizados; recién lo encontró al ponerse a corregir.
   - El reemplazo automático de nombres cambió "Teatro San Martín" por "Teatro San Dilollo"; se corrigió al revisar el diff. También se ajustó la cita del chat ("Sí, chica, …") al texto actual del seed.
   - Los resultados esperados de la prueba integral son del seed del 2026-11-03; el seed sumó después mensajes de Blanco sin responder, así que algunos "Esperado" pueden no coincidir hasta repetir la prueba.
-- **Aprendizaje:** cuando cambio datos del seed, tengo que buscar en los docs todo lo que los menciona (guion, pruebas), no solo en el código y los tests; y un reemplazo automático de texto siempre hay que revisarlo en el diff.
+- **Aprendizaje:** cuando cambio datos del seed, tengo que buscar en los docs todo lo que los menciona, no solo en el código y los tests; y un reemplazo automático de texto siempre hay que revisarlo en el diff.
 
 ### 2026-11-20 · Límite de largo de los textos del evento
 - **Tarea:** Límite de largo de los textos del evento en el backend
@@ -1180,20 +1153,6 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Corregido / problemas:** ninguno. Quedó afuera, a propósito, limitar la cantidad de tipos de entrada y de imágenes y el largo de cada URL.
 - **Aprendizaje:** una validación que ya está en la app tiene que estar también en el backend, porque a la API se le puede pegar sin pasar por la pantalla (como en Swagger).
 
-### 2026-11-20 · Guion del video actualizado y probado en el emulador
-- **Tarea:** Elegir el flujo a presentar y preparar guion del video (actualización)
-- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
-- **Pedido (prompt):** "actualiza el guion y proba ese flujo en el emulador".
-- **Resultado:**
-  - Guion reescrito para la compra en pasos del rediseño: "Reservar 2 entradas" y después "Pagar ahora $ 180.000", que abre el detalle ya confirmado. Tabla de tiempos que suma ~8:45 (antes daba ~10:15, más que el máximo), Swagger pasó a "para alargar" y la sección de skills se achicó a 1 minuto.
-  - Recorrido completo en el emulador con adb: Paredes reserva y paga (Confirmada, "Faltan 60 días", historial Reservada/Pagada), Dilollo marca como utilizada la compra de Blanco del Stand-up, Blanco publica la reseña y el Amistoso pasa de "Sin reseñas" a "★ 5 · 1 reseña". Todo funcionó.
-  - Con lo visto se ajustaron los pasos: buscar el evento en el catálogo, usar los chips Confirmadas, Realizados y Utilizadas para llegar a cada compra, el texto real del botón ("Publicar reseña") y un aviso sobre el botón flotante de Expo Go.
-- **Bien:** probar el guion en el celular mostró que varios eventos no aparecen en la primera pantalla; sin eso, en la grabación habría que scrollear buscándolos.
-- **Corregido / problemas:**
-  - El backend de una prueba anterior había quedado corriendo (detener la tarea de npm no cerró el proceso de node) y tenía datos de prueba en memoria; hubo que cerrarlo para arrancar del seed.
-  - Al tipear con adb, el primer carácter del email salió duplicado ("pparedes@gmail.com"); se armó un script que verifica lo escrito antes de enviar.
-- **Aprendizaje:** un guion se valida recorriéndolo en la app real: los pasos escritos desde el código no muestran cuánto hay que navegar para llegar a cada pantalla.
-
 ### 2026-11-20 · Un solo componente de filtros, en una línea deslizable
 - **Tarea:** Un solo componente de filtros (`FiltroChips`) en una línea deslizable
 - **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
@@ -1206,80 +1165,24 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Corregido / problemas:** en la primera prueba, los chips de Mis compras salían cortados por abajo: la lista de debajo achicaba la fila deslizable. Se arregló con `flexShrink: 0`. Sin probarlo en el emulador no se hubiera visto, porque el lint pasaba.
 - **Aprendizaje:** cuando una misma cosa se ve distinta en dos pantallas, conviene pedir un solo componente compartido: así el próximo cambio se hace una vez y queda igual en todos lados.
 
-### 2026-11-20 · Flujo del video acotado a comprar una entrada
-- **Tarea:** Elegir el flujo a presentar y preparar guion del video (corrección)
-- **Herramienta / skill:** Claude Code, `/registrar-ia`
-- **Pedido (prompt):** "el flujo que hay que mostrar no es todo ese ciclo, un flujo es mas corto, un flujo podria ser comprar una entrada, desde que inicia sesion hasta que compra la entrada y la paga".
-- **Resultado:**
-  - Guion rehecho sobre un solo flujo: iniciar sesión → buscar el evento → elegir la entrada y reservar → pagar, y cerrar mostrando la compra en Mis compras (casos 3, 12 y 1). Se sacaron los pasos de marcar como utilizada y reseñar, que cambiaban de usuario dos veces.
-  - Con el tiempo que liberó, cada paso explica más a fondo su back-end y su front-end. Se sumó el inicio de sesión: la validación en la pantalla, `POST /sesiones`, el hash con `scrypt` y el mismo mensaje de error para email y contraseña. También la búsqueda del caso 3 (`buscarEventos`).
-  - Tiempos: ~8:45. La tabla de pestañas de VS Code quedó con los archivos de este flujo.
-- **Bien:** acotar el flujo dejó tiempo para mostrar el código de cada paso, que es lo que pide la consigna.
-- **Corregido / problemas:** la IA había elegido el "ciclo de la compra" (comprar → pagar → usar → reseñar), que en realidad son varios flujos, y lo había mantenido en las actualizaciones del guion sin cuestionarlo. Lo corregí yo.
-- **Aprendizaje:** la consigna pide un flujo y explicarlo a fondo; mostrar más pantallas no suma si cada una se explica por arriba. Conviene contrastar con el enunciado no solo el código, también la forma de presentarlo.
-
-### 2026-11-20 · Números de la conclusión actualizados
-- **Tarea:** Redactar conclusión sobre el uso de IA (actualización)
-- **Herramienta / skill:** Claude Code, `/registrar-ia`
-- **Pedido (prompt):** "Sí, actualizalos", sobre los números viejos de `docs/conclusion-ia.md` que había marcado la revisión.
-- **Resultado:** la conclusión pasó de "50 entradas, 4 días (31/10 al 3/11), 63 commits y 56 tests" a 81 entradas, 7 días de trabajo (31/10 al 20/11), 109 commits y 97 tests, contados con `git` y con `npm test` (los totales incluyen esta entrada y su commit). El tiempo de "Para decir en el video" quedó en ~1:15, como en el guion.
-- **Bien:** los números salieron de contar en el repo, no de memoria.
-- **Corregido / problemas:** ninguno.
-- **Aprendizaje:** los números de un documento se desactualizan solos; antes de presentarlo hay que recontarlos.
-
-### 2026-11-20 · Video centrado en la compra de entradas y conclusión ampliada
-- **Tarea:** Elegir el flujo a presentar y preparar guion del video, y Redactar conclusión sobre el uso de IA (correcciones)
-- **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
-- **Pedido (prompt):** "el flujo debe ser unicamente de la compra de entradas, nada de login ni de pago, asi vamnos mas en detalle y la conclusion de la ia es muy importante".
-- **Resultado:**
-  - Guion rehecho sobre la compra sola (caso 12): el evento y sus disponibles, elegir el tipo y la cantidad, el recorrido del pedido de la ruta a la persistencia (401, 400, 409 y 201 con `Location`) y una demo en vivo de dos compradores a la vez. La sesión se inicia antes de grabar y el flujo termina en la reserva.
-  - La demo se probó en el emulador: con 3 VIP elegidas en la app, Blanco compra 98 desde la API; al reservar aparece "No hay cupo suficiente: quedan 2 entradas", la cantidad baja sola a 2 y la reserva de 2 queda Pendiente de pago. También se verificó el mensaje del 400 con cantidad 0.
-  - La conclusión pasó de 1:15 a 2:30, con siete puntos y un ejemplo concreto en cada uno, y se sumó como desventaja que la IA no revisa sus decisiones viejas (el guion con usuarios que no existían y el flujo demasiado largo).
-- **Bien:** al ir a un solo flujo se puede mostrar el caso de error en vivo, que es lo que mejor explica por qué el backend vuelve a validar el cupo.
-- **Corregido / problemas:**
-  - Era la tercera versión del flujo en el día: la IA había propuesto primero el ciclo entero y después login → compra → pago, y en las dos lo tuve que acotar yo.
-  - En la conclusión, la IA escribió que la regla de que una compra pendiente ocupe lugar salió de la prueba de la carrera por el cupo. Al chequearlo en el registro, esa regla se había aprobado antes; se corrigió el ejemplo.
-- **Aprendizaje:** a la IA le cuesta acotar: propone mostrar de más. Tengo que decirle explícitamente qué entra y qué queda afuera, y hacerle verificar contra el registro cada ejemplo que pone en mi nombre.
-
 ### 2026-11-20 · Singular en los mensajes de cupo y disponibles
-- **Tarea:** Corrección de bugs y pulido visual (detalle encontrado al preparar el video)
+- **Tarea:** Corrección de bugs y pulido visual (detalle encontrado al probar el cupo)
 - **Herramienta / skill:** Claude Code, `/probar-caso-de-uso`, `/registrar-ia`
 - **Pedido (prompt):** "Sí, corregilo", sobre el mensaje "No hay cupo suficiente: quedan 1 entradas".
 - **Resultado:**
   - Backend: `comprar` dice "queda 1 entrada" cuando queda una sola, con un test nuevo (98 tests).
   - App: el mismo error estaba en tres textos más, y se corrigieron con el mismo cambio: "1 disponible" en el detalle del evento y en la compra (nueva función `formatDisponibles` en `format.js`) y "Ver más (queda 1)" en las listas.
   - Probado contra el backend (409 "No hay cupo suficiente: queda 1 entrada") y en el emulador ("1 disponible" en la compra).
-- **Bien:** el detalle apareció al ensayar la demo del video, antes de grabarla.
+- **Bien:** el detalle apareció al probar en el emulador dos compras a la vez sobre las últimas entradas.
 - **Corregido / problemas:** al guardar `format.js`, Expo recargó la app entera y se perdió la sesión (no se recuerda al recargar). Si se toca código durante la grabación, hay que volver a iniciar sesión.
 - **Aprendizaje:** cuando aparece un error de texto en un lugar, conviene buscar el mismo patrón en todo el proyecto: acá había cuatro.
-
-### 2026-11-20 · Texto base para cada paso del guion
-- **Tarea:** Elegir el flujo a presentar y preparar guion del video (texto para decir)
-- **Herramienta / skill:** Claude Code, `/registrar-ia`
-- **Pedido (prompt):** "en cada punto del guion agrega exactamente que tengo que decir en cada paso, es para tener una base, despues voy a usar mis palabras".
-- **Resultado:**
-  - Cada paso del guion tiene su bloque **Decir** en primera persona, en el orden de la pantalla (app, frontend, backend), incluida la conclusión completa en siete partes. Los ejemplos de la conclusión se chequearon contra el registro.
-  - La primera versión sumaba ~1290 palabras, unos 9:15 hablando, que con las pausas de cada acción pasaba de 10 minutos. Se recortó a ~1080 palabras (~7:45), sin tocar el contenido de la conclusión.
-  - La conclusión pasó de 97 a 98 tests, por el test que se agregó hoy.
-- **Bien:** medir las palabras por sección contra el tiempo de cada una mostró que el primer borrador no entraba, antes de ensayarlo.
-- **Corregido / problemas:** el primer borrador de la IA era demasiado largo para los tiempos que ella misma había fijado; se detectó al contarlo y se recortó.
-- **Aprendizaje:** un texto para leer en voz alta hay que medirlo (unas 140 palabras por minuto) y dejar margen para las acciones en pantalla.
-
-### 2026-11-20 · Ejemplo de la conclusión cambiado
-- **Tarea:** Redactar conclusión sobre el uso de IA (ajuste)
-- **Herramienta / skill:** Claude Code, `/registrar-ia`
-- **Pedido (prompt):** "modifica el guion, no digas que el guion lo hice con claude", sobre el ejemplo de la desventaja que hablaba del guion del video.
-- **Resultado:** en el guion y en `docs/conclusion-ia.md` la desventaja ahora usa otros dos ejemplos que ya estaban en la conclusión: las pruebas de búsqueda con textos que no aparecen en la pantalla y una prueba dada por buena que había corrido código viejo. Se sacó el punto "No revisa sus propias decisiones viejas", cuyo único ejemplo era el guion.
-- **Bien:** el cambio fue directo, y los ejemplos nuevos salen del registro.
-- **Corregido / problemas:** el ejemplo lo había propuesto la IA sin preguntarme si quería contar en el video que el guion lo armé con ella.
-- **Aprendizaje:** lo que digo en el video en primera persona lo decido yo; antes de aceptar un ejemplo, pienso si quiero contarlo.
 
 ### 2026-11-21 · Limpieza de docs/ para la entrega
 - **Tarea:** Cierre técnico (preparar el repo para la entrega)
 - **Herramienta / skill:** Claude Code, `/registrar-ia`
 - **Pedido (prompt):** sacar del repo los documentos que no aportan a quien lo revise.
 - **Resultado:**
-  - Se borraron de `docs/` los documentos de trabajo: el material del video, la prueba integral y los 24 bocetos HTML. Quedan `persistencia.md` (las decisiones de diseño de los datos) y este registro (el uso de IA), que es lo que el enunciado dice que se va a valorar: el criterio, la justificación de decisiones y la reflexión sobre la IA.
+  - Se borraron de `docs/` los documentos de trabajo: la prueba integral, los 24 bocetos HTML y otros apuntes. Quedan `persistencia.md` (las decisiones de diseño de los datos) y este registro (el uso de IA), que es lo que el enunciado dice que se va a valorar: el criterio, la justificación de decisiones y la reflexión sobre la IA.
   - Se actualizaron las referencias en el README, `CLAUDE.md` y la skill `/nueva-pantalla`, que ahora deja los bocetos fuera del repo.
 - **Bien:** antes de borrar, la IA preguntó qué entraba y recomendó dejar los dos archivos que respaldan el criterio y las decisiones, en lugar de borrar toda la carpeta.
 - **Corregido / problemas:** ninguno. Lo borrado sigue en el historial de git.
