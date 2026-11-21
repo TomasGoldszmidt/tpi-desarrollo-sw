@@ -1273,3 +1273,14 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** el cambio fue directo, y los ejemplos nuevos salen del registro.
 - **Corregido / problemas:** el ejemplo lo había propuesto la IA sin preguntarme si quería contar en el video que el guion lo armé con ella.
 - **Aprendizaje:** lo que digo en el video en primera persona lo decido yo; antes de aceptar un ejemplo, pienso si quiero contarlo.
+
+### 2026-11-21 · Limpieza de docs/ para la entrega
+- **Tarea:** Cierre técnico (preparar el repo para la entrega)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** sacar del repo los documentos que no aportan a quien lo revise.
+- **Resultado:**
+  - Se borraron de `docs/` los documentos de trabajo: el material del video, la prueba integral y los 24 bocetos HTML. Quedan `persistencia.md` (las decisiones de diseño de los datos) y este registro (el uso de IA), que es lo que el enunciado dice que se va a valorar: el criterio, la justificación de decisiones y la reflexión sobre la IA.
+  - Se actualizaron las referencias en el README, `CLAUDE.md` y la skill `/nueva-pantalla`, que ahora deja los bocetos fuera del repo.
+- **Bien:** antes de borrar, la IA preguntó qué entraba y recomendó dejar los dos archivos que respaldan el criterio y las decisiones, en lugar de borrar toda la carpeta.
+- **Corregido / problemas:** ninguno. Lo borrado sigue en el historial de git.
+- **Aprendizaje:** el repo que se entrega es para quien lo corrige: conviene dejar lo que muestra cómo y por qué se hizo, y sacar lo que solo servía para trabajar.

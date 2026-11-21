@@ -10,7 +10,7 @@ Trabajo práctico individual de Diseño de Sistemas (UTN FRBA, 2C 2026), desarro
 |---|---|
 | `backend/` | API REST en Node + Express 5 (ES Modules), con persistencia en memoria |
 | `mobile/` | App en React Native con Expo SDK 58 y Expo Router (JavaScript) |
-| `docs/` | Decisiones de persistencia, bocetos de las pantallas, registro de uso de IA y prueba integral |
+| `docs/` | Decisiones de persistencia y registro de uso de IA |
 | `.claude/skills/` | Las skills de Claude Code creadas para el TP (ver [Desarrollo con IA](#desarrollo-con-ia)) |
 
 ## Requisitos
@@ -107,6 +107,3 @@ El proyecto se hizo con Claude Code, dividiendo cada tarea de [`TAREAS.md`](TARE
 | `/registrar-ia` | Anota en el registro qué se hizo, qué salió bien y qué hubo que corregir |
 
 - [`docs/registro-ia.md`](docs/registro-ia.md): bitácora de cada subtarea (pedidos, resultados, correcciones y aprendizajes).
-- [`docs/bocetos/`](docs/bocetos/): los bocetos aprobados de cada pantalla (HTML, se abren en el navegador).
-- [`docs/prueba-integral.md`](docs/prueba-integral.md): el recorrido de los 12 casos de uso en el celular.
-- [`docs/conclusion-ia.md`](docs/conclusion-ia.md): la conclusión sobre el uso de IA.

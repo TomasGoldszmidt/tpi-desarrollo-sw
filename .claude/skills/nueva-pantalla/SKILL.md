@@ -11,7 +11,6 @@ Archivos de apoyo:
 - [referencia-dominio.md](../persistencia/referencia-dominio.md): casos de uso del enunciado. Leerlo siempre.
 - `backend/src/docs/openapi.yaml`: los endpoints que existen, con sus parámetros, respuestas y errores.
 - `backend/src/persistence/seed.js`: los datos para el boceto y la prueba.
-- `docs/bocetos/`: los bocetos ya aprobados, para mantener el mismo estilo.
 - `mobile/AGENTS.md` y `mobile/src/`: convenciones de Expo y lo que ya existe (componentes, cliente HTTP, contexto).
 - `TAREAS.md`, sección 3: qué pantallas faltan.
 
@@ -30,9 +29,9 @@ Un mockup en HTML de la pantalla como se vería en el celular:
 - **Estados que importan:** el principal y, cuando aplique, cargando, vacío y error (ej: "Mis compras" sin compras, un tipo de entrada sin cupo, el mensaje de un 409). Se muestran uno al lado del otro.
 - **Dentro del celular, solo lo que ve el usuario:** nada de status HTTP (409, 404), endpoints, nombres de código ni explicaciones ("la pantalla vuelve a pedir…"). Cada estado (error, vacío, sin cupo) se dibuja como la pantalla real en ese estado; lo técnico va en las notas de afuera o en el análisis.
 - **Anotaciones:** cada elemento tocable (botón, filtro, tarjeta) lleva una nota numerada al costado con adónde lleva o qué endpoint llama.
-- **Estilo coherente** con los bocetos anteriores de `docs/bocetos/` y con `mobile/src/theme.js` si ya existe. Componentes que se puedan hacer con React Native puro (sin librerías de UI).
+- **Estilo coherente** con las pantallas que ya existen en `mobile/src/app/` y con `mobile/src/theme.js`. Componentes que se puedan hacer con React Native puro (sin librerías de UI).
 
-Mostrarlo **dentro de la conversación** con la herramienta de visualización inline si está disponible; si no, abrir el HTML en el panel del navegador. Guardarlo en `docs/bocetos/<pantalla>.html` (nombre en kebab-case: `catalogo.html`, `detalle-compra.html`), autocontenido y sin dependencias externas.
+Mostrarlo **dentro de la conversación** con la herramienta de visualización inline si está disponible; si no, abrir el HTML en el panel del navegador. Si hace falta un archivo, guardarlo fuera del repo (en la carpeta temporal de la sesión), autocontenido y sin dependencias externas: los bocetos son de trabajo y no se versionan.
 
 ## Paso 2 · Análisis breve y FRENAR
 
@@ -59,11 +58,11 @@ Convenciones de `mobile/` (lo técnico en inglés, lo del dominio en español):
 - **Cliente HTTP** en `src/api/client.js`: `fetch` contra `API_URL` (de `src/config.js`), con el header `X-User-Id` del usuario activo cuando lo hay. Si la respuesta no es 2xx, lanza un `Error` con el mensaje de `{ "error": "..." }`, que la pantalla muestra tal cual (ya viene en español). Un archivo por recurso (`api/eventos.js`, `api/compras.js`) con funciones que nombran la operación: `buscarEventos`, `getCompra`, `pagarCompra`.
 - **Usuario activo** en `src/context/UsuarioContext.js`: la cuenta con la que se inició sesión (`POST /sesiones`) o que se creó (`POST /usuarios`). Se cambia con `iniciarSesion`, `actualizarCuenta` y `cerrarSesion`, y su id viaja en `X-User-Id`. Los formularios de cuenta usan `src/components/Formulario.js`.
 - **Componentes:** de función con hooks, en `src/components/` cuando se usan en más de una pantalla (`EventoCard`, `EstadoBadge`). Estilos con `StyleSheet` y valores compartidos (colores, espaciados) en `src/theme.js`.
-- **Estados de la pantalla:** toda pantalla que carga datos muestra cargando, error (con reintentar) y vacío, como en el boceto. Para pedir los datos usar el hook `src/hooks/useCarga.js` (`{ data, loading, error, recargar }`) en lugar de un `useEffect` propio: ESLint (`react-hooks/set-state-in-effect`) rechaza los `setState` sincrónicos dentro de un efecto. Mientras se vuelve a pedir, `data` conserva lo anterior y `loading` es `true`. La carga se muestra como en `docs/bocetos/carga.html`:
+- **Estados de la pantalla:** toda pantalla que carga datos muestra cargando, error (con reintentar) y vacío, como en el boceto. Para pedir los datos usar el hook `src/hooks/useCarga.js` (`{ data, loading, error, recargar }`) en lugar de un `useEffect` propio: ESLint (`react-hooks/set-state-in-effect`) rechaza los `setState` sincrónicos dentro de un efecto. Mientras se vuelve a pedir, `data` conserva lo anterior y `loading` es `true`. La carga se muestra así:
   - Al abrir una pantalla sin datos todavía: `PantallaCarga` (`src/components/Carga.js`) con un mensaje ("Cargando el evento…").
   - Dentro de una pantalla abierta (buscar, filtrar, reintentar): `EstadoCarga` con `mensaje` en el lugar de la lista; el error, con el mismo componente.
   - Al confirmar una acción (comprar, pagar, cancelar): `CargaEncima` cubriendo la pantalla ("Confirmando tu compra…").
-- **Listados de a páginas** (los que el backend devuelve como `{ resultados, total, hayMas }`): `src/hooks/usePaginado.js` en lugar de `useCarga`, de a 10, y al final de la lista `PieLista` (`src/components/PieLista.js`). La página siguiente se pide **siempre con el botón "Ver más (quedan N)"**, nunca sola al scrollear (`onEndReached`): así lo eligió el usuario para toda la app. Al terminar, "Ya viste los N …". Ver `docs/bocetos/ver-mas-listas.html`.
+- **Listados de a páginas** (los que el backend devuelve como `{ resultados, total, hayMas }`): `src/hooks/usePaginado.js` en lugar de `useCarga`, de a 10, y al final de la lista `PieLista` (`src/components/PieLista.js`). La página siguiente se pide **siempre con el botón "Ver más (quedan N)"**, nunca sola al scrollear (`onEndReached`): así lo eligió el usuario para toda la app. Al terminar, "Ya viste los N …".
 - **Teclado:** en Android la pantalla es de borde a borde y `KeyboardAvoidingView` no corre el contenido. En las pantallas con un campo de texto abajo (como el chat), usar `src/hooks/useAlturaTeclado.js` y dejar ese alto como `paddingBottom`.
 - **Nada técnico en la app:** ni URLs, ni el backend, ni status. Los errores de conexión y los inesperados ya los traduce `api/client.js`; los del backend vienen en español. Después de una acción (pagar, cancelar) se vuelven a pedir los datos al backend en lugar de modificar el estado a mano.
 - **Fechas y precios** se formatean en un solo lugar (`src/format.js`), en es-AR.
