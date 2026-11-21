@@ -1,5 +1,5 @@
 import * as usuarioRepository from './repositories/usuarioRepository.js';
-import { registrar } from '../domain/cuenta.js';
+import { hashContrasenia } from '../domain/cuenta.js';
 import * as categoriaRepository from './repositories/categoriaRepository.js';
 import * as eventoRepository from './repositories/eventoRepository.js';
 import * as compraRepository from './repositories/compraRepository.js';
@@ -12,6 +12,11 @@ function daysFromNow(days, hour = 21) {
   date.setDate(date.getDate() + days);
   date.setHours(hour, 0, 0, 0);
   return date;
+}
+
+// Las cuentas del seed se guardan directo, con la contraseña hasheada como en el registro.
+function registrar({ contrasenia, ...datos }) {
+  return usuarioRepository.create({ ...datos, contraseniaHash: hashContrasenia(contrasenia) });
 }
 
 // Carga los datos de ejemplo. Se ejecuta una vez al iniciar el servidor:

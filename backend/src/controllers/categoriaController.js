@@ -1,5 +1,5 @@
-import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
+import * as categoriaService from '../services/categoriaService.js';
 
 export async function list(req, res) {
-  res.status(200).json(categoriaRepository.findAll());
+  res.status(200).json(categoriaService.listarCategorias());
 }

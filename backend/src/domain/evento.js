@@ -1,15 +1,18 @@
-import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
-import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
 import { calcularDisponibles } from './tipoEntrada.js';
-import { calcularPuntajes } from './resenia.js';
-import { BusinessRuleError, ForbiddenError, ValidationError } from '../http/errors.js';
+import { BusinessRuleError, ForbiddenError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Evento} Evento */
 /** @typedef {import('../persistence/schemas.js').Categoria} Categoria */
 /** @typedef {import('../persistence/schemas.js').Usuario} Usuario */
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
+// Lo que hace falta para armar los resúmenes del catálogo, buscado una sola vez por el service.
+/**
+ * @typedef {{
+ *   categorias: Map<number, Categoria>,
+ *   usuarios: Map<number, Usuario>,
+ *   puntajes: import('./resenia.js').Puntajes,
+ * }} ContextoResumenes
+ */
 
 // `Evento.tuPrecioEstaEntre(Int, Int)` del diagrama: alcanza con que un tipo de entrada
 // tenga un precio en el rango, con los extremos incluidos. Cualquiera de los dos
@@ -35,13 +38,11 @@ export function esElDiaOPosterior(evento, ahora = new Date()) {
   return inicioDelDia <= ahora;
 }
 
-// Caso de uso 4. Los datos llegan con la forma ya validada por el controlador;
-// acá van las reglas que dependen del resto del sistema.
-/** @param {Usuario} organizador @param {Date} [ahora] @returns {Evento} */
-export function crearEvento(datos, organizador, ahora = new Date()) {
-  if (!categoriaRepository.findById(datos.categoriaId)) {
-    throw new ValidationError(`No existe la categoría ${datos.categoriaId}`);
-  }
+// Caso de uso 4. Los datos llegan con la forma ya validada por el controlador (y la
+// categoría, verificada por el service); acá van las reglas del evento. Devuelve los
+// datos del evento nuevo; lo guarda el service.
+/** @param {Usuario} organizador @param {Date} [ahora] */
+export function nuevoEvento(datos, organizador, ahora = new Date()) {
   if (datos.fecha <= ahora) {
     throw new BusinessRuleError('La fecha del evento tiene que ser futura');
   }
@@ -51,7 +52,7 @@ export function crearEvento(datos, organizador, ahora = new Date()) {
     throw new BusinessRuleError('Hay tipos de entrada con el nombre repetido');
   }
 
-  return eventoRepository.create({ ...datos, organizadorId: organizador.id });
+  return { ...datos, organizadorId: organizador.id };
 }
 
 // Forma del evento para la app: resúmenes de categoría y organizador (con su puntaje, como
@@ -103,31 +104,30 @@ function resumenEvento(evento, categoria, organizador, puntajes) {
   };
 }
 
-// Arma los resúmenes de una lista de eventos, buscando de una vez las categorías,
-// los organizadores y los puntajes.
-function resumenes(eventos) {
-  const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
-  const categorias = new Map(categoriaRepository.findAll().map((c) => [c.id, c]));
-  const usuarios = new Map(usuarioRepository.findAll().map((u) => [u.id, u]));
+// Arma los resúmenes de una lista de eventos, con las categorías, los organizadores y los puntajes.
+/** @param {Evento[]} eventos @param {ContextoResumenes} contexto */
+export function resumenes(eventos, { categorias, usuarios, puntajes }) {
   return eventos.map((evento) =>
     resumenEvento(evento, categorias.get(evento.categoriaId), usuarios.get(evento.organizadorId), puntajes));
 }
 
-// Los filtros llegan validados por el controlador; todos son opcionales.
+// Los filtros llegan validados por el controlador; todos son opcionales. Los de texto y
+// categoría ya los aplicó la búsqueda del repositorio: acá van el precio y el orden.
 // Los eventos que ya se realizaron no se muestran: el catálogo es para comprar.
-export function buscarEventos({ texto, categoriaId, precioMin, precioMax, orden = 'fecha' } = {}, ahora = new Date()) {
-  const eventos = eventoRepository.search({ texto, categoriaId })
+/** @param {Evento[]} eventos @param {ContextoResumenes} contexto */
+export function buscarEventos(eventos, { precioMin, precioMax, orden = 'fecha' } = {}, contexto, ahora = new Date()) {
+  const vigentes = eventos
     .filter((evento) => !yaSeRealizo(evento, ahora) && tuPrecioEstaEntre(evento, precioMin, precioMax));
-  return resumenes(eventos).sort(COMPARADORES[orden]);
+  return resumenes(vigentes, contexto).sort(COMPARADORES[orden]);
 }
 
 // Los eventos que organiza el usuario, incluidos los pasados: los necesita para ver
 // las ventas y marcar entradas como utilizadas. Primero los próximos, del más cercano al
 // más lejano, y después los realizados, del más reciente al más viejo (como historial).
 // Mis eventos va de a páginas: el orden tiene que estar resuelto acá y no en la app.
-/** @param {Usuario} organizador @param {Date} [ahora] */
-export function eventosOrganizados(organizador, ahora = new Date()) {
-  const eventos = resumenes(eventoRepository.findByOrganizador(organizador.id));
+/** @param {Evento[]} eventos Los del organizador. @param {ContextoResumenes} contexto @param {Date} [ahora] */
+export function eventosOrganizados(eventosDelOrganizador, contexto, ahora = new Date()) {
+  const eventos = resumenes(eventosDelOrganizador, contexto);
   const proximos = eventos.filter((evento) => !yaSeRealizo(evento, ahora)).sort(porFecha);
   const realizados = eventos.filter((evento) => yaSeRealizo(evento, ahora)).sort((a, b) => porFecha(b, a));
   return [...proximos, ...realizados];
@@ -155,9 +155,9 @@ export function cantidadesOrganizador(eventos, ahora = new Date()) {
 }
 
 // Los eventos favoritos del usuario, incluidos los que ya se realizaron, ordenados por fecha.
-/** @param {Usuario} usuario */
-export function eventosFavoritos(usuario) {
-  return resumenes(eventoRepository.findByIds(usuario.favoritos)).sort(porFecha);
+/** @param {Evento[]} favoritos @param {ContextoResumenes} contexto */
+export function eventosFavoritos(favoritos, contexto) {
+  return resumenes(favoritos, contexto).sort(porFecha);
 }
 
 // Caso de uso 2: las ventas de un evento solo las ve su organizador.

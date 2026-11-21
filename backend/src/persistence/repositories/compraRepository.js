@@ -36,6 +36,16 @@ export function findByEvento(eventoId) {
   return compras.findAll((compra) => compra.eventoId === Number(eventoId));
 }
 
+// Guarda lo que cambió el dominio: estado e historial (que se pasan juntos para que no se
+// desincronicen), mensajes o hasta cuándo leyó cada uno. Lo que no venga queda igual.
+/** @returns {Compra | null} */
+export function update(id, { estado, historial, mensajes, mensajesLeidosHasta }) {
+  const cambios = Object.fromEntries(
+    Object.entries({ estado, historial, mensajes, mensajesLeidosHasta }).filter(([, valor]) => valor !== undefined),
+  );
+  return compras.update(id, cambios);
+}
+
 // Escribe el estado y el historial juntos para que no se desincronicen.
 // Si la transición es válida lo decide el dominio.
 /** @returns {Compra | null} */

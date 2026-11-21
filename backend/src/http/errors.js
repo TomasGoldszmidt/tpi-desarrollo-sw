@@ -1,4 +1,4 @@
-// Errores con su status HTTP. Los lanzan los controladores, el dominio y los middlewares;
+// Errores con su status HTTP. Los lanzan los controladores, los services, el dominio y los middlewares;
 // el errorHandler los convierte en la respuesta { error: mensaje }.
 export class AppError extends Error {
   constructor(message, status) {

@@ -2,9 +2,12 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { loadSeed } from '../src/persistence/seed.js';
 import * as usuarioRepository from '../src/persistence/repositories/usuarioRepository.js';
-import { actualizarPerfil, hashContrasenia, iniciarSesion, registrar, verificarContrasenia } from '../src/domain/cuenta.js';
+import {
+  cambiosDePerfil, hashContrasenia, nuevaCuenta, verificarContrasenia, verificarCredenciales,
+} from '../src/domain/cuenta.js';
+import { actualizarPerfil, iniciarSesion, registrar } from '../src/services/cuentaService.js';
 import { requireContrasenia, requireEmail } from '../src/http/validation.js';
-import { BusinessRuleError, ForbiddenError, UnauthorizedError, ValidationError } from '../src/http/errors.js';
+import { BusinessRuleError, ForbiddenError, NotFoundError, UnauthorizedError, ValidationError } from '../src/http/errors.js';
 
 const seed = loadSeed();
 
@@ -88,6 +91,51 @@ describe('edición del perfil', () => {
     actualizarPerfil(blanco, blanco.id, { contraseniaActual: 'blanco1234', contraseniaNueva: 'nueva12345' });
     assert.equal(iniciarSesion('blanco@gmail.com', 'nueva12345').id, blanco.id);
     assert.throws(() => iniciarSesion('blanco@gmail.com', 'blanco1234'), UnauthorizedError);
+  });
+
+  it('de un usuario inexistente da NotFoundError', () => {
+    assert.throws(() => actualizarPerfil(dilollo, 9999, { nombre: 'X' }), NotFoundError);
+  });
+});
+
+// Funciones puras del dominio: reciben lo que averiguó el service, sin repositorios.
+describe('dominio de la cuenta', () => {
+  const usuario = { id: 1, nombre: 'Ana', apellido: 'Paz', favoritos: [] };
+  const guardado = { id: 1, contraseniaHash: hashContrasenia('actual1234') };
+
+  it('nuevaCuenta hashea la contraseña y rechaza un email en uso', () => {
+    const datos = { nombre: 'Ana', apellido: 'Paz', email: 'ana@gmail.com', contrasenia: 'ana12345' };
+    const cuenta = nuevaCuenta(datos, false);
+    assert.deepEqual(Object.keys(cuenta).sort(), ['apellido', 'contraseniaHash', 'email', 'nombre']);
+    assert.ok(verificarContrasenia('ana12345', cuenta.contraseniaHash));
+    assert.throws(() => nuevaCuenta(datos, true), { name: 'BusinessRuleError', message: 'Ya hay una cuenta con ese email.' });
+  });
+
+  it('verificarCredenciales rechaza un email sin cuenta o una contraseña incorrecta', () => {
+    assert.doesNotThrow(() => verificarCredenciales(guardado, 'actual1234'));
+    assert.throws(() => verificarCredenciales(null, 'actual1234'), UnauthorizedError);
+    assert.throws(() => verificarCredenciales(guardado, 'otra12345'), UnauthorizedError);
+  });
+
+  it('cambiosDePerfil no deja editar el perfil de otro', () => {
+    assert.throws(
+      () => cambiosDePerfil(usuario, 2, { nombre: 'X' }, { emailEnUso: false, contraseniaHash: guardado.contraseniaHash }),
+      ForbiddenError,
+    );
+  });
+
+  it('cambiosDePerfil pide la contraseña actual para cambiarla', () => {
+    const datos = { emailEnUso: false, contraseniaHash: guardado.contraseniaHash };
+    assert.throws(() => cambiosDePerfil(usuario, 1, { contraseniaNueva: 'nueva12345' }, datos), ValidationError);
+    const cambios = cambiosDePerfil(usuario, 1, { contraseniaActual: 'actual1234', contraseniaNueva: 'nueva12345' }, datos);
+    assert.ok(verificarContrasenia('nueva12345', cambios.contraseniaHash));
+  });
+
+  it('cambiosDePerfil rechaza un email que ya usa otra cuenta', () => {
+    assert.throws(
+      () => cambiosDePerfil(usuario, 1, { email: 'otro@gmail.com' }, { emailEnUso: true, contraseniaHash: guardado.contraseniaHash }),
+      BusinessRuleError,
+    );
   });
 });
 

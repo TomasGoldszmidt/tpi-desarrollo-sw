@@ -1,25 +1,23 @@
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { perfilUsuario } from '../domain/resenia.js';
-import { actualizarPerfil, registrar } from '../domain/cuenta.js';
-import { NotFoundError, ValidationError } from '../http/errors.js';
+import * as usuarioService from '../services/usuarioService.js';
+import * as reseniaService from '../services/reseniaService.js';
+import * as cuentaService from '../services/cuentaService.js';
+import { ValidationError } from '../http/errors.js';
 import { requireContrasenia, requireEmail, requireId, requireString } from '../http/validation.js';
 
 export async function list(req, res) {
-  res.status(200).json(usuarioRepository.findAll());
+  res.status(200).json(usuarioService.listarUsuarios());
 }
 
 // Público: lo usa la pantalla de reseñas del organizador para mostrar su nombre y puntaje.
 export async function getById(req, res) {
   const id = requireId(req.params.id);
-  const usuario = usuarioRepository.findById(id);
-  if (!usuario) throw new NotFoundError(`No existe el usuario ${id}`);
-  res.status(200).json(perfilUsuario(usuario));
+  res.status(200).json(reseniaService.perfilDe(id));
 }
 
 // Registro: crea la cuenta y la devuelve con el email (la app entra con ese usuario).
 export async function create(req, res) {
   const body = req.body ?? {};
-  const cuenta = registrar({
+  const cuenta = cuentaService.registrar({
     nombre: requireString(body.nombre, 'nombre', { maxLength: 50 }),
     apellido: requireString(body.apellido, 'apellido', { maxLength: 50 }),
     email: requireEmail(body.email),
@@ -31,8 +29,6 @@ export async function create(req, res) {
 // Edición del perfil: solo los campos que vienen. Para cambiar la contraseña hay que mandar la actual.
 export async function update(req, res) {
   const id = requireId(req.params.id);
-  if (!usuarioRepository.findById(id)) throw new NotFoundError(`No existe el usuario ${id}`);
-
   const body = req.body ?? {};
   const cambios = {};
   if (body.nombre !== undefined) cambios.nombre = requireString(body.nombre, 'nombre', { maxLength: 50 });
@@ -44,5 +40,5 @@ export async function update(req, res) {
   }
   if (Object.keys(cambios).length === 0) throw new ValidationError('No hay cambios para guardar');
 
-  res.status(200).json(actualizarPerfil(req.usuario, id, cambios));
+  res.status(200).json(cuentaService.actualizarPerfil(req.usuario, id, cambios));
 }

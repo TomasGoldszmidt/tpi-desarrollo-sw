@@ -1,9 +1,6 @@
 import { EstadoCompra } from './estadoCompra.js';
 import { yaSeRealizo, esElDiaOPosterior } from './evento.js';
 import { calcularDisponibles, hayCupoPara } from './tipoEntrada.js';
-import * as compraRepository from '../persistence/repositories/compraRepository.js';
-import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
 import { BusinessRuleError, ForbiddenError, ValidationError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
@@ -52,7 +49,8 @@ export function estadoAlCancelar(compra) {
 }
 
 // `Compra.actualizarEstado(EstadoCompra)` del diagrama. Valida la transición, quién la pide
-// y la fecha del evento; si todo está bien, graba el estado y el historial juntos.
+// y la fecha del evento; si todo está bien, devuelve la compra con el estado nuevo y el
+// cambio sumado al historial. La guarda el service.
 /**
  * @param {Compra} compra @param {Evento} evento El evento de la compra.
  * @param {string} nuevoEstado @param {Usuario} usuario Quien hace el cambio.
@@ -71,20 +69,22 @@ export function actualizarEstado(compra, evento, nuevoEstado, usuario, ahora = n
     throw new BusinessRuleError(transicion.condicion.mensaje);
   }
 
-  return compraRepository.addCambioEstado(compra.id, { estado: nuevoEstado, usuarioId: usuario.id, fechaHora: ahora });
+  return {
+    ...compra,
+    estado: nuevoEstado,
+    historial: [...compra.historial, { estado: nuevoEstado, usuarioId: usuario.id, fechaHora: ahora }],
+  };
 }
 
 // Caso de uso 12. La compra arranca PENDIENTE y ya ocupa cupo. El total lo calcula el
 // dominio con el precio actual: es lo que se paga y lo que se reembolsa.
+// Devuelve los datos de la compra nueva; la guarda el service.
 /**
- * @param {{ eventoId: number, tipoEntradaId: number, cantidad: number }} datos Forma ya validada.
+ * @param {{ tipoEntradaId: number, cantidad: number }} datos Forma ya validada.
+ * @param {Evento} evento @param {Compra[]} compras Las compras del evento (para el cupo).
  * @param {Usuario} comprador @param {Date} [ahora]
- * @returns {Compra}
  */
-export function comprar({ eventoId, tipoEntradaId, cantidad }, comprador, ahora = new Date()) {
-  const evento = eventoRepository.findById(eventoId);
-  if (!evento) throw new ValidationError(`No existe el evento ${eventoId}`);
-
+export function nuevaCompra({ tipoEntradaId, cantidad }, evento, compras, comprador, ahora = new Date()) {
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
   if (!tipoEntrada) throw new ValidationError(`El evento no tiene el tipo de entrada ${tipoEntradaId}`);
 
@@ -94,21 +94,20 @@ export function comprar({ eventoId, tipoEntradaId, cantidad }, comprador, ahora 
   }
   if (yaSeRealizo(evento, ahora)) throw new BusinessRuleError('El evento ya se realizó');
 
-  const compras = compraRepository.findByEvento(evento.id);
   if (!hayCupoPara(tipoEntrada, compras, cantidad)) {
     const disponibles = calcularDisponibles(tipoEntrada, compras);
     const quedan = disponibles === 1 ? 'queda 1 entrada' : `quedan ${disponibles} entradas`;
     throw new BusinessRuleError(`No hay cupo suficiente: ${quedan}`);
   }
 
-  return compraRepository.create({
+  return {
     compradorId: comprador.id,
     eventoId: evento.id,
     tipoEntradaId,
     cantidad,
     total: tipoEntrada.precio * cantidad,
     fechaHora: ahora,
-  });
+  };
 }
 
 const UN_DIA = 24 * 60 * 60 * 1000;
@@ -201,13 +200,12 @@ export function puedeVer(compra, evento, usuario) {
 // Con `lector` (quien pide), suma cuántos mensajes del chat todavía no leyó.
 /**
  * @param {Compra} compra @param {Evento} evento @param {Usuario} comprador
+ * @param {Usuario} organizador El del evento: Mis compras usa su nombre en el aviso de mensajes ("Tomas te escribió").
  * @param {Usuario | null} [lector] @param {Date} [ahora]
  */
-export function detalleCompra(compra, evento, comprador, lector = null, ahora = new Date()) {
+export function detalleCompra(compra, evento, comprador, organizador, lector = null, ahora = new Date()) {
   const { compradorId: _compradorId, eventoId: _eventoId, tipoEntradaId, mensajesLeidosHasta: _leidos, ...resto } = compra;
   const tipoEntrada = evento.tiposEntrada.find((tipo) => tipo.id === tipoEntradaId);
-  // El nombre del organizador lo usa Mis compras para el aviso de mensajes ("Tomas te escribió").
-  const organizador = usuarioRepository.findById(evento.organizadorId);
   return {
     id: compra.id,
     evento: {
@@ -228,10 +226,13 @@ export function detalleCompra(compra, evento, comprador, lector = null, ahora = 
 
 // Cada mensaje con los datos de quien lo escribió, para que el chat muestre nombres:
 // la compra trae al comprador, pero no al organizador.
-/** @param {import('../persistence/schemas.js').Mensaje[]} mensajes */
-export function mensajesConAutor(mensajes) {
+/**
+ * @param {import('../persistence/schemas.js').Mensaje[]} mensajes
+ * @param {Map<number, Usuario>} usuarios Los usuarios por id (al menos los que escribieron).
+ */
+export function mensajesConAutor(mensajes, usuarios) {
   return mensajes.map(({ usuarioId, mensaje, enviado }) => {
-    const autor = usuarioRepository.findById(usuarioId);
+    const autor = usuarios.get(usuarioId);
     return { autor: { id: autor.id, nombre: autor.nombre, apellido: autor.apellido }, mensaje, enviado };
   });
 }
@@ -276,25 +277,27 @@ export function conversaciones(compras, evento, usuario) {
 }
 
 // Al abrir el chat: todo lo que hay hasta ahora queda leído para quien lo abrió.
+// Devuelve la compra con esa fecha en el rol de quien lo abrió. La guarda el service.
 /** @param {Compra} compra @param {Evento} evento @param {Usuario} usuario @param {Date} [ahora] @returns {Compra} */
 export function leerMensajes(compra, evento, usuario, ahora = new Date()) {
   const rol = rolEnCompra(compra, evento, usuario);
   if (!rol) throw new ForbiddenError('Solo el comprador y el organizador pueden leer este chat');
-  return compraRepository.marcarMensajesLeidos(compra.id, rol, ahora);
+  return { ...compra, mensajesLeidosHasta: { ...compra.mensajesLeidosHasta, [rol]: ahora } };
 }
 
 // Casos de uso 5 y 6: comprador y organizador escriben "en cualquier momento",
 // así que no importa el estado de la compra ni si el evento ya pasó.
+// Devuelve la compra con el mensaje al final y el chat leído para quien escribe (ya lo vio
+// hasta acá). La guarda el service.
 /**
  * @param {Compra} compra @param {Evento} evento @param {Usuario} usuario
  * @param {string} texto Ya validado por el controlador. @param {Date} [ahora]
+ * @returns {Compra}
  */
 export function enviarMensaje(compra, evento, usuario, texto, ahora = new Date()) {
   if (!puedeVer(compra, evento, usuario)) {
     throw new ForbiddenError('Solo el comprador y el organizador pueden escribir en este chat');
   }
-  const actualizada = compraRepository.addMensaje(compra.id, { usuarioId: usuario.id, mensaje: texto, enviado: ahora });
-  // Quien escribe ya vio el chat hasta acá.
-  compraRepository.marcarMensajesLeidos(compra.id, rolEnCompra(compra, evento, usuario), ahora);
-  return mensajesConAutor([actualizada.mensajes.at(-1)])[0];
+  const conMensaje = { ...compra, mensajes: [...compra.mensajes, { usuarioId: usuario.id, mensaje: texto, enviado: ahora }] };
+  return leerMensajes(conMensaje, evento, usuario, ahora);
 }

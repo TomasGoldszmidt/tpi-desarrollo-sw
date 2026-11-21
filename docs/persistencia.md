@@ -206,6 +206,7 @@ Estados posibles: `pendiente` · `analizada` (esperando ok) · `implementada` ·
 - `addCambioEstado`, que actualiza `estado` y agrega el registro al historial en una sola escritura
 - `addMensaje`
 - `marcarMensajesLeidos(id, rol, fecha)`, con rol `comprador` u `organizador` (quién es quién lo decide el dominio)
+- `update(id, { estado, historial, mensajes, mensajesLeidosHasta })`, agregado con la capa de services: el dominio devuelve la compra cambiada y el service guarda solo esos campos. `addCambioEstado`, `addMensaje` y `marcarMensajesLeidos` quedan para el seed.
 
 **Decisiones aprobadas:**
 - `EstadoCompra` es una constante congelada en `backend/src/domain/estadoCompra.js`, la primera pieza de la carpeta del dominio.

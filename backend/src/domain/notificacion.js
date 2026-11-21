@@ -1,11 +1,10 @@
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
-import * as compraRepository from '../persistence/repositories/compraRepository.js';
-import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
 import { ForbiddenError, NotFoundError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Usuario} Usuario */
+/** @typedef {import('../persistence/schemas.js').Cuenta} Cuenta */
 /** @typedef {import('../persistence/schemas.js').Compra} Compra */
+/** @typedef {import('../persistence/schemas.js').Evento} Evento */
+/** @typedef {import('../persistence/schemas.js').Resenia} Resenia */
 
 // Las notificaciones no se guardan: se calculan con lo que ya está guardado.
 // Una notificación es algo que hizo OTRA persona en una compra en la que el usuario
@@ -20,7 +19,8 @@ import { ForbiddenError, NotFoundError } from '../http/errors.js';
 // - MENSAJE: el otro escribió en el chat de la compra. Lleva el texto.
 // - RESENIA: un comprador reseñó un evento tuyo. Lleva la puntuación.
 
-function verificarPropio(usuarioActivo, id) {
+/** @param {Usuario} usuarioActivo @param {number} id El dueño de las notificaciones. */
+export function verificarPropias(usuarioActivo, id) {
   if (usuarioActivo.id !== id) {
     throw new ForbiddenError('Solo podés ver tus propias notificaciones.');
   }
@@ -71,25 +71,22 @@ function estaLeida(notificacion, chatLeidoHasta, cuenta) {
 /**
  * Las notificaciones del usuario, con `leida`: primero las no leídas y, dentro de cada grupo,
  * de la más reciente a la más vieja (si empatan, por id). Así las páginas no mezclan las
- * nuevas con las anteriores: la app las muestra en dos secciones.
- * @param {Usuario} usuarioActivo
+ * nuevas con las anteriores: la app las muestra en dos secciones. Lo guardado lo junta el service.
+ * @param {Cuenta} cuenta
+ * @param {{
+ *   participaciones: { compra: Compra, evento: Evento }[],
+ *   misEventos: Evento[],
+ *   resenias: Resenia[],
+ *   usuarios: Map<number, Usuario>,
+ * }} datos Las compras en las que participa (como comprador o como organizador), con su evento;
+ *   los eventos que organiza, las reseñas de esos eventos y los usuarios por id.
  */
-export function notificacionesDe(usuarioActivo, id) {
-  verificarPropio(usuarioActivo, id);
-  const cuenta = usuarioRepository.findCuentaById(id);
-
-  const misEventos = eventoRepository.findByOrganizador(id);
-  const comoComprador = compraRepository.findByComprador(id)
-    .map((compra) => ({ compra, evento: eventoRepository.findById(compra.eventoId) }));
-  const comoOrganizador = misEventos.flatMap((evento) =>
-    compraRepository.findByEvento(evento.id).map((compra) => ({ compra, evento })));
-
-  const deCompras = [...comoComprador, ...comoOrganizador]
-    .flatMap(({ compra, evento }) => deCompra(compra, evento, cuenta));
+export function notificacionesDe(cuenta, { participaciones, misEventos, resenias, usuarios }) {
+  const deCompras = participaciones.flatMap(({ compra, evento }) => deCompra(compra, evento, cuenta));
 
   const eventosPorId = new Map(misEventos.map((evento) => [evento.id, evento]));
-  const deResenias = reseniaRepository.findByEventos([...eventosPorId.keys()])
-    .filter((resenia) => resenia.compradorId !== id)
+  const deResenias = resenias
+    .filter((resenia) => resenia.compradorId !== cuenta.id)
     .map((resenia) => ({
       id: `resenia-${resenia.id}`,
       tipo: 'RESENIA',
@@ -99,7 +96,6 @@ export function notificacionesDe(usuarioActivo, id) {
       evento: { id: resenia.eventoId, nombre: eventosPorId.get(resenia.eventoId).nombre },
     }));
 
-  const usuarios = new Map(usuarioRepository.findAll().map((u) => [u.id, u]));
   return [...deCompras, ...deResenias]
     .map(({ deId, chatLeidoHasta, ...notificacion }) => {
       const de = usuarios.get(deId);
@@ -112,17 +108,10 @@ export function notificacionesDe(usuarioActivo, id) {
     .sort((a, b) => a.leida - b.leida || b.fecha - a.fecha || a.id.localeCompare(b.id));
 }
 
-// "Marcar todas como leídas": las que hay hasta ahora quedan como leídas.
-/** @param {Usuario} usuarioActivo */
-export function marcarLeidas(usuarioActivo, id, ahora = new Date()) {
-  verificarPropio(usuarioActivo, id);
-  usuarioRepository.marcarNotificacionesLeidas(id, ahora);
-}
-
-// Al abrir una notificación: solo esa queda leída. Tiene que ser una de las del usuario.
-/** @param {Usuario} usuarioActivo @param {string} notificacionId */
-export function marcarLeida(usuarioActivo, id, notificacionId) {
-  const existe = notificacionesDe(usuarioActivo, id).some((notificacion) => notificacion.id === notificacionId);
-  if (!existe) throw new NotFoundError(`No existe la notificación ${notificacionId}`);
-  usuarioRepository.addNotificacionLeida(id, notificacionId);
+// Al abrir una notificación: tiene que ser una de las del usuario.
+/** @param {{ id: string }[]} notificaciones Las del usuario. @param {string} notificacionId */
+export function verificarNotificacion(notificaciones, notificacionId) {
+  if (!notificaciones.some((notificacion) => notificacion.id === notificacionId)) {
+    throw new NotFoundError(`No existe la notificación ${notificacionId}`);
+  }
 }

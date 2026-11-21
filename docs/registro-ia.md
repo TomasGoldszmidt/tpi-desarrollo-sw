@@ -1187,3 +1187,17 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** antes de borrar, la IA preguntó qué entraba y recomendó dejar los dos archivos que respaldan el criterio y las decisiones, en lugar de borrar toda la carpeta.
 - **Corregido / problemas:** ninguno. Lo borrado sigue en el historial de git.
 - **Aprendizaje:** el repo que se entrega es para quien lo corrige: conviene dejar lo que muestra cómo y por qué se hizo, y sacar lo que solo servía para trabajar.
+
+### 2026-11-21 · Capa de services en el backend
+- **Tarea:** 6. Pruebas y rediseño (arquitectura del backend)
+- **Herramienta / skill:** Claude Code, con 5 subagentes en paralelo (uno por entidad), `/registrar-ia`
+- **Pedido (prompt):** "No hay service, la orquestación la hace el controller, eso está muy mal, debería haber un service." Después: "Hacelo en todos y verificá que funcione todo bien, con tests de integración de los flujos más importantes", y "hacé el refactor de cada entidad con distintos subagentes".
+- **Resultado:**
+  - Al revisar, la IA encontró que el problema era doble: los controllers buscaban en los repositorios y armaban las respuestas, y el dominio también llamaba a los repositorios. Propuso arreglar las dos cosas.
+  - Capas nuevas: `routes/ → controllers/ → services/ → domain/ + repositories/`. Los controllers solo validan y responden. Los 8 services (`compraService`, `eventoService`, …) buscan, tiran el 404, llaman al dominio y guardan. El dominio quedó puro: recibe documentos y devuelve resultados o lo que hay que guardar, sin importar repositorios.
+  - Antes de tocar el código: una "foto" de 874 respuestas de la API y `test/integracion.test.js`, con 26 tests por HTTP de los flujos principales (comprar, pagar, chatear, cancelar, crear un evento, reseñar, cuenta, favoritos, notificaciones y errores).
+  - La IA hizo el dominio y los services. Después 5 subagentes pasaron en paralelo los controllers y los tests de cada entidad, cada uno solo con sus archivos. `domain.test.js` se repartió en un archivo por entidad.
+  - Resultado: 152 tests (antes 98). De las 874 respuestas, 846 son idénticas. Las otras 28 cambian a propósito: un parámetro mal formado ahora da 400 antes que el 403/404 del recurso, porque el controller valida antes de llamar al service.
+- **Bien:** la foto de la API y los tests de integración, armados antes del refactor, permitieron comprobar que la API responde igual sin probar a mano. Los subagentes terminaron en uno o dos minutos cada uno, y como cada uno tenía sus archivos, no se pisaron.
+- **Corregido / problemas:** el diseño original (que ya estaba en este registro) mandaba las lecturas simples del controller directo al repositorio y dejaba el dominio con acceso a los datos. Funcionaba, pero mezclaba capas: hizo falta que yo lo marcara. Los subagentes no se dieron cuenta de que los métodos viejos del repositorio los sigue usando el seed, y sugirieron borrarlos: no se borraron.
+- **Aprendizaje:** la IA aplica la arquitectura que se le pide, pero no siempre la cuestiona: revisar las capas por mi cuenta encontró un problema que había pasado varias tareas sin que nadie lo notara. Y para un refactor grande, sacar una foto de la API antes sirve más que leer el diff.

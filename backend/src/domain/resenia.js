@@ -1,13 +1,11 @@
 import { EstadoCompra } from './estadoCompra.js';
-import * as reseniaRepository from '../persistence/repositories/reseniaRepository.js';
-import * as compraRepository from '../persistence/repositories/compraRepository.js';
-import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { BusinessRuleError, ValidationError } from '../http/errors.js';
+import { BusinessRuleError } from '../http/errors.js';
 
 /** @typedef {import('../persistence/schemas.js').Evento} Evento */
 /** @typedef {import('../persistence/schemas.js').Resenia} Resenia */
 /** @typedef {import('../persistence/schemas.js').Usuario} Usuario */
+/** @typedef {import('../persistence/schemas.js').Compra} Compra */
+/** @typedef {Map<number, { puntaje: number, cantidadResenias: number }>} Puntajes */
 
 // Puntaje de cada organizador: promedio de las reseñas de todos sus eventos. No se guarda.
 // La reseña no lleva el organizador, así que se llega a él por el evento reseñado.
@@ -15,7 +13,7 @@ import { BusinessRuleError, ValidationError } from '../http/errors.js';
 /**
  * @param {Evento[]} eventos Todos los eventos (para saber de quién es cada uno).
  * @param {Resenia[]} resenias
- * @returns {Map<number, { puntaje: number, cantidadResenias: number }>}
+ * @returns {Puntajes}
  */
 export function calcularPuntajes(eventos, resenias) {
   const organizadorDe = new Map(eventos.map((evento) => [evento.id, evento.organizadorId]));
@@ -42,55 +40,56 @@ export function detalleResenia(resenia, evento, comprador) {
   };
 }
 
-// La reseña que dejó el comprador de la compra para ese evento, o null. Va en el detalle
+// La reseña que dejó el comprador de una compra para ese evento, o null. Va en el detalle
 // de la compra para que la app muestre la reseña ya hecha o el formulario (caso de uso 9).
-/** @param {import('../persistence/schemas.js').Compra} compra */
-export function reseniaDeCompra(compra) {
-  const resenia = reseniaRepository.findByCompradorAndEvento(compra.compradorId, compra.eventoId);
+/** @param {Resenia | null} resenia */
+export function resumenResenia(resenia) {
   return resenia ? { id: resenia.id, puntuacion: resenia.puntuacion, detalle: resenia.detalle } : null;
 }
 
 // Caso de uso 9: solo reseña quien usó su entrada, y una vez por evento.
 // La forma (puntuación 1 a 5, detalle) llega validada por el controlador.
-/** @param {{ eventoId: number, puntuacion: number, detalle: string }} datos @param {Usuario} comprador */
-export function crearResenia({ eventoId, puntuacion, detalle }, comprador) {
-  const evento = eventoRepository.findById(eventoId);
-  if (!evento) throw new ValidationError(`No existe el evento ${eventoId}`);
-
-  const asistio = compraRepository.findByComprador(comprador.id)
+// Devuelve los datos de la reseña nueva; la guarda el service.
+/**
+ * @param {{ puntuacion: number, detalle: string }} datos
+ * @param {Evento} evento @param {Compra[]} compras Las compras del comprador.
+ * @param {Resenia | null} reseniaAnterior La que ya dejó para ese evento, si hay.
+ * @param {Usuario} comprador
+ */
+export function nuevaResenia({ puntuacion, detalle }, evento, compras, reseniaAnterior, comprador) {
+  const asistio = compras
     .some((compra) => compra.eventoId === evento.id && compra.estado === EstadoCompra.UTILIZADA);
   if (!asistio) throw new BusinessRuleError('Solo podés reseñar eventos a los que asististe');
 
-  if (reseniaRepository.findByCompradorAndEvento(comprador.id, evento.id)) {
-    throw new BusinessRuleError('Ya reseñaste este evento');
-  }
+  if (reseniaAnterior) throw new BusinessRuleError('Ya reseñaste este evento');
 
-  const resenia = reseniaRepository.create({ compradorId: comprador.id, eventoId: evento.id, detalle, puntuacion });
-  return detalleResenia(resenia, evento, comprador);
+  return { compradorId: comprador.id, eventoId: evento.id, detalle, puntuacion };
 }
 
 // Puntaje de un solo organizador, con los mismos valores que muestra el catálogo
 // (null y 0 si no tiene reseñas).
-/** @param {Usuario} organizador @returns {{ puntaje: number | null, cantidadResenias: number }} */
-export function puntajeDe(organizador) {
-  const puntajes = calcularPuntajes(eventoRepository.findAll(), reseniaRepository.findAll());
+/** @param {Usuario} organizador @param {Puntajes} puntajes @returns {{ puntaje: number | null, cantidadResenias: number }} */
+export function puntajeDe(organizador, puntajes) {
   const { puntaje = null, cantidadResenias = 0 } = puntajes.get(organizador.id) ?? {};
   return { puntaje, cantidadResenias };
 }
 
 // GET /usuarios/:id: el usuario con su puntaje como organizador. Es la cabecera
 // de la pantalla de reseñas del organizador (caso de uso 10).
-/** @param {Usuario} usuario */
-export function perfilUsuario(usuario) {
-  return { ...usuario, ...puntajeDe(usuario) };
+/** @param {Usuario} usuario @param {Puntajes} puntajes */
+export function perfilUsuario(usuario, puntajes) {
+  return { ...usuario, ...puntajeDe(usuario, puntajes) };
 }
 
-// Caso de uso 10: las reseñas de todos los eventos de un organizador, del evento
-// más reciente al más viejo. Un usuario que no organiza nada no tiene reseñas.
-/** @param {Usuario} organizador */
-export function reseniasDeOrganizador(organizador) {
-  const eventos = new Map(eventoRepository.findByOrganizador(organizador.id).map((e) => [e.id, e]));
-  return reseniaRepository.findByEventos([...eventos.keys()])
-    .map((resenia) => detalleResenia(resenia, eventos.get(resenia.eventoId), usuarioRepository.findById(resenia.compradorId)))
+// Caso de uso 10: las reseñas de los eventos de un organizador, del evento más reciente
+// al más viejo. Un usuario que no organiza nada no tiene reseñas.
+/**
+ * @param {Resenia[]} resenias Las de sus eventos.
+ * @param {Map<number, Evento>} eventos Sus eventos por id.
+ * @param {Map<number, Usuario>} usuarios Los usuarios por id (al menos los compradores).
+ */
+export function reseniasDeOrganizador(resenias, eventos, usuarios) {
+  return resenias
+    .map((resenia) => detalleResenia(resenia, eventos.get(resenia.eventoId), usuarios.get(resenia.compradorId)))
     .sort((a, b) => b.evento.fecha - a.evento.fecha || b.id - a.id);
 }

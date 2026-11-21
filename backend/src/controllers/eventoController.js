@@ -1,29 +1,12 @@
-import * as eventoRepository from '../persistence/repositories/eventoRepository.js';
-import * as compraRepository from '../persistence/repositories/compraRepository.js';
-import * as categoriaRepository from '../persistence/repositories/categoriaRepository.js';
-import * as usuarioRepository from '../persistence/repositories/usuarioRepository.js';
-import { crearEvento, detalleEvento, buscarEventos, ORDENES, eventosOrganizados, verificarOrganizador,
-  FILTROS_ORGANIZADOR, filtroOrganizador, cantidadesOrganizador } from '../domain/evento.js';
-import {
-  cantidadConMensajesNoLeidos, cantidadesPorEstado, conversaciones, detalleCompra, masRecientesPrimero, ORDEN_ESTADOS, resumenVentas,
-} from '../domain/compra.js';
-import { puntajeDe, reseniaDeCompra } from '../domain/resenia.js';
-import { NotFoundError, ValidationError } from '../http/errors.js';
-import { paginar, parsePagina } from '../http/pagination.js';
+import * as eventoService from '../services/eventoService.js';
+import * as compraService from '../services/compraService.js';
+import { ORDENES, FILTROS_ORGANIZADOR } from '../domain/evento.js';
+import { ORDEN_ESTADOS } from '../domain/compra.js';
+import { ValidationError } from '../http/errors.js';
+import { parsePagina } from '../http/pagination.js';
 import {
   requireArray, requireDate, requireId, requireInteger, requireNumber, requireString, requireUrl,
 } from '../http/validation.js';
-
-function toDetalle(evento) {
-  const organizador = usuarioRepository.findById(evento.organizadorId);
-  return detalleEvento(
-    evento,
-    compraRepository.findByEvento(evento.id),
-    categoriaRepository.findById(evento.categoriaId),
-    organizador,
-    puntajeDe(organizador),
-  );
-}
 
 // Largo máximo de los textos del evento. Son los mismos que LARGOS en mobile/src/app/eventos/nuevo.js:
 // si se cambian, cambiarlos en los dos lados.
@@ -63,10 +46,9 @@ export async function list(req, res) {
   if (filtros.precioMin !== undefined && filtros.precioMax !== undefined && filtros.precioMin > filtros.precioMax) {
     throw new ValidationError('El campo precioMin no puede ser mayor que precioMax');
   }
-
   const pagina = parsePagina(req.query);
 
-  res.status(200).json(paginar(buscarEventos(filtros), pagina));
+  res.status(200).json(eventoService.buscarEnCatalogo(filtros, pagina));
 }
 
 export async function create(req, res) {
@@ -85,24 +67,19 @@ export async function create(req, res) {
     tiposEntrada: requireArray(body.tiposEntrada, 'tiposEntrada', { minLength: 1 }).map(parseTipoEntrada),
   };
 
-  const evento = crearEvento(datos, req.usuario);
-  res.status(201).location(`/eventos/${evento.id}`).json(toDetalle(evento));
+  const evento = eventoService.crearEvento(datos, req.usuario);
+  res.status(201).location(`/eventos/${evento.id}`).json(evento);
 }
 
 export async function getById(req, res) {
   const id = requireId(req.params.id);
-  const evento = eventoRepository.findById(id);
-  if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
-  res.status(200).json(toDetalle(evento));
+  res.status(200).json(eventoService.verEvento(id));
 }
 
 // GET /usuarios/:id/eventos: los eventos que organiza, incluidos los pasados. Son públicos.
-// Cada uno trae cuántas compras tienen mensajes que el organizador no leyó. Van de a
-// páginas, con un filtro opcional y cuántos hay con cada filtro (los chips de la app).
+// El filtro es opcional; el armado de la página está en eventoService.eventosDe.
 export async function listByOrganizador(req, res) {
   const id = requireId(req.params.id);
-  const organizador = usuarioRepository.findById(id);
-  if (!organizador) throw new NotFoundError(`No existe el usuario ${id}`);
   const filtro = optional(req.query.filtro, (v) => {
     if (!FILTROS_ORGANIZADOR.includes(v)) {
       throw new ValidationError(`El campo filtro tiene que ser uno de: ${FILTROS_ORGANIZADOR.join(', ')}`);
@@ -111,25 +88,13 @@ export async function listByOrganizador(req, res) {
   });
   const pagina = parsePagina(req.query);
 
-  const ahora = new Date();
-  const eventos = eventosOrganizados(organizador, ahora).map((evento) => ({
-    ...evento,
-    conMensajesNoLeidos: cantidadConMensajesNoLeidos(
-      compraRepository.findByEvento(evento.id), eventoRepository.findById(evento.id), organizador,
-    ),
-  }));
-  const filtrados = eventos.filter((evento) => filtroOrganizador(evento, filtro, ahora));
-  res.status(200).json(paginar(filtrados, pagina, { cantidades: cantidadesOrganizador(eventos, ahora) }));
+  res.status(200).json(eventoService.eventosDe(id, filtro, pagina));
 }
 
 // Caso de uso 2, de a páginas. Las disponibles por tipo salen de GET /eventos/:id.
-// Con ?conMensajes=true es la bandeja de mensajes: solo las compras con chat, primero las
-// que tienen mensajes sin leer, y noLeidas cuenta esas conversaciones en todas las páginas.
+// Con ?conMensajes=true es la bandeja de mensajes (ver compraService.ventasDe).
 export async function listCompras(req, res) {
   const id = requireId(req.params.id);
-  const evento = eventoRepository.findById(id);
-  if (!evento) throw new NotFoundError(`No existe el evento ${id}`);
-  verificarOrganizador(evento, req.usuario);
   const conMensajes = optional(req.query.conMensajes, (v) => {
     if (v !== 'true' && v !== 'false') throw new ValidationError('El campo conMensajes tiene que ser true o false');
     return v === 'true';
@@ -140,21 +105,5 @@ export async function listCompras(req, res) {
   });
   const pagina = parsePagina(req.query);
 
-  const compras = compraRepository.findByEvento(evento.id);
-  // Las ventas suman el resumen (vendidas y recaudado) y cuántas hay en cada estado (los chips);
-  // ?estado= filtra la lista, pero el resumen y las cantidades cuentan todas.
-  const delEstado = estado ? compras.filter((compra) => compra.estado === estado) : compras;
-  const lista = conMensajes ? conversaciones(compras, evento, req.usuario) : masRecientesPrimero(delEstado);
-  const extra = conMensajes
-    ? { noLeidas: cantidadConMensajesNoLeidos(compras, evento, req.usuario) }
-    : { resumen: resumenVentas(compras), cantidades: cantidadesPorEstado(compras) };
-  // Se arma el detalle solo de las compras de la página pedida.
-  const { resultados, ...datosPagina } = paginar(lista, pagina, extra);
-  res.status(200).json({
-    resultados: resultados.map((compra) => ({
-      ...detalleCompra(compra, evento, usuarioRepository.findById(compra.compradorId), req.usuario),
-      resenia: reseniaDeCompra(compra),
-    })),
-    ...datosPagina,
-  });
+  res.status(200).json(compraService.ventasDe(id, req.usuario, { conMensajes, estado }, pagina));
 }
