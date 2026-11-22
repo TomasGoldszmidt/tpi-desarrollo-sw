@@ -3,26 +3,26 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { cancelarCompra, getCompra, marcarUtilizada, pagarCompra } from '../../api/compras.js';
-import { getEvento } from '../../api/eventos.js';
-import { crearResenia } from '../../api/resenias.js';
-import { useUsuario } from '../../context/UsuarioContext.js';
-import { useAvisos } from '../../context/AvisosContext.js';
-import { useCarga } from '../../hooks/useCarga.js';
-import { useLayout } from '../../hooks/useLayout.js';
-import { Avatar } from '../../components/Avatar.js';
-import { Boton } from '../../components/Boton.js';
-import { CargaEncima } from '../../components/CargaEncima.js';
-import { PantallaCarga } from '../../components/PantallaCarga.js';
-import { Conversacion } from '../../components/Conversacion.js';
-import { EstadoBadge } from '../../components/EstadoBadge.js';
-import { Etiqueta } from '../../components/Etiqueta.js';
-import { EstadoCarga } from '../../components/EstadoCarga.js';
-import { Estrellas } from '../../components/Estrellas.js';
-import { Aviso } from '../../components/Aviso.js';
-import { ReseniaForm } from '../../components/ReseniaForm.js';
-import { formatDia, formatDiasRestantes, formatFecha, formatPrecio } from '../../format.js';
-import { colors, fontSize, spacing } from '../../theme.js';
+import { cancelarCompra, getCompra, marcarUtilizada, pagarCompra } from '../../../api/compras.js';
+import { getEvento } from '../../../api/eventos.js';
+import { crearResenia } from '../../../api/resenias.js';
+import { useUsuario } from '../../../context/UsuarioContext.js';
+import { useAvisos } from '../../../context/AvisosContext.js';
+import { useCarga } from '../../../hooks/useCarga.js';
+import { useLayout } from '../../../hooks/useLayout.js';
+import { Avatar } from '../../../components/Avatar.js';
+import { Boton } from '../../../components/Boton.js';
+import { CargaEncima } from '../../../components/CargaEncima.js';
+import { PantallaCarga } from '../../../components/PantallaCarga.js';
+import { Conversacion } from '../../../components/Conversacion.js';
+import { EstadoBadge } from '../../../components/EstadoBadge.js';
+import { Etiqueta } from '../../../components/Etiqueta.js';
+import { EstadoCarga } from '../../../components/EstadoCarga.js';
+import { Estrellas } from '../../../components/Estrellas.js';
+import { Aviso } from '../../../components/Aviso.js';
+import { ReseniaForm } from '../../../components/ReseniaForm.js';
+import { formatDia, formatDiasRestantes, formatFecha, formatPrecio } from '../../../format.js';
+import { colors, fontSize, spacing } from '../../../theme.js';
 
 // Cómo se cuenta cada cambio de estado en el historial, con su ícono y colores.
 const HISTORIAL = {

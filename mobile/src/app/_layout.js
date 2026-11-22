@@ -25,12 +25,12 @@ export default function RootLayout() {
           <Stack.Screen name="perfil" options={conHeader} />
           <Stack.Screen name="notificaciones" options={conHeader} />
           <Stack.Screen name="eventos/nuevo" options={conHeader} />
-          <Stack.Screen name="eventos/[id]" options={conHeader} />
+          <Stack.Screen name="eventos/[id]/index" options={conHeader} />
           <Stack.Screen name="eventos/[id]/comprar" options={conHeader} />
           <Stack.Screen name="eventos/[id]/ventas" options={conHeader} />
           <Stack.Screen name="eventos/[id]/mensajes" options={conHeader} />
           <Stack.Screen name="usuarios/[id]/resenias" options={conHeader} />
-          <Stack.Screen name="compras/[id]" options={conHeader} />
+          <Stack.Screen name="compras/[id]/index" options={conHeader} />
           <Stack.Screen name="compras/[id]/chat" options={conHeader} />
         </Stack>
       </ConFavoritos>

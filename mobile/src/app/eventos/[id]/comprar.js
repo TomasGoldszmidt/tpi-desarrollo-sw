@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,13 +9,13 @@ import { useCarga } from '../../../hooks/useCarga.js';
 import { Boton } from '../../../components/Boton.js';
 import { CargaEncima } from '../../../components/CargaEncima.js';
 import { PantallaCarga } from '../../../components/PantallaCarga.js';
-import { Etiqueta } from '../../../components/Etiqueta.js';
 import { EstadoCarga } from '../../../components/EstadoCarga.js';
 import { Aviso } from '../../../components/Aviso.js';
 import { Pasos } from '../../../components/Pasos.js';
-import { BotonCantidad } from '../../../components/comprar/BotonCantidad.js';
 import { Reserva } from '../../../components/comprar/Reserva.js';
-import { formatDisponibles, formatFecha, formatPrecio } from '../../../format.js';
+import { SelectorCantidad } from '../../../components/comprar/SelectorCantidad.js';
+import { TipoEntradaOpcion } from '../../../components/comprar/TipoEntradaOpcion.js';
+import { formatFecha, formatPrecio } from '../../../format.js';
 import { colors, fontSize, spacing } from '../../../theme.js';
 
 // Caso de uso 12: comprar eligiendo un tipo de entrada y una cantidad, sin superar el cupo.
@@ -53,7 +53,6 @@ export default function Comprar() {
   const conCupo = evento.tiposEntrada.filter((tipo) => tipo.disponibles > 0);
   const tipo = conCupo.find((t) => t.id === tipoId) ?? conCupo[0];
   const cantidadValida = tipo ? Math.min(cantidad, tipo.disponibles) : 0;
-  const enElMaximo = tipo && cantidadValida >= tipo.disponibles;
 
   async function reservar() {
     setEnviando(true);
@@ -81,61 +80,15 @@ export default function Comprar() {
 
         <Text style={styles.seccion}>Elegí el tipo de entrada</Text>
         <View accessibilityRole="radiogroup" style={styles.opciones}>
-          {evento.tiposEntrada.map((opcion) => {
-            const agotado = opcion.disponibles === 0;
-            const elegido = opcion.id === tipo?.id;
-            return (
-              <Pressable
-                key={opcion.id}
-                style={[styles.opcion, elegido && styles.opcionElegida, agotado && styles.opcionAgotada]}
-                onPress={() => setTipoId(opcion.id)}
-                disabled={agotado}
-                accessibilityRole="radio"
-                accessibilityState={{ checked: elegido, disabled: agotado }}
-              >
-                <Ionicons
-                  name={elegido ? 'radio-button-on' : 'radio-button-off'}
-                  size={22}
-                  color={agotado ? colors.border : elegido ? colors.primary : colors.textMuted}
-                />
-                <View style={styles.opcionInfo}>
-                  <Text style={[styles.opcionNombre, agotado && styles.apagado]}>{opcion.nombre}</Text>
-                  <Text style={styles.meta}>
-                    {opcion.descripcion}
-                    {agotado ? '' : ` · ${formatDisponibles(opcion.disponibles)}`}
-                  </Text>
-                </View>
-                {agotado ? (
-                  <Etiqueta texto="Agotado" fondo={colors.dangerSoft} color={colors.dangerText} />
-                ) : (
-                  <Text style={styles.precio}>{formatPrecio(opcion.precio)}</Text>
-                )}
-              </Pressable>
-            );
-          })}
+          {evento.tiposEntrada.map((opcion) => (
+            <TipoEntradaOpcion key={opcion.id} tipo={opcion} elegido={opcion.id === tipo?.id} onElegir={setTipoId} />
+          ))}
         </View>
 
         {tipo ? (
           <>
             <Text style={styles.seccion}>¿Cuántas?</Text>
-            <View style={styles.cantidad}>
-              <BotonCantidad
-                icono="remove"
-                onPress={() => setCantidad(cantidadValida - 1)}
-                disabled={cantidadValida <= 1}
-                label="Una entrada menos"
-              />
-              <Text style={styles.cantidadNumero} accessibilityLiveRegion="polite">{cantidadValida}</Text>
-              <BotonCantidad
-                icono="add"
-                onPress={() => setCantidad(cantidadValida + 1)}
-                disabled={enElMaximo}
-                label="Una entrada más"
-              />
-              <Text style={styles.meta}>
-                {enElMaximo ? `Máximo ${tipo.disponibles}` : `${cantidadValida} × ${formatPrecio(tipo.precio)}`}
-              </Text>
-            </View>
+            <SelectorCantidad cantidad={cantidadValida} maximo={tipo.disponibles} precio={tipo.precio} onCambiar={setCantidad} />
 
             <View style={styles.info}>
               <Ionicons name="information-circle-outline" size={20} color={colors.textSecondary} />
@@ -203,52 +156,6 @@ const styles = StyleSheet.create({
   },
   opciones: {
     gap: spacing.sm + 2,
-  },
-  opcion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.borderSoft,
-    borderRadius: 14,
-    padding: spacing.md + 2,
-    minHeight: 64,
-  },
-  opcionElegida: {
-    borderColor: colors.primary,
-    borderWidth: 2,
-    backgroundColor: colors.primarySofter,
-  },
-  opcionAgotada: {
-    backgroundColor: colors.surface,
-  },
-  opcionInfo: {
-    flex: 1,
-  },
-  opcionNombre: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  apagado: {
-    color: colors.textMuted,
-  },
-  precio: {
-    color: colors.text,
-    fontSize: fontSize.large,
-    fontWeight: 'bold',
-  },
-  cantidad: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.lg,
-  },
-  cantidadNumero: {
-    color: colors.text,
-    fontSize: fontSize.headline,
-    fontWeight: 'bold',
-    minWidth: 28,
-    textAlign: 'center',
   },
   info: {
     flexDirection: 'row',

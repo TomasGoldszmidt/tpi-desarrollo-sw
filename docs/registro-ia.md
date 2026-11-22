@@ -1215,3 +1215,16 @@ Sirve como insumo para la conclusión del video: ventajas, desventajas, dificult
 - **Bien:** los subagentes trabajaron en orden (primero los compartidos, porque tocaban los imports de todas las pantallas, y después las pantallas en paralelo), así que no se pisaron. La comparación automática de estilos dio más confianza que mirar el diff de 1400 líneas.
 - **Corregido / problemas:** la IA empezó a mover código a mano y a mitad de camino le pedí que siguiera con subagentes. Un primer script falló porque el Bash de Windows rompía los `\` de las expresiones regulares, y hubo que guardar los scripts en archivos. Al relanzar la app, Expo Go mostró un error viejo de descarga y hubo que reabrirla. El componente que devolvía `icono()` en las pestañas quedó como una función con nombre, porque una flecha anónima no pasaba el lint.
 - **Aprendizaje:** para un refactor que toca muchos archivos, primero hay que separar lo que comparten todos y recién después repartir el resto entre subagentes, con archivos que no se crucen; y un chequeo automático de que no cambió nada vale más que revisar el diff a ojo.
+
+### 2026-11-22 · Rutas con index y componentes de la compra
+- **Tarea:** 4. Cierre técnico (preparar el guion del video: la parte del front)
+- **Herramienta / skill:** Claude Code, `/registrar-ia`
+- **Pedido (prompt):** antes de enfocar la parte del front del video en componentes, props, eventos y hooks, revisar que el código del flujo de compra esté bien componentizado. "Lo primero que veo raro es [id].js, no sé por qué se llama así el archivo y por qué tiene DetalleEvento".
+- **Resultado:**
+  - La IA explicó que en Expo Router el nombre del archivo es la ruta (`[id].js` equivale a `path="/eventos/:id"` en react-router y `useLocalSearchParams` a `useParams`), y que el nombre del componente lo elegimos nosotros. Lo raro era que el detalle estaba afuera de la carpeta `[id]/` y sus subrutas adentro.
+  - `eventos/[id].js` y `compras/[id].js` pasaron a `[id]/index.js`, y se ajustaron sus nombres en `app/_layout.js` y los imports. Ante la duda de si usar un `index.js` por componente, la IA recomendó que no: solo en rutas con subrutas, y en `components/` un archivo con el nombre del componente.
+  - De `comprar.js` salieron `TipoEntradaOpcion` (`tipo`, `elegido`, `onElegir`) y `SelectorCantidad` (`cantidad`, `maximo`, `precio`, `onCambiar`). La pantalla guarda el estado y los hijos avisan con eventos. La pantalla se ve igual.
+  - Verificación: lint sin errores y el bundle de Android armado por Metro con las rutas nuevas y los dos componentes.
+- **Bien:** la revisión confirmó que los hooks ya estaban bien usados (estado mínimo y valores derivados en cada render, sin `useEffect` para ajustar la cantidad), y eso sirve de ejemplo para el video.
+- **Corregido / problemas:** la IA había dejado estas partes escritas a mano dentro de la pantalla en el refactor anterior de un componente por archivo, porque solo separó los archivos que definían más de un componente. El primer pedido del bundle a Metro salió sin las pantallas, porque le faltaba el parámetro `transform.routerRoot`.
+- **Aprendizaje:** revisar el código pensando en cómo lo voy a explicar encuentra cosas que un refactor mecánico no ve: un archivo puede tener un solo componente y aun así mezclar varias piezas que conviene separar.
